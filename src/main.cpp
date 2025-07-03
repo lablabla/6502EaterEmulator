@@ -1,21 +1,41 @@
-#include "cpu/CPU.h"
+#include "computer.h"
 
-#include <iostream>
+#include "spdlog/spdlog.h"
+
+#include <filesystem>
+#include <fstream>
 #include <chrono>
 #include <thread>
+#include <vector>
 
-int main() 
+int main(int argc, char* argv[]) 
 {
-    ya6502e::CPU cpu(nullptr, 0); // Create an instance of the CPU
-    while (true) 
+    spdlog::set_pattern("[%H:%M:%S %z] [%n] [%^---%L---%$] %v");
+    if (argc < 2) 
     {
-        std::cout << "Ticking CPU..." << std::endl;
-        cpu.tick(); // Execute one CPU cycle
-
-
-
-        std::this_thread::sleep_for(std::chrono::milliseconds(1)); // Simulate a delay for each tick
-
+        spdlog::error("No ROM file specified.");
+        spdlog::info("Usage: {} <path_to_rom>", argv[0]);
+        return 1;
     }
+
+    std::vector<uint8_t> rom; // Buffer to hold the ROM data
+    // Read the ROM into a buffer
+    if(auto ifs = std::ifstream { argv[1], std::ios::binary }) 
+    {
+        auto size = std::filesystem::file_size(argv[1]);
+        rom.resize(size);
+        ifs.seekg(0, std::ios::beg);
+        ifs.read(reinterpret_cast<char*>(rom.data()), rom.size());
+    }
+    else 
+    {
+        spdlog::error("Error reading ROM file: {}", argv[1]);
+        return 1;
+    }
+
+    EaterEmulator::Computer computer; // Create an instance of the Computer
+    computer.addRom(rom); // Load the ROM into the computer
+    spdlog::info("Starting the emulator...");
+    computer.run(); // Run the emulator
     return 0;
 }
