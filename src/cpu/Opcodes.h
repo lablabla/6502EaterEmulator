@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstddef>
 #include <unordered_map>
 #include <cstdint>
 
@@ -196,5 +197,61 @@ namespace EaterEmulator
         BRK = 0x00, // Force Interrupt
         NOP = 0xEA, // No Operation
         RTI = 0x40, // Return from Interrupt
+    };
+
+    enum class AddressingMode : uint8_t 
+    {
+        IMP, // Implied
+        ACC, // Accumulator
+        IMM, // Immediate
+        ZP,  // Zero Page
+        ZPX, // Zero Page,X
+        ZPY, // Zero Page,Y
+        ABS, // Absolute
+        ABSX,// Absolute,X
+        ABSY,// Absolute,Y
+        IND,// Indirect
+        INDX,// Indirect,X
+        INDY,// Indirect,Y
+        REL, // Relative
+    };
+
+    struct OpcodeInfo 
+    {
+        Opcode opcode; // The opcode value
+        AddressingMode mode; // The addressing mode used by the opcode
+        size_t cycles; // Number of cycles required to execute the opcode
+    };   
+    
+    static std::unordered_map<Opcode, OpcodeInfo> OpcodeMap
+    {
+        // Load/Store Operations
+        {Opcode::LDA_IMM, { Opcode::LDA_IMM, AddressingMode::IMM, 2}},
+        {Opcode::LDA_ZP, { Opcode::LDA_ZP, AddressingMode::ZP, 3}},
+        {Opcode::LDA_ZPX, { Opcode::LDA_ZPX, AddressingMode::ZPX, 4}},
+        {Opcode::LDA_ABS, { Opcode::LDA_ABS, AddressingMode::ABS, 4}},
+        {Opcode::LDA_ABSX, { Opcode::LDA_ABSX, AddressingMode::ABSX, 4}},
+        {Opcode::LDA_ABSY, { Opcode::LDA_ABSY, AddressingMode::ABSY, 4}},
+        {Opcode::LDA_INDX, { Opcode::LDA_INDX, AddressingMode::INDX, 6}},
+        {Opcode::LDA_INDY, { Opcode::LDA_INDY, AddressingMode::INDY, 5}},
+
+        {Opcode::STA_ZP, { Opcode::STA_ZP, AddressingMode::ZP, 3}},
+        {Opcode::STA_ZPX, { Opcode::STA_ZPX, AddressingMode::ZP, 4}},
+        {Opcode::STA_ABS, { Opcode::STA_ABS, AddressingMode::ABS, 4}},
+        {Opcode::STA_ABSX, { Opcode::STA_ABSX, AddressingMode::ABS, 5}},        
+        {Opcode::STA_ABSY, { Opcode::STA_ABSY, AddressingMode::ABS, 5}},
+        {Opcode::STA_INDX, { Opcode::STA_INDX, AddressingMode::ABS, 6}},
+        {Opcode::STA_INDY, { Opcode::STA_INDY, AddressingMode::ABS, 6}},
+
+        // Jump
+        {Opcode::JMP_ABS, { Opcode::JMP_ABS, AddressingMode::ABS, 3}},
+        {Opcode::JMP_IND, { Opcode::JMP_IND, AddressingMode::IND, 5}},
+
+
+        
+        {Opcode::NOP, {Opcode::NOP, AddressingMode::IMP, 2}}, // NOP is a no-operation instruction
+        {Opcode::BRK, {Opcode::BRK, AddressingMode::IMP, 7}}, // BRK is a break instruction
+        {Opcode::RTI, {Opcode::RTI, AddressingMode::IMP, 6}}, // RTI is a return from interrupt instruction
+
     };
 }

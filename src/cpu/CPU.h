@@ -5,11 +5,22 @@
 
 #include <cstdint>
 #include <cstddef> // for size_t
+#include <sys/types.h>
 #include <vector>
 #include <memory>
 
 namespace EaterEmulator 
 {
+    enum class StatusBits
+    {
+        CarryFlag = 0x01, // Carry flag bit in status register
+        ZeroFlag = 0x02, // Zero flag bit in status register
+        InterruptDisableFlag = 0x04, // Interrupt disable flag bit in status register
+        DecimalFlag = 0x08, // Decimal mode flag bit in status register
+        OverflowFlag = 0x40, // Overflow flag bit in status register
+        NegativeFlag = 0x80 // Negative flag bit in status register
+    };
+
     class IODevice; // Forward declaration of IODevice
 
     class CPU 
@@ -64,6 +75,11 @@ namespace EaterEmulator
 
         // Opcode handling methods
         void handleOpcode(Opcode opcode); // Handle the opcode execution
+        void decodeAddressingMode(AddressingMode addressingMode, std::vector<uint8_t>& operands); // Decode the addressing mode for the opcode
+
+        void updateStatusFlag(StatusBits flag, bool value);
+        void setStatusFlag(StatusBits flag);
+        void clearStatusFlag(StatusBits flag);
 
 
         // Private methods for instruction execution, memory access, etc.
