@@ -34,6 +34,7 @@ namespace EaterEmulator
         {
             uint16_t address = pins.addressBus.getAddress(); // Get the address from the address bus
             pins.dataBus.setData(memory[address - _offset]); // Set the data bus with the value from memory
+            spdlog::debug("{} - Read value {} from address 0x{:04X}", getName(), memory[address - _offset], address);
         }
         // EEPROM is read only, so we don't handle write operations
     }

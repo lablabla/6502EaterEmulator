@@ -19,7 +19,7 @@ namespace EaterEmulator
         Computer(Computer&&) = delete; // Disable move constructor
         Computer& operator=(Computer&&) = delete; // Disable move assignment
 
-        void addRom(const std::vector<uint8_t>& rom);
+        void initDevices(const std::vector<uint8_t>& rom);
 
         void run();
 

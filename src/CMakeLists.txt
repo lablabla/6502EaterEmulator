@@ -4,6 +4,7 @@
 add_library(${LIB_NAME} STATIC
     ${CMAKE_SOURCE_DIR}/src/cpu/CPU.cpp
     ${CMAKE_SOURCE_DIR}/src/io/EEPROM28C256.cpp
+    ${CMAKE_SOURCE_DIR}/src/io/SRAM62256.cpp
     ${CMAKE_SOURCE_DIR}/src/computer.cpp
 )
 

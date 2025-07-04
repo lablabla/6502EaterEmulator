@@ -34,7 +34,7 @@ int main(int argc, char* argv[])
     }
 
     EaterEmulator::Computer computer; // Create an instance of the Computer
-    computer.addRom(rom); // Load the ROM into the computer
+    computer.initDevices(rom); // Load the ROM into the computer
     spdlog::info("Starting the emulator...");
     computer.run(); // Run the emulator
     return 0;

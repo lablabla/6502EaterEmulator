@@ -234,6 +234,16 @@ namespace EaterEmulator
         {Opcode::LDA_ABSY, { Opcode::LDA_ABSY, AddressingMode::ABSY, 4}},
         {Opcode::LDA_INDX, { Opcode::LDA_INDX, AddressingMode::INDX, 6}},
         {Opcode::LDA_INDY, { Opcode::LDA_INDY, AddressingMode::INDY, 5}},
+        {Opcode::LDX_IMM, { Opcode::LDX_IMM, AddressingMode::IMM, 2}},
+        {Opcode::LDX_ZP, { Opcode::LDX_ZP, AddressingMode::ZP, 3}},
+        {Opcode::LDX_ZPY, { Opcode::LDX_ZPY, AddressingMode::ZPY, 4}},
+        {Opcode::LDX_ABS, { Opcode::LDX_ABS, AddressingMode::ABS, 4}},
+        {Opcode::LDX_ABSY, { Opcode::LDX_ABSY, AddressingMode::ABSY, 4}},
+        {Opcode::LDY_IMM, { Opcode::LDY_IMM, AddressingMode::IMM, 2}},
+        {Opcode::LDY_ZP, { Opcode::LDY_ZP, AddressingMode::ZP, 3}},
+        {Opcode::LDY_ZPX, { Opcode::LDY_ZPX, AddressingMode::ZPX, 4}},
+        {Opcode::LDY_ABS, { Opcode::LDY_ABS, AddressingMode::ABS, 4}},
+        {Opcode::LDY_ABSX, { Opcode::LDY_ABSX, AddressingMode::ABSX, 4}},
 
         {Opcode::STA_ZP, { Opcode::STA_ZP, AddressingMode::ZP, 3}},
         {Opcode::STA_ZPX, { Opcode::STA_ZPX, AddressingMode::ZP, 4}},
@@ -242,10 +252,36 @@ namespace EaterEmulator
         {Opcode::STA_ABSY, { Opcode::STA_ABSY, AddressingMode::ABS, 5}},
         {Opcode::STA_INDX, { Opcode::STA_INDX, AddressingMode::ABS, 6}},
         {Opcode::STA_INDY, { Opcode::STA_INDY, AddressingMode::ABS, 6}},
+        {Opcode::STX_ZP, { Opcode::STX_ZP, AddressingMode::ZP, 3}},
+        {Opcode::STX_ZPY, { Opcode::STX_ZPY, AddressingMode::ZPY, 4}},
+        {Opcode::STX_ABS, { Opcode::STX_ABS, AddressingMode::ABS, 4}},
+        {Opcode::STY_ZP, { Opcode::STY_ZP, AddressingMode::ZP, 3}},
+        {Opcode::STY_ZPX, { Opcode::STY_ZPX, AddressingMode::ZPX, 4}},
+        {Opcode::STY_ABS, { Opcode::STY_ABS, AddressingMode::ABS, 4}},
 
-        // Jump
+        // Register Transfers
+        {Opcode::TAX, { Opcode::TAX, AddressingMode::IMP, 2}},
+        {Opcode::TXA, { Opcode::TXA, AddressingMode::IMP, 2}},
+        {Opcode::DEX, { Opcode::DEX, AddressingMode::IMP, 2}},
+        {Opcode::INX, { Opcode::INX, AddressingMode::IMP, 2}},
+        {Opcode::TAY, { Opcode::TAY, AddressingMode::IMP, 2}},
+        {Opcode::TYA, { Opcode::TYA, AddressingMode::IMP, 2}},
+        {Opcode::DEY, { Opcode::DEY, AddressingMode::IMP, 2}},
+        {Opcode::INY, { Opcode::INY, AddressingMode::IMP, 2}},
+
+        // Stack Operations
+        {Opcode::TSX, { Opcode::TSX, AddressingMode::IMP, 2}},
+        {Opcode::TXS, { Opcode::TXS, AddressingMode::IMP, 2}},
+        {Opcode::PHA, { Opcode::PHA, AddressingMode::IMP, 3}},
+        {Opcode::PLA, { Opcode::PLA, AddressingMode::IMP, 4}},
+        {Opcode::PHP, { Opcode::PHP, AddressingMode::IMP, 3}},
+        {Opcode::PLP, { Opcode::PLP, AddressingMode::IMP, 4}},
+
+        // Jump & Calls
         {Opcode::JMP_ABS, { Opcode::JMP_ABS, AddressingMode::ABS, 3}},
         {Opcode::JMP_IND, { Opcode::JMP_IND, AddressingMode::IND, 5}},
+        {Opcode::JSR, { Opcode::JSR, AddressingMode::ABS, 6}},
+        {Opcode::RTS, { Opcode::RTS, AddressingMode::IMP, 6}},
 
 
         
