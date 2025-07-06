@@ -3,6 +3,7 @@
 
 #include "devices/EEPROM28C256.h"
 #include "devices/SRAM62256.h"
+#include "devices/VIAW65C22.h"
 #include "spdlog/spdlog.h"
 
 namespace EaterEmulator 
@@ -26,6 +27,10 @@ namespace EaterEmulator
         // Add SRAM device
         addDevice(std::make_shared<SRAM62256>());
         spdlog::info("SRAM62256 initialized.");
+
+        // Add VIA device
+        addDevice(std::make_shared<VIAW65C22>());
+        spdlog::info("VIAW65C22 initialized.");
 
     }
 
