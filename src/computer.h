@@ -1,7 +1,7 @@
 #pragma once
 
 #include "cpu/CPU.h"
-#include "io/IODevice.h"
+#include "devices/Device.h"
 
 #include <memory>
 #include <vector>
@@ -25,12 +25,12 @@ namespace EaterEmulator
 
     private:
 
-        void addIODevice(std::shared_ptr<IODevice> device);
+        void addDevice(std::shared_ptr<Device> device);
         
 
         DataBus _dataBus; // Pointer to the data bus
         AddressBus _addressBus; // Pointer to the address bus
         CPU _cpu; // Pointer to the CPU instance
-        std::vector<std::shared_ptr<IODevice>> _devices; // List of I/O devices
+        std::vector<std::shared_ptr<Device>> _devices; // List of I/O devices
     };
 } // namespace EaterEmulator

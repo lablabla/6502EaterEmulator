@@ -1,7 +1,7 @@
 #pragma once
 
 #include "cpu/Opcodes.h"
-#include "io/BUS.h"
+#include "devices/BUS.h"
 
 #include <cstdint>
 #include <cstddef> // for size_t
@@ -21,7 +21,7 @@ namespace EaterEmulator
         NegativeFlag = 0x80 // Negative flag bit in status register
     };
 
-    class IODevice; // Forward declaration of IODevice
+    class Device; // Forward declaration of Device
 
     class CPU 
     {
@@ -39,7 +39,7 @@ namespace EaterEmulator
         
         void reset(); // Reset the CPU state
         
-        void setDevices(const std::vector<std::shared_ptr<IODevice>>& devices); // Set the devices for the CPU
+        void setDevices(const std::vector<std::shared_ptr<Device>>& devices); // Set the devices for the CPU
 
         struct Registers
         {
@@ -90,7 +90,7 @@ namespace EaterEmulator
         Registers registers; // CPU registers
 
         Pins _pins; // Pins for the CPU
-        std::vector<std::shared_ptr<IODevice>> _devices; // List of I/O devices
+        std::vector<std::shared_ptr<Device>> _devices; // List of I/O devices
 
         static constexpr size_t memorySize = 0x10000; // 64KB address space for 6502
     };

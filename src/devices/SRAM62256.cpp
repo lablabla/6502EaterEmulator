@@ -1,12 +1,12 @@
 
-#include "io/SRAM62256.h"
-#include "io/IODevice.h"
+#include "devices/SRAM62256.h"
+#include "devices/Device.h"
 #include "spdlog/spdlog.h"
 
 namespace EaterEmulator 
 {
     SRAM62256::SRAM62256()
-        : IODevice(0x0000)          
+        : Device(0x0000)          
     {
         spdlog::info("SRAM62256 initialized.");
     }

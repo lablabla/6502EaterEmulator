@@ -6,16 +6,16 @@
 
 namespace EaterEmulator 
 {
-    class IODevice 
+    class Device 
     {
     public:
-        IODevice(uint16_t offset = 0): _offset(offset){} // Default constructor
-        virtual ~IODevice() = default; // Default destructor
+        Device(uint16_t offset = 0): _offset(offset){} // Default constructor
+        virtual ~Device() = default; // Default destructor
 
-        IODevice(const IODevice&) = default;
-        IODevice& operator=(const IODevice&) = default;
-        IODevice(IODevice&&) = default; 
-        IODevice& operator=(IODevice&&) = default;
+        Device(const Device&) = default;
+        Device& operator=(const Device&) = default;
+        Device(Device&&) = default; 
+        Device& operator=(Device&&) = default;
         
         virtual bool shouldHandlePins(CPU::Pins& pins) = 0; // Pure virtual function to check if device can handle pins
         virtual void handlePins(CPU::Pins& pins) = 0; // Pure virtual function for device action

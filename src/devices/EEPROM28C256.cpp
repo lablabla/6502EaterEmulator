@@ -1,12 +1,12 @@
 
-#include "io/EEPROM28C256.h"
-#include "io/IODevice.h"
+#include "devices/EEPROM28C256.h"
+#include "devices/Device.h"
 #include "spdlog/spdlog.h"
 
 namespace EaterEmulator 
 {
     EEPROM28C256::EEPROM28C256(const std::vector<uint8_t>& rom)
-        : IODevice(0x8000)          
+        : Device(0x8000)          
     {
         if (rom.size() != 0x8000) 
         {

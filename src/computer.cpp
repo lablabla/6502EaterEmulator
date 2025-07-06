@@ -1,8 +1,8 @@
 
 #include "computer.h"
 
-#include "io/EEPROM28C256.h"
-#include "io/SRAM62256.h"
+#include "devices/EEPROM28C256.h"
+#include "devices/SRAM62256.h"
 #include "spdlog/spdlog.h"
 
 namespace EaterEmulator 
@@ -20,11 +20,11 @@ namespace EaterEmulator
     void Computer::initDevices(const std::vector<uint8_t>&rom) 
     {
         EEPROM28C256 eeprom(rom);
-        addIODevice(std::make_shared<EEPROM28C256>(eeprom));
+        addDevice(std::make_shared<EEPROM28C256>(eeprom));
         spdlog::info("EEPROM28C256 initialized.");
 
         // Add SRAM device
-        addIODevice(std::make_shared<SRAM62256>());
+        addDevice(std::make_shared<SRAM62256>());
         spdlog::info("SRAM62256 initialized.");
 
     }
@@ -40,10 +40,10 @@ namespace EaterEmulator
         }
     }
 
-    void Computer::addIODevice(std::shared_ptr<IODevice> device) 
+    void Computer::addDevice(std::shared_ptr<Device> device) 
     {
         _devices.push_back(device);
-        spdlog::info("IODevice added - {}.", device->getName());
+        spdlog::info("Device added - {}.", device->getName());
     }
 
 } // namespace EaterEmulator

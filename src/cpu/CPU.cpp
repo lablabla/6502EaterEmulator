@@ -1,8 +1,8 @@
 #include "cpu/CPU.h"
 #include "cpu/Opcodes.h"
 
-#include "io/BUS.h"
-#include "io/IODevice.h"
+#include "devices/BUS.h"
+#include "devices/Device.h"
 
 #include "spdlog/spdlog.h"
 
@@ -46,7 +46,7 @@ namespace EaterEmulator
         registers.pc = fetchAddress(RESET_VECTOR_ADDRESS); // Fetch the reset vector from the ROM
     }
 
-    void CPU::setDevices(const std::vector<std::shared_ptr<IODevice>>& devices)
+    void CPU::setDevices(const std::vector<std::shared_ptr<Device>>& devices)
     {
         _devices = devices; // Set the devices for the CPU
         spdlog::info("Devices set for CPU.");
