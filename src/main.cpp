@@ -1,41 +1,54 @@
 #include <iostream>
-#include <thread>
-#include "core/bus.h"
-#include "core/clock.h" 
-#include "core/defines.h"
+#include <fstream>
+#include <filesystem>
+#include <vector>
+#include <cstdint>
 
+#include "core/bus.h"
+
+#include "devices/EEPROM28C256/EEPROM28C256.h"
 #include "devices/W65C02S/W65C02S.h"
+#include "spdlog/spdlog.h"
 
 using namespace EaterEmulator;
 
-int main() {
-    using namespace EaterEmulator::core;
+int main(int argc, char* argv[]) {
 
-    // Create a clock with a frequency of 1 MHz
-    Clock<1> clock;
+    spdlog::set_pattern("[%H:%M:%S %z] [%n] [%^---%L---%$] %v");
+    spdlog::set_level(spdlog::level::debug); 
+    if (argc < 2) 
+    {
+        spdlog::error("No ROM file specified.");
+        spdlog::info("Usage: {} <path_to_rom>", argv[0]);
+        return 1;
+    }
+
+    std::vector<uint8_t> rom; // Buffer to hold the ROM data
+    // Read the ROM into a buffer
+    if(auto ifs = std::ifstream { argv[1], std::ios::binary }) 
+    {
+        auto size = std::filesystem::file_size(argv[1]);
+        rom.resize(size);
+        ifs.seekg(0, std::ios::beg);
+        ifs.read(reinterpret_cast<char*>(rom.data()), rom.size());
+    }
+    else 
+    {
+        spdlog::error("Error reading ROM file: {}", argv[1]);
+        return 1;
+    }
     core::Bus bus;
-    // Create address and data buses
-    devices::W65C02S cpu(bus);
-    devices::W65C02S cpu2(bus);
     
-    // Register CPU with clock
-    clock.registerObserver(&cpu);
-    clock.registerObserver(&cpu2);
+    devices::W65C02S cpu6502(bus);
+    cpu6502.reset(); // Reset the CPU to initialize registers
+    devices::EEPROM28C256 rom28C256(rom, bus);
+    bus.addSlave(&rom28C256); // Add the ROM to the bus
 
-    // Start the clock
-    clock.start();
-
-    std::cout << "Clock started. CPU running in background thread." << std::endl;
-
-    // Simulate running for a while
-    std::this_thread::sleep_for(std::chrono::seconds(5));
-
-    // Stop the clock
-    clock.stop();
+    while (true)
+    {
+        cpu6502.handleClockStateChange(core::LOW);
+        cpu6502.handleClockStateChange(core::HIGH);
+    }
     
-    // Stop the CPU background thread
-    cpu.stop();
-
-    std::cout << "Clock and CPU stopped." << std::endl;
     return 0;
 }
