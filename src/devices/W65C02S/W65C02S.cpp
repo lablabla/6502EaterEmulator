@@ -31,6 +31,7 @@ namespace EaterEmulator::devices
         _status = 0; // Processor Status
         _adl = 0; // Address Low Byte
         _adh = 0; // Address High Byte
+        _resetStage = 0;
     }
 
     void W65C02S::handleClockStateChange(core::ClockState state)
@@ -82,6 +83,31 @@ namespace EaterEmulator::devices
                         _bus.setAddress((_adh << 8) | _adl);
                     }
                 }
+                break;
+                case AddressingMode::ABSX: // Absolute,X
+                {
+                    if (_stage == 2)
+                    {
+                        _bus.setAddress(_pc); // Read high byte of address
+                    }
+                    else
+                    {
+                        _bus.setAddress(((_adh << 8) | _adl) + _x);
+                    }
+                }
+                break;
+                case AddressingMode::ABSY: // Absolute,Y
+                {
+                    if (_stage == 2)
+                    {
+                        _bus.setAddress(_pc); // Read high byte of address
+                    }
+                    else
+                    {
+                        _bus.setAddress(((_adh << 8) | _adl) + _y);
+                    }
+                }
+                break;
                 default:
                     break;
             }
@@ -94,11 +120,32 @@ namespace EaterEmulator::devices
         {
             return;
         }
-        uint8_t rwb = _stage == 0 ? core::HIGH : getRWB();
+        bool inReset = _resetStage < 2;
+        uint8_t rwb = (_stage == 0 || inReset) ? core::HIGH : getRWB();
         if (rwb == core::HIGH)
         {
             // Notify slaves that we are reading, set the data on the bus
             _bus.notifySlaves(rwb);
+        }
+        if (inReset)
+        {
+            if (_resetStage == 0)
+            {
+                _adl = fetchByte(); // Read low byte of reset vector
+                spdlog::debug("CPU: Read reset vector low byte: {:#04x}", _adl);
+                _resetStage++;
+                _pc++;
+                return;
+            }
+            else if (_resetStage == 1)
+            {
+                _adh = fetchByte(); // Read high byte of reset vector
+                spdlog::debug("CPU: Read reset vector high byte: {:#04x}", _adh);
+                _resetStage++;
+                _pc = (_adh << 8) | _adl; // Set program counter to reset vector
+                spdlog::debug("CPU: Reset complete, PC set to {:#04x}", _pc);
+                return;
+            }
         }
         if (_stage == 0)
         {
@@ -111,20 +158,19 @@ namespace EaterEmulator::devices
         auto it = OpcodeMap.find(_ir);
         if (it == OpcodeMap.end()) {
             std::cerr << "Unknown opcode: " << static_cast<int>(_ir) << std::endl;
-            return; // Handle unknown opcode gracefully
+            return;
         }
         const OpcodeInfo& opcodeInfo = it->second;
         if (_stage == opcodeInfo.cycles - 1) // If last cycle, we finished fetching, execute the instruction
         {
-            bool incrementPC = true;
-            executeInstruction(opcodeInfo.opcode, incrementPC);
+            executeInstruction(opcodeInfo.opcode);
             if (rwb == core::LOW)
             {
                 // Notify the slaves that we are writing, take values from bus
                 _bus.notifySlaves(rwb);
             }
             _stage = 0; // Reset stage for next instruction
-            if (incrementPC)
+            if (shouldIncrementPC(opcodeInfo.mode))
             {
                 _pc++;
             }
@@ -145,6 +191,9 @@ namespace EaterEmulator::devices
         else 
         {
             spdlog::debug("CPU: unhandled stage {} for opcode: {:#04x}", _stage, static_cast<int>(_ir));
+            // Reset the stage if we are not in a valid state
+            _stage = 0;
+            return; // If we are not in a valid state, do nothing
         }
         _pc++;
     }
@@ -156,9 +205,8 @@ namespace EaterEmulator::devices
         return data;
     }
 
-    void W65C02S::executeInstruction(Opcode opcode, bool& incrementPC)
+    void W65C02S::executeInstruction(Opcode opcode)
     {   
-        incrementPC = true;
         switch(opcode)
         {
             case Opcode::LDA_IMM:
@@ -174,6 +222,17 @@ namespace EaterEmulator::devices
                 updateStatusFlags(_a);
                 spdlog::debug("CPU: LDA_ABS executed, A = {:#04x}", static_cast<int>(_a));
                 break;
+            case Opcode::LDA_ABSX:
+                _a = fetchByte();
+                updateStatusFlags(_a);
+                spdlog::debug("CPU: LDA_ABSX executed, A = {:#04x}", static_cast<int>(_a));
+                break;
+            case Opcode::LDA_ABSY:
+                _a = fetchByte();
+                updateStatusFlags(_a);
+                spdlog::debug("CPU: LDA_ABSY executed, A = {:#04x}", static_cast<int>(_a));
+                break;
+
             case Opcode::STA_ABS:
                 _bus.setData(_a); // Write the accumulator to the bus
                 spdlog::debug("CPU: STA_ABS executed, A = {:#04x}", static_cast<int>(_a));
@@ -183,7 +242,6 @@ namespace EaterEmulator::devices
                 _adh = fetchByte();
                 spdlog::debug("CPU: Read address high byte: {:#04x}", _adh);
                 _pc = (_adh << 8) | _adl;
-                incrementPC = false; // Do not increment PC after a jump
                 spdlog::debug("CPU: JMP_ABS executed, PC = {:#04x}", static_cast<int>(_pc));
                 break;
             default:
@@ -220,10 +278,25 @@ namespace EaterEmulator::devices
             case AddressingMode::IMM:
             case AddressingMode::ZP:
                 return core::HIGH; // Read operation
-            case AddressingMode::ABS:                
+            case AddressingMode::ABS:
+            case AddressingMode::ABSX:
+            case AddressingMode::ABSY:
                 return _stage < 3 ? core::HIGH : it->second.rwb;
             default:
                 return core::LOW; // Write operation
+        }
+    }
+
+    bool W65C02S::shouldIncrementPC(AddressingMode mode) const
+    {
+        switch(mode)
+        {
+            case AddressingMode::ABS:
+            case AddressingMode::ABSX:
+            case AddressingMode::ABSY:
+                return false; // Do not increment PC for absolute addressing modes
+            default:
+                return true; // Increment PC for other addressing modes
         }
     }
 }

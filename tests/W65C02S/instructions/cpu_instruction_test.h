@@ -31,6 +31,7 @@ protected:
         memory.resize(0x8000, 0x00); // Initialize memory with 64KB of zeros
         cpu = std::make_unique<devices::W65C02S>(bus);
         cpu->reset(); 
+        cpu->setResetStage(2); // Simulate reset stage to avoid reset vector fetch
     }
 
     void TearDown() override {

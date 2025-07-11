@@ -28,6 +28,7 @@ TEST_F(CPUInstructionTest, STA_ABS_StoreValue)
     
     auto romMemory = rom->getMemory();
     EXPECT_EQ(romMemory[0x8037 - MEMORY_OFFSET], 0x42);
+    EXPECT_EQ(cpu->getProgramCounter(), 0xFFFE + 1);
     uint8_t status = cpu->getStatus();
     EXPECT_EQ(status, statusBefore); // Status should remain unchanged
 }

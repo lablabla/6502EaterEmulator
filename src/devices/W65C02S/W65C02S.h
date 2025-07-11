@@ -43,6 +43,7 @@ namespace EaterEmulator::devices
         void setStackPointer(uint8_t value) { _sp = value; }
         void setProgramCounter(uint16_t value) { _pc = value; }
         void setStatus(uint8_t value) { _status = value; }
+        void setResetStage(uint8_t stage) { _resetStage = stage; }
 
         uint8_t getAccumulator() const { return _a; }
         uint8_t getXRegister() const { return _x; }
@@ -62,9 +63,10 @@ namespace EaterEmulator::devices
 
         uint8_t fetchByte();
 
-        void executeInstruction(Opcode opcode, bool& incrementPC);
+        void executeInstruction(Opcode opcode);
         void updateStatusFlags(uint8_t value);
         uint8_t getRWB() const;
+        bool shouldIncrementPC(AddressingMode mode) const;
 
         // Registers
         uint8_t _a; // Accumulator
@@ -81,5 +83,6 @@ namespace EaterEmulator::devices
         int _stage = 0; // Current stage of instruction execution
 
         bool _started = false;
+        uint8_t _resetStage = 0;
     };
 };
