@@ -26,6 +26,10 @@ namespace EaterEmulator::devices
         
         std::string getName() const override { return "EEPROM28C256"; }
 
+#ifdef UNIT_TEST
+        const std::array<uint8_t, 0x8000>& getMemory() const { return _memory; }
+#endif 
+
     private:
         std::array<uint8_t, 0x8000> _memory; // 32K x 8-bit memory
 

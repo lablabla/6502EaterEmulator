@@ -94,8 +94,12 @@ namespace EaterEmulator::devices
         {
             return;
         }
-        uint8_t rwb = core::HIGH; // TODO: Determine if this is a read or write operation
-        _bus.notifySlaves(rwb);
+        uint8_t rwb = _stage == 0 ? core::HIGH : getRWB();
+        if (rwb == core::HIGH)
+        {
+            // Notify slaves that we are reading, set the data on the bus
+            _bus.notifySlaves(rwb);
+        }
         if (_stage == 0)
         {
             uint8_t opcode = fetchByte();
@@ -110,10 +114,21 @@ namespace EaterEmulator::devices
             return; // Handle unknown opcode gracefully
         }
         const OpcodeInfo& opcodeInfo = it->second;
-        if (_stage == opcodeInfo.cycles - 1) // If last cycle, we finished fetching address, execute the instruction
+        if (_stage == opcodeInfo.cycles - 1) // If last cycle, we finished fetching, execute the instruction
         {
-            executeInstruction(opcodeInfo.opcode);
+            bool incrementPC = true;
+            executeInstruction(opcodeInfo.opcode, incrementPC);
+            if (rwb == core::LOW)
+            {
+                // Notify the slaves that we are writing, take values from bus
+                _bus.notifySlaves(rwb);
+            }
             _stage = 0; // Reset stage for next instruction
+            if (incrementPC)
+            {
+                _pc++;
+            }
+            return;
         }
         else if (_stage == 1)
         {
@@ -129,7 +144,7 @@ namespace EaterEmulator::devices
         }
         else 
         {
-            spdlog::debug("CPU: Fetching data for opcode: {:#04x}", static_cast<int>(_ir));
+            spdlog::debug("CPU: unhandled stage {} for opcode: {:#04x}", _stage, static_cast<int>(_ir));
         }
         _pc++;
     }
@@ -141,8 +156,9 @@ namespace EaterEmulator::devices
         return data;
     }
 
-    void W65C02S::executeInstruction(Opcode opcode)
-    {
+    void W65C02S::executeInstruction(Opcode opcode, bool& incrementPC)
+    {   
+        incrementPC = true;
         switch(opcode)
         {
             case Opcode::LDA_IMM:
@@ -157,6 +173,18 @@ namespace EaterEmulator::devices
                 _a = fetchByte();
                 updateStatusFlags(_a);
                 spdlog::debug("CPU: LDA_ABS executed, A = {:#04x}", static_cast<int>(_a));
+                break;
+            case Opcode::STA_ABS:
+                _bus.setData(_a); // Write the accumulator to the bus
+                spdlog::debug("CPU: STA_ABS executed, A = {:#04x}", static_cast<int>(_a));
+                break;
+
+            case Opcode::JMP_ABS:
+                _adh = fetchByte();
+                spdlog::debug("CPU: Read address high byte: {:#04x}", _adh);
+                _pc = (_adh << 8) | _adl;
+                incrementPC = false; // Do not increment PC after a jump
+                spdlog::debug("CPU: JMP_ABS executed, PC = {:#04x}", static_cast<int>(_pc));
                 break;
             default:
                 spdlog::error("CPU: Unhandled opcode: {:#04x}", static_cast<int>(opcode));
@@ -178,5 +206,24 @@ namespace EaterEmulator::devices
             _status &= ~STATUS_NEGATIVE; // Clear negative flag
         }
         spdlog::debug("CPU: Status flags updated: {:#04x}", static_cast<int>(_status));
+    }
+
+    uint8_t W65C02S::getRWB() const
+    {       
+        auto it = OpcodeMap.find(_ir);
+        if (it == OpcodeMap.end()) {
+            std::cerr << "Unknown opcode: " << static_cast<int>(_ir) << std::endl;
+            return 0;
+        }
+        switch(it->second.mode)
+        {
+            case AddressingMode::IMM:
+            case AddressingMode::ZP:
+                return core::HIGH; // Read operation
+            case AddressingMode::ABS:                
+                return _stage < 3 ? core::HIGH : it->second.rwb;
+            default:
+                return core::LOW; // Write operation
+        }
     }
 }

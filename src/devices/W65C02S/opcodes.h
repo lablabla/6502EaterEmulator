@@ -1,5 +1,6 @@
 #pragma once
 
+#include "core/defines.h"
 #include <cstddef>
 #include <unordered_map>
 #include <cstdint>
@@ -221,73 +222,74 @@ namespace EaterEmulator
         Opcode opcode; // The opcode value
         AddressingMode mode; // The addressing mode used by the opcode
         uint8_t cycles; // Number of cycles required to execute the opcode
+        uint8_t rwb; // Read/Write flag (0 for read, 1 for write)
     };   
     
     static std::unordered_map<Opcode, OpcodeInfo> OpcodeMap
     {
         // Load/Store Operations
-        {Opcode::LDA_IMM, { Opcode::LDA_IMM, AddressingMode::IMM, 2}},
-        {Opcode::LDA_ZP, { Opcode::LDA_ZP, AddressingMode::ZP, 3}},
-        {Opcode::LDA_ZPX, { Opcode::LDA_ZPX, AddressingMode::ZPX, 4}},
-        {Opcode::LDA_ABS, { Opcode::LDA_ABS, AddressingMode::ABS, 4}},
-        {Opcode::LDA_ABSX, { Opcode::LDA_ABSX, AddressingMode::ABSX, 4}},
-        {Opcode::LDA_ABSY, { Opcode::LDA_ABSY, AddressingMode::ABSY, 4}},
-        {Opcode::LDA_INDX, { Opcode::LDA_INDX, AddressingMode::INDX, 6}},
-        {Opcode::LDA_INDY, { Opcode::LDA_INDY, AddressingMode::INDY, 5}},
-        {Opcode::LDX_IMM, { Opcode::LDX_IMM, AddressingMode::IMM, 2}},
-        {Opcode::LDX_ZP, { Opcode::LDX_ZP, AddressingMode::ZP, 3}},
-        {Opcode::LDX_ZPY, { Opcode::LDX_ZPY, AddressingMode::ZPY, 4}},
-        {Opcode::LDX_ABS, { Opcode::LDX_ABS, AddressingMode::ABS, 4}},
-        {Opcode::LDX_ABSY, { Opcode::LDX_ABSY, AddressingMode::ABSY, 4}},
-        {Opcode::LDY_IMM, { Opcode::LDY_IMM, AddressingMode::IMM, 2}},
-        {Opcode::LDY_ZP, { Opcode::LDY_ZP, AddressingMode::ZP, 3}},
-        {Opcode::LDY_ZPX, { Opcode::LDY_ZPX, AddressingMode::ZPX, 4}},
-        {Opcode::LDY_ABS, { Opcode::LDY_ABS, AddressingMode::ABS, 4}},
-        {Opcode::LDY_ABSX, { Opcode::LDY_ABSX, AddressingMode::ABSX, 4}},
+        {Opcode::LDA_IMM, { Opcode::LDA_IMM, AddressingMode::IMM, 2, core::HIGH}},
+        {Opcode::LDA_ZP, { Opcode::LDA_ZP, AddressingMode::ZP, 3, core::HIGH}},
+        {Opcode::LDA_ZPX, { Opcode::LDA_ZPX, AddressingMode::ZPX, 4, core::HIGH}},
+        {Opcode::LDA_ABS, { Opcode::LDA_ABS, AddressingMode::ABS, 4, core::HIGH}},
+        {Opcode::LDA_ABSX, { Opcode::LDA_ABSX, AddressingMode::ABSX, 4, core::HIGH}},
+        {Opcode::LDA_ABSY, { Opcode::LDA_ABSY, AddressingMode::ABSY, 4, core::HIGH}},
+        {Opcode::LDA_INDX, { Opcode::LDA_INDX, AddressingMode::INDX, 6, core::HIGH}},
+        {Opcode::LDA_INDY, { Opcode::LDA_INDY, AddressingMode::INDY, 5, core::HIGH}},
+        {Opcode::LDX_IMM, { Opcode::LDX_IMM, AddressingMode::IMM, 2, core::HIGH}},
+        {Opcode::LDX_ZP, { Opcode::LDX_ZP, AddressingMode::ZP, 3, core::HIGH}},
+        {Opcode::LDX_ZPY, { Opcode::LDX_ZPY, AddressingMode::ZPY, 4, core::HIGH}},
+        {Opcode::LDX_ABS, { Opcode::LDX_ABS, AddressingMode::ABS, 4, core::HIGH}},
+        {Opcode::LDX_ABSY, { Opcode::LDX_ABSY, AddressingMode::ABSY, 4, core::HIGH}},
+        {Opcode::LDY_IMM, { Opcode::LDY_IMM, AddressingMode::IMM, 2, core::HIGH}},
+        {Opcode::LDY_ZP, { Opcode::LDY_ZP, AddressingMode::ZP, 3, core::HIGH}},
+        {Opcode::LDY_ZPX, { Opcode::LDY_ZPX, AddressingMode::ZPX, 4, core::HIGH}},
+        {Opcode::LDY_ABS, { Opcode::LDY_ABS, AddressingMode::ABS, 4, core::HIGH}},
+        {Opcode::LDY_ABSX, { Opcode::LDY_ABSX, AddressingMode::ABSX, 4, core::HIGH}},
 
-        {Opcode::STA_ZP, { Opcode::STA_ZP, AddressingMode::ZP, 3}},
-        {Opcode::STA_ZPX, { Opcode::STA_ZPX, AddressingMode::ZP, 4}},
-        {Opcode::STA_ABS, { Opcode::STA_ABS, AddressingMode::ABS, 4}},
-        {Opcode::STA_ABSX, { Opcode::STA_ABSX, AddressingMode::ABS, 5}},        
-        {Opcode::STA_ABSY, { Opcode::STA_ABSY, AddressingMode::ABS, 5}},
-        {Opcode::STA_INDX, { Opcode::STA_INDX, AddressingMode::ABS, 6}},
-        {Opcode::STA_INDY, { Opcode::STA_INDY, AddressingMode::ABS, 6}},
-        {Opcode::STX_ZP, { Opcode::STX_ZP, AddressingMode::ZP, 3}},
-        {Opcode::STX_ZPY, { Opcode::STX_ZPY, AddressingMode::ZPY, 4}},
-        {Opcode::STX_ABS, { Opcode::STX_ABS, AddressingMode::ABS, 4}},
-        {Opcode::STY_ZP, { Opcode::STY_ZP, AddressingMode::ZP, 3}},
-        {Opcode::STY_ZPX, { Opcode::STY_ZPX, AddressingMode::ZPX, 4}},
-        {Opcode::STY_ABS, { Opcode::STY_ABS, AddressingMode::ABS, 4}},
+        {Opcode::STA_ZP, { Opcode::STA_ZP, AddressingMode::ZP, 3, core::LOW}},
+        {Opcode::STA_ZPX, { Opcode::STA_ZPX, AddressingMode::ZP, 4, core::LOW}},
+        {Opcode::STA_ABS, { Opcode::STA_ABS, AddressingMode::ABS, 4, core::LOW}},
+        {Opcode::STA_ABSX, { Opcode::STA_ABSX, AddressingMode::ABS, 5, core::LOW}},        
+        {Opcode::STA_ABSY, { Opcode::STA_ABSY, AddressingMode::ABS, 5, core::LOW}},
+        {Opcode::STA_INDX, { Opcode::STA_INDX, AddressingMode::ABS, 6, core::LOW}},
+        {Opcode::STA_INDY, { Opcode::STA_INDY, AddressingMode::ABS, 6, core::LOW}},
+        {Opcode::STX_ZP, { Opcode::STX_ZP, AddressingMode::ZP, 3, core::LOW}},
+        {Opcode::STX_ZPY, { Opcode::STX_ZPY, AddressingMode::ZPY, 4, core::LOW}},
+        {Opcode::STX_ABS, { Opcode::STX_ABS, AddressingMode::ABS, 4, core::LOW}},
+        {Opcode::STY_ZP, { Opcode::STY_ZP, AddressingMode::ZP, 3, core::LOW}},
+        {Opcode::STY_ZPX, { Opcode::STY_ZPX, AddressingMode::ZPX, 4, core::LOW}},
+        {Opcode::STY_ABS, { Opcode::STY_ABS, AddressingMode::ABS, 4, core::LOW}},
 
         // Register Transfers
-        {Opcode::TAX, { Opcode::TAX, AddressingMode::IMP, 2}},
-        {Opcode::TXA, { Opcode::TXA, AddressingMode::IMP, 2}},
-        {Opcode::DEX, { Opcode::DEX, AddressingMode::IMP, 2}},
-        {Opcode::INX, { Opcode::INX, AddressingMode::IMP, 2}},
-        {Opcode::TAY, { Opcode::TAY, AddressingMode::IMP, 2}},
-        {Opcode::TYA, { Opcode::TYA, AddressingMode::IMP, 2}},
-        {Opcode::DEY, { Opcode::DEY, AddressingMode::IMP, 2}},
-        {Opcode::INY, { Opcode::INY, AddressingMode::IMP, 2}},
+        {Opcode::TAX, { Opcode::TAX, AddressingMode::IMP, 2, core::HIGH}},
+        {Opcode::TXA, { Opcode::TXA, AddressingMode::IMP, 2, core::HIGH}},
+        {Opcode::DEX, { Opcode::DEX, AddressingMode::IMP, 2, core::HIGH}},
+        {Opcode::INX, { Opcode::INX, AddressingMode::IMP, 2, core::HIGH}},
+        {Opcode::TAY, { Opcode::TAY, AddressingMode::IMP, 2, core::HIGH}},
+        {Opcode::TYA, { Opcode::TYA, AddressingMode::IMP, 2, core::HIGH}},
+        {Opcode::DEY, { Opcode::DEY, AddressingMode::IMP, 2, core::HIGH}},
+        {Opcode::INY, { Opcode::INY, AddressingMode::IMP, 2, core::HIGH}},
 
         // Stack Operations
-        {Opcode::TSX, { Opcode::TSX, AddressingMode::IMP, 2}},
-        {Opcode::TXS, { Opcode::TXS, AddressingMode::IMP, 2}},
-        {Opcode::PHA, { Opcode::PHA, AddressingMode::IMP, 3}},
-        {Opcode::PLA, { Opcode::PLA, AddressingMode::IMP, 4}},
-        {Opcode::PHP, { Opcode::PHP, AddressingMode::IMP, 3}},
-        {Opcode::PLP, { Opcode::PLP, AddressingMode::IMP, 4}},
+        {Opcode::TSX, { Opcode::TSX, AddressingMode::IMP, 2, core::HIGH}},
+        {Opcode::TXS, { Opcode::TXS, AddressingMode::IMP, 2, core::HIGH}},
+        {Opcode::PHA, { Opcode::PHA, AddressingMode::IMP, 3, core::HIGH}},
+        {Opcode::PLA, { Opcode::PLA, AddressingMode::IMP, 4, core::HIGH}},
+        {Opcode::PHP, { Opcode::PHP, AddressingMode::IMP, 3, core::HIGH}},
+        {Opcode::PLP, { Opcode::PLP, AddressingMode::IMP, 4, core::HIGH}},
 
         // Jump & Calls
-        {Opcode::JMP_ABS, { Opcode::JMP_ABS, AddressingMode::ABS, 3}},
-        {Opcode::JMP_IND, { Opcode::JMP_IND, AddressingMode::IND, 5}},
-        {Opcode::JSR, { Opcode::JSR, AddressingMode::ABS, 6}},
-        {Opcode::RTS, { Opcode::RTS, AddressingMode::IMP, 6}},
+        {Opcode::JMP_ABS, { Opcode::JMP_ABS, AddressingMode::ABS, 3, core::HIGH}},
+        {Opcode::JMP_IND, { Opcode::JMP_IND, AddressingMode::IND, 5, core::HIGH}},
+        {Opcode::JSR, { Opcode::JSR, AddressingMode::ABS, 6, core::HIGH}},
+        {Opcode::RTS, { Opcode::RTS, AddressingMode::IMP, 6, core::HIGH}},
 
 
         
-        {Opcode::NOP, {Opcode::NOP, AddressingMode::IMP, 2}}, // NOP is a no-operation instruction
-        {Opcode::BRK, {Opcode::BRK, AddressingMode::IMP, 7}}, // BRK is a break instruction
-        {Opcode::RTI, {Opcode::RTI, AddressingMode::IMP, 6}}, // RTI is a return from interrupt instruction
+        {Opcode::NOP, {Opcode::NOP, AddressingMode::IMP, 2, core::HIGH}}, // NOP is a no-operation instruction
+        {Opcode::BRK, {Opcode::BRK, AddressingMode::IMP, 7, core::HIGH}}, // BRK is a break instruction
+        {Opcode::RTI, {Opcode::RTI, AddressingMode::IMP, 6, core::HIGH}}, // RTI is a return from interrupt instruction
 
     };
 }

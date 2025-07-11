@@ -36,6 +36,14 @@ namespace EaterEmulator::devices
 
 #ifdef UNIT_TEST
         // For unit testing purposes
+
+        void setAccumulator(uint8_t value) { _a = value; }
+        void setXRegister(uint8_t value) { _x = value; }
+        void setYRegister(uint8_t value) { _y = value; }
+        void setStackPointer(uint8_t value) { _sp = value; }
+        void setProgramCounter(uint16_t value) { _pc = value; }
+        void setStatus(uint8_t value) { _status = value; }
+
         uint8_t getAccumulator() const { return _a; }
         uint8_t getXRegister() const { return _x; }
         uint8_t getYRegister() const { return _y; }
@@ -54,8 +62,9 @@ namespace EaterEmulator::devices
 
         uint8_t fetchByte();
 
-        void executeInstruction(Opcode opcode);
+        void executeInstruction(Opcode opcode, bool& incrementPC);
         void updateStatusFlags(uint8_t value);
+        uint8_t getRWB() const;
 
         // Registers
         uint8_t _a; // Accumulator

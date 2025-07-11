@@ -36,5 +36,6 @@ if (${BUILD_TESTS})
     FetchContent_MakeAvailable(googletest)
 
     enable_testing()
+    target_compile_definitions(${LIB_NAME} PRIVATE UNIT_TEST)
     add_subdirectory(tests)
 endif()
