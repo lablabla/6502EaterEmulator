@@ -1,0 +1,76 @@
+#pragma once
+
+#include "core/bus_master.h"
+#include "core/defines.h"
+#include "devices/W65C02S/opcodes.h"
+
+namespace EaterEmulator::devices
+{
+    // Status flags bits
+    static constexpr uint8_t STATUS_CARRY = 0x01; // Carry Flag
+    static constexpr uint8_t STATUS_ZERO = 0x02; // Zero Flag
+    static constexpr uint8_t STATUS_OVERFLOW = 0x40; // Overflow Flag
+    static constexpr uint8_t STATUS_NEGATIVE = 0x80; // Negative Flag
+
+
+    // W65C02S CPU device class
+    class W65C02S : public core::BusMaster
+    {
+    public:
+        W65C02S(core::Bus& bus);
+        virtual ~W65C02S();
+
+        // Non-copyable, Non-movable
+        W65C02S(const W65C02S&) = delete;
+        W65C02S& operator=(const W65C02S&) = delete;
+        W65C02S(W65C02S&&) = delete;
+        W65C02S& operator=(W65C02S&&) = delete;
+
+        // Reset the CPU
+        void reset();
+
+        void handleClockStateChange(core::ClockState state) override;
+        void notifyBus(uint8_t rwb) override;
+
+        std::string getName() const override { return "W65C02S"; }
+
+#ifdef UNIT_TEST
+        // For unit testing purposes
+        uint8_t getAccumulator() const { return _a; }
+        uint8_t getXRegister() const { return _x; }
+        uint8_t getYRegister() const { return _y; }
+        uint8_t getStackPointer() const { return _sp; }
+        uint16_t getProgramCounter() const { return _pc; }
+        uint8_t getStatus() const { return _status; }
+        Opcode getInstructionRegister() const { return _ir; }
+        uint8_t getAddressLow() const { return _adl; }
+        uint8_t getAddressHigh() const { return _adh; }
+#endif
+
+    private:
+
+        void handlePhi2Low();
+        void handlePhi2High();
+
+        uint8_t fetchByte();
+
+        void executeInstruction(Opcode opcode);
+        void updateStatusFlags(uint8_t value);
+
+        // Registers
+        uint8_t _a; // Accumulator
+        uint8_t _x; // X Register
+        uint8_t _y; // Y Register
+        uint8_t _sp; // Stack Pointer
+        uint16_t _pc; // Program Counter
+        uint8_t _status; // Processor Status
+
+        Opcode _ir; // Instruction Register
+        uint8_t _adl; // Address Low Byte
+        uint8_t _adh; // Address High Byte
+
+        int _stage = 0; // Current stage of instruction execution
+
+        bool _started = false;
+    };
+};
