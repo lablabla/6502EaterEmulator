@@ -4,6 +4,7 @@ add_library(${LIB_NAME} STATIC
     
     ${CMAKE_SOURCE_DIR}/src/devices/W65C02S/W65C02S.cpp
     ${CMAKE_SOURCE_DIR}/src/devices/EEPROM28C256/EEPROM28C256.cpp
+    ${CMAKE_SOURCE_DIR}/src/devices/SRAM62256/SRAM62256.cpp
 )
 
 target_include_directories(${LIB_NAME} PRIVATE 

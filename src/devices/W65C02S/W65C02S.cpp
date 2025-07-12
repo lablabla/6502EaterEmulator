@@ -51,7 +51,7 @@ namespace EaterEmulator::devices
 
     void W65C02S::handlePhi2Low()
     {
-        if (_stage < 2)
+        if (_stage < 2) // For any opcode with more than 2 cycles, the first 2 cycles are reading opcode and first operand from PC.
         {
             _bus.setAddress(_pc);
             _started = true; // Make sure we start the CPU on the PHI2 low
@@ -72,9 +72,23 @@ namespace EaterEmulator::devices
                 case AddressingMode::ZP: // Zero Page
                     _bus.setAddress(_adl);
                     break;
+                case AddressingMode::ZPX:                
+                    _bus.setAddress(_adh);
+                break;
                 case AddressingMode::ABS: // Absolute
                 {
-                    if (_stage == 2)
+                    if (it->second.opcode == Opcode::JSR)
+                    {
+                        if (_stage == 5)
+                        {
+                            _bus.setAddress(_pc);
+                        }
+                        else
+                        {
+                            _bus.setAddress(0x0100 + _sp); // Push to stack
+                        }
+                    }
+                    else if (_stage == 2)
                     {
                         _bus.setAddress(_pc); // Read high byte of address
                     }
@@ -106,6 +120,23 @@ namespace EaterEmulator::devices
                     {
                         _bus.setAddress(((_adh << 8) | _adl) + _y);
                     }
+                }
+                break;
+                case AddressingMode::IMP:
+                {                    
+                    _bus.setAddress(0x0100 + _sp); // Push to stack
+                    // switch(it->second.opcode)
+                    // {
+                    //     case Opcode::PHA:
+                    //     case Opcode::PLA:
+                    //     case Opcode::PHP:
+                    //     case Opcode::PLP:
+                    //         _bus.setAddress(0x0100 + _sp); // Push to stack
+                    //         break;
+                    //     default:
+                    //         spdlog::error("Unhandled implied addressing mode for opcode: {:#04x}", static_cast<int>(it->second.opcode));
+                    //         break;
+                    // }
                 }
                 break;
                 default:
@@ -147,7 +178,7 @@ namespace EaterEmulator::devices
                 return;
             }
         }
-        if (_stage == 0)
+        if (_stage == 0) // First cycle is always fetch the opcode
         {
             uint8_t opcode = fetchByte();
             _ir = static_cast<Opcode>(opcode); // Read the instruction from the data bus
@@ -155,6 +186,12 @@ namespace EaterEmulator::devices
             _stage++; // Move to the next stage
             return;
         }
+
+        handleOpcode(rwb);
+    }
+
+    void W65C02S::handleOpcode(uint8_t rwb)
+    {
         auto it = OpcodeMap.find(_ir);
         if (it == OpcodeMap.end()) {
             std::cerr << "Unknown opcode: " << static_cast<int>(_ir) << std::endl;
@@ -164,28 +201,30 @@ namespace EaterEmulator::devices
         if (_stage == opcodeInfo.cycles - 1) // If last cycle, we finished fetching, execute the instruction
         {
             executeInstruction(opcodeInfo.opcode);
-            if (rwb == core::LOW)
-            {
-                // Notify the slaves that we are writing, take values from bus
-                _bus.notifySlaves(rwb);
-            }
             _stage = 0; // Reset stage for next instruction
             if (shouldIncrementPC(opcodeInfo.mode))
             {
                 _pc++;
             }
-            return;
         }
         else if (_stage == 1)
         {
-            _adl = fetchByte(); // Fetch the low byte of the address
-            spdlog::debug("CPU: Read address low byte: {:#04x}", _adl);
+            handleStage1(opcodeInfo);
             _stage++;
         }
         else if (_stage == 2)
         {
-            _adh = fetchByte(); // Fetch the high byte of the address
-            spdlog::debug("CPU: Read address high byte: {:#04x}", _adh);
+            handleStage2(opcodeInfo);
+            _stage++;
+        }
+        else if (_stage == 3)
+        {
+            handleStage3(opcodeInfo);
+            _stage++;
+        }
+        else if (_stage == 4)
+        {
+            handleStage4(opcodeInfo);
             _stage++;
         }
         else 
@@ -195,7 +234,94 @@ namespace EaterEmulator::devices
             _stage = 0;
             return; // If we are not in a valid state, do nothing
         }
-        _pc++;
+        if (rwb == core::LOW)
+        {
+            // Notify the slaves that we are writing, take values from bus
+            _bus.notifySlaves(rwb);
+        }
+    }
+
+    void W65C02S::handleStage1(const OpcodeInfo& info)
+    {
+        switch (info.opcode)
+        {
+            case Opcode::PHA:
+            case Opcode::PLA:
+            case Opcode::PHP:
+            case Opcode::PLP:
+            case Opcode::RTS:
+                fetchByte(); // Fetch byte, ignore result
+                break;
+            default:                
+                _adl = fetchByte(); // Fetch the low byte of the address
+                spdlog::debug("CPU: Read address low byte: {:#04x}", _adl);
+                _pc++;
+                break;
+        }
+    }
+
+    void W65C02S::handleStage2(const OpcodeInfo& info)
+    {
+        switch(info.opcode)
+        {
+            case Opcode::LDA_ZPX:
+            case Opcode::LDY_ZPX:
+            case Opcode::STY_ZPX:
+                _adh = _adl + _x;
+                break;
+            case Opcode::PLA:
+            case Opcode::PLP:
+            case Opcode::RTS:
+                _sp++;
+                break;
+            case Opcode::JSR:
+                // Internal operation
+                break;
+            default:
+                _adh = fetchByte(); // Fetch the high byte of the address                
+                _pc++;
+                break;
+        }
+    }
+    
+    void W65C02S::handleStage3(const OpcodeInfo& info)
+    {
+        switch(info.opcode)
+        {
+            case Opcode::JSR:
+            {
+                uint8_t pch = (_pc >> 8);
+                _bus.setData(pch);
+                _sp--;
+            }
+                break;
+            case Opcode::RTS:
+                _adl = fetchByte();
+                _sp++;
+                break;
+            default:
+                break;
+        }
+    }
+    
+    void W65C02S::handleStage4(const OpcodeInfo& info)
+    {
+        switch(info.opcode)
+        {
+            case Opcode::JSR:
+            {
+                uint8_t pcl = static_cast<uint8_t>(_pc);
+                _bus.setData(pcl);
+                _sp--;
+            }
+                break;
+            case Opcode::RTS:
+                _adh = fetchByte();
+                _pc = (_adh << 8) | _adl;
+                break;
+            default:
+                break;
+        }
     }
 
     uint8_t W65C02S::fetchByte()
@@ -210,27 +336,14 @@ namespace EaterEmulator::devices
         switch(opcode)
         {
             case Opcode::LDA_IMM:
-                _a = fetchByte();
-                updateStatusFlags(_a);
-                spdlog::debug("CPU: LDA_IMM executed, A = {:#04x}", static_cast<int>(_a));
-                break;
             case Opcode::LDA_ZP:
-                updateStatusFlags(_a);
-                break;
+            case Opcode::LDA_ZPX:
             case Opcode::LDA_ABS:
-                _a = fetchByte();
-                updateStatusFlags(_a);
-                spdlog::debug("CPU: LDA_ABS executed, A = {:#04x}", static_cast<int>(_a));
-                break;
             case Opcode::LDA_ABSX:
-                _a = fetchByte();
-                updateStatusFlags(_a);
-                spdlog::debug("CPU: LDA_ABSX executed, A = {:#04x}", static_cast<int>(_a));
-                break;
             case Opcode::LDA_ABSY:
                 _a = fetchByte();
                 updateStatusFlags(_a);
-                spdlog::debug("CPU: LDA_ABSY executed, A = {:#04x}", static_cast<int>(_a));
+                spdlog::debug("CPU: LDA executed, A = {:#04x}", static_cast<int>(_a));
                 break;
 
             case Opcode::STA_ABS:
@@ -239,10 +352,28 @@ namespace EaterEmulator::devices
                 break;
 
             case Opcode::JMP_ABS:
+            case Opcode::JSR:
                 _adh = fetchByte();
                 spdlog::debug("CPU: Read address high byte: {:#04x}", _adh);
                 _pc = (_adh << 8) | _adl;
-                spdlog::debug("CPU: JMP_ABS executed, PC = {:#04x}", static_cast<int>(_pc));
+                break;
+
+            case Opcode::PHA:
+                _bus.setData(_a);
+                _sp--;
+                break;
+            case Opcode::PLA:
+                _a = fetchByte();
+                break;
+            case Opcode::PHP:
+                _bus.setData(_status);
+                _sp--;
+                break;
+            case Opcode::PLP:
+                _status = fetchByte();
+                break;
+            case Opcode::RTS:
+                _pc++;
                 break;
             default:
                 spdlog::error("CPU: Unhandled opcode: {:#04x}", static_cast<int>(opcode));
@@ -277,11 +408,33 @@ namespace EaterEmulator::devices
         {
             case AddressingMode::IMM:
             case AddressingMode::ZP:
-                return core::HIGH; // Read operation
+            case AddressingMode::ZPX:
+                return core::HIGH;
+            case AddressingMode::IMP:
+            {
+                switch (it->second.opcode) 
+                {
+                    case Opcode::PHA:
+                    case Opcode::PHP:
+                        return core::LOW;
+                    default:
+                        return core::HIGH;
+                }
+            }
             case AddressingMode::ABS:
             case AddressingMode::ABSX:
             case AddressingMode::ABSY:
+            {
+                if (it->second.opcode == Opcode::JSR)
+                {
+                    if (_stage < 3 || _stage == 5)
+                    {
+                        return core::HIGH;
+                    }
+                    return core::LOW;
+                }
                 return _stage < 3 ? core::HIGH : it->second.rwb;
+            }
             default:
                 return core::LOW; // Write operation
         }
@@ -294,6 +447,10 @@ namespace EaterEmulator::devices
             case AddressingMode::ABS:
             case AddressingMode::ABSX:
             case AddressingMode::ABSY:
+            case AddressingMode::ZP:
+            case AddressingMode::ZPX:
+            case AddressingMode::ZPY:
+            case AddressingMode::IMP:
                 return false; // Do not increment PC for absolute addressing modes
             default:
                 return true; // Increment PC for other addressing modes

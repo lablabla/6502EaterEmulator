@@ -26,7 +26,7 @@ protected:
     
     std::vector<uint8_t> memory;
     void SetUp() override { 
-        spdlog::set_pattern("[%H:%M:%S.%e] [thread %t] %v");
+        spdlog::set_pattern("[%H:%M:%S %z] [%n] [%^---%L---%$] %v");
         spdlog::set_level(spdlog::level::debug); // Set log level to debug for detailed output
         memory.resize(0x8000, 0x00); // Initialize memory with 64KB of zeros
         cpu = std::make_unique<devices::W65C02S>(bus);

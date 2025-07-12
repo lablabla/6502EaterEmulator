@@ -1,11 +1,12 @@
 // Test suite for LDA opcode
 #include "cpu_instruction_test.h"
+#include "devices/SRAM62256/SRAM62256.h"
 #include <cstdint>
 #include <sys/types.h>
 
 using namespace EaterEmulator;
 
-TEST_F(CPUInstructionTest, JMP_ABS_StoreValue) 
+TEST_F(CPUInstructionTest, JMP_ABS) 
 {
     auto opcode = Opcode::JMP_ABS;
     auto it = OpcodeMap.find(opcode);
@@ -25,6 +26,78 @@ TEST_F(CPUInstructionTest, JMP_ABS_StoreValue)
     }
     
     EXPECT_EQ(cpu->getProgramCounter(), 0x8037);
+    uint8_t status = cpu->getStatus();
+    EXPECT_EQ(status, statusBefore); // Status should remain unchanged
+}
+
+TEST_F(CPUInstructionTest, JSR) 
+{
+    auto opcode = Opcode::JSR;
+    auto it = OpcodeMap.find(opcode);
+    ASSERT_NE(it, OpcodeMap.end()) << "Opcode not found in map";
+    cpu->setResetStage(0); // Not enought room to start from reset vector, perform full reset
+    auto cycles = it->second.cycles + 2; // + 2 for the reset stages.
+    memory[0xFFFC - MEMORY_OFFSET] = 0x05;
+    memory[0xFFFD - MEMORY_OFFSET] = 0xFF;
+
+    memory[0xFF05 - MEMORY_OFFSET] = static_cast<uint8_t>(opcode);
+    memory[0xFF06 - MEMORY_OFFSET] = 0x0A;
+    memory[0xFF07 - MEMORY_OFFSET] = 0xFF;
+
+    uint8_t statusBefore = cpu->getStatus();
+    rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
+    bus.addSlave(rom.get());
+    auto ram = std::make_unique<devices::SRAM62256>(bus);
+    bus.addSlave(ram.get());
+
+    cpu->setStackPointer(0xFF);
+    
+    for (int i = 0; i < cycles; ++i) 
+    {
+        cpu->handleClockStateChange(core::LOW);
+        cpu->handleClockStateChange(core::HIGH);
+    }
+    
+    auto ramMemory = ram->getMemory();
+    EXPECT_EQ(cpu->getProgramCounter(), 0xFF0A);
+    EXPECT_EQ(cpu->getStackPointer(), 0xFF - 2);
+    EXPECT_EQ(ramMemory[0x01FF], 0xFF);
+    EXPECT_EQ(ramMemory[0x01FF-1], 0x07);
+    uint8_t status = cpu->getStatus();
+    EXPECT_EQ(status, statusBefore); // Status should remain unchanged
+}
+
+TEST_F(CPUInstructionTest, RTS) 
+{
+    auto opcode = Opcode::RTS;
+    auto it = OpcodeMap.find(opcode);
+    ASSERT_NE(it, OpcodeMap.end()) << "Opcode not found in map";
+    auto cycles = it->second.cycles;
+    memory[0xFFFC - MEMORY_OFFSET] = 0x05;
+    memory[0xFFFD - MEMORY_OFFSET] = 0xFF;
+
+    memory[0xFF0A - MEMORY_OFFSET] = static_cast<uint8_t>(opcode);
+
+    uint8_t statusBefore = cpu->getStatus();
+    rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
+    bus.addSlave(rom.get());
+    auto ram = std::make_unique<devices::SRAM62256>(bus);
+    bus.addSlave(ram.get());
+
+    auto& ramMemory = ram->getMemory();
+    ramMemory[0x01FF] = 0xFF;
+    ramMemory[0x01FF-1] = 0x07;
+    cpu->setStackPointer(0xFF - 2);
+    cpu->setProgramCounter(0xFF0A);
+    
+    for (int i = 0; i < cycles; ++i) 
+    {
+        cpu->handleClockStateChange(core::LOW);
+        cpu->handleClockStateChange(core::HIGH);
+    }
+    
+    EXPECT_EQ(cpu->getProgramCounter(), 0xFF08);
+    EXPECT_EQ(cpu->getStackPointer(), 0xFF);
     uint8_t status = cpu->getStatus();
     EXPECT_EQ(status, statusBefore); // Status should remain unchanged
 }

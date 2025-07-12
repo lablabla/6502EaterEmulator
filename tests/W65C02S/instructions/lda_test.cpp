@@ -1,5 +1,6 @@
 // Test suite for LDA opcode
 #include "cpu_instruction_test.h"
+#include "devices/SRAM62256/SRAM62256.h"
 #include <cstdint>
 #include <sys/types.h>
 
@@ -305,23 +306,195 @@ TEST_F(CPUInstructionTest, LDA_ABSX_LoadsAbsoluteYZeroValue)
     EXPECT_EQ(status & devices::STATUS_NEGATIVE, 0); // Negative flag should not be set
 }
 
-
-// TEST_F(CPUInstructionTest, LDA_ZP_LoadsZPValue) 
-// {
-//     auto opcode = Opcode::LDA_ZP;
-//     auto it = OpcodeMap.find(opcode);
-//     ASSERT_NE(it, OpcodeMap.end()) << "Opcode not found in map";
-//     auto cycles = it->second.cycles;
-//     memory[0xFFFC - MEMORY_OFFSET] = static_cast<uint8_t>(opcode);
-//     memory[0xFFFD - MEMORY_OFFSET] = 0x42 + MEMORY_OFFSET;
-//     memory[0x0042 - MEMORY_OFFSET] = 0x37; // Zero Page address 0x0042 contains value 0x37]
-//     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-//     bus.addSlave(rom.get());
+TEST_F(CPUInstructionTest, LDA_ZP_LoadsZeroPageValue) 
+{
+    auto opcode = Opcode::LDA_ZP;
+    auto it = OpcodeMap.find(opcode);
+    ASSERT_NE(it, OpcodeMap.end()) << "Opcode not found in map";
+    auto cycles = it->second.cycles;
+    memory[0xFFFC - MEMORY_OFFSET] = static_cast<uint8_t>(opcode);
+    memory[0xFFFD - MEMORY_OFFSET] = 0x37;
+    rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
     
-//     for (int i = 0; i < cycles; ++i) 
-//     {
-//         cpu->handleClockStateChange(core::LOW);
-//         cpu->handleClockStateChange(core::HIGH);
-//     }
-//     EXPECT_EQ(cpu->getAccumulator(), 0x37);
-// }
+    bus.addSlave(rom.get());
+    auto ram = std::make_unique<devices::SRAM62256>(bus);
+    ram->getMemory()[0x0037] = 0x11; // Zero page address 0x0037 contains value 0x11
+    bus.addSlave(ram.get());
+    
+    for (int i = 0; i < cycles; ++i) 
+    {
+        cpu->handleClockStateChange(core::LOW);
+        cpu->handleClockStateChange(core::HIGH);
+    }
+    EXPECT_EQ(cpu->getAccumulator(), 0x11);
+    EXPECT_EQ(cpu->getProgramCounter(), 0xFFFD + 1);
+    uint8_t status = cpu->getStatus();
+    EXPECT_EQ(status & devices::STATUS_ZERO, 0); // Zero flag should not be set
+    EXPECT_EQ(status & devices::STATUS_NEGATIVE, 0); // Negative flag should not be set
+}
+
+TEST_F(CPUInstructionTest, LDA_ZP_LoadsZeroPageNegativeValue) 
+{
+    auto opcode = Opcode::LDA_ZP;
+    auto it = OpcodeMap.find(opcode);
+    ASSERT_NE(it, OpcodeMap.end()) << "Opcode not found in map";
+    auto cycles = it->second.cycles;
+    memory[0xFFFC - MEMORY_OFFSET] = static_cast<uint8_t>(opcode);
+    memory[0xFFFD - MEMORY_OFFSET] = 0x37;
+    rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
+    
+    bus.addSlave(rom.get());
+    auto ram = std::make_unique<devices::SRAM62256>(bus);
+    ram->getMemory()[0x0037] = 0x81; // Zero page address 0x0081 contains value 0x11
+    bus.addSlave(ram.get());
+    
+    for (int i = 0; i < cycles; ++i) 
+    {
+        cpu->handleClockStateChange(core::LOW);
+        cpu->handleClockStateChange(core::HIGH);
+    }
+    EXPECT_EQ(cpu->getAccumulator(), 0x81);
+    EXPECT_EQ(cpu->getProgramCounter(), 0xFFFD + 1);
+    uint8_t status = cpu->getStatus();
+    EXPECT_EQ(status & devices::STATUS_ZERO, 0); // Zero flag should not be set
+    EXPECT_EQ(status & devices::STATUS_NEGATIVE, devices::STATUS_NEGATIVE); // Negative flag should not be set
+}
+
+TEST_F(CPUInstructionTest, LDA_ZP_LoadsZeroPageZeroValue) 
+{
+    auto opcode = Opcode::LDA_ZP;
+    auto it = OpcodeMap.find(opcode);
+    ASSERT_NE(it, OpcodeMap.end()) << "Opcode not found in map";
+    auto cycles = it->second.cycles;
+    memory[0xFFFC - MEMORY_OFFSET] = static_cast<uint8_t>(opcode);
+    memory[0xFFFD - MEMORY_OFFSET] = 0x37;
+    rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
+    
+    bus.addSlave(rom.get());
+    auto ram = std::make_unique<devices::SRAM62256>(bus);
+    ram->getMemory()[0x0037] = 0x00; // Zero page address 0x0037 contains value 0x11
+    bus.addSlave(ram.get());
+    
+    for (int i = 0; i < cycles; ++i) 
+    {
+        cpu->handleClockStateChange(core::LOW);
+        cpu->handleClockStateChange(core::HIGH);
+    }
+    EXPECT_EQ(cpu->getAccumulator(), 0x00);
+    EXPECT_EQ(cpu->getProgramCounter(), 0xFFFD + 1);
+    uint8_t status = cpu->getStatus();
+    EXPECT_EQ(status & devices::STATUS_ZERO, devices::STATUS_ZERO); // Zero flag should not be set
+    EXPECT_EQ(status & devices::STATUS_NEGATIVE, 0); // Negative flag should not be set
+}
+
+TEST_F(CPUInstructionTest, LDA_ZP_LoadsZeroPageXValue) 
+{
+    auto opcode = Opcode::LDA_ZPX;
+    auto it = OpcodeMap.find(opcode);
+    ASSERT_NE(it, OpcodeMap.end()) << "Opcode not found in map";
+    auto cycles = it->second.cycles;
+    memory[0xFFFC - MEMORY_OFFSET] = static_cast<uint8_t>(opcode);
+    memory[0xFFFD - MEMORY_OFFSET] = 0x80;
+    cpu->setXRegister(0x0F);
+    rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
+    
+    bus.addSlave(rom.get());
+    auto ram = std::make_unique<devices::SRAM62256>(bus);
+    ram->getMemory()[0x008F] = 0x11; // Zero page address 0x0037 contains value 0x11
+    bus.addSlave(ram.get());
+    
+    for (int i = 0; i < cycles; ++i) 
+    {
+        cpu->handleClockStateChange(core::LOW);
+        cpu->handleClockStateChange(core::HIGH);
+    }
+    EXPECT_EQ(cpu->getAccumulator(), 0x11);
+    EXPECT_EQ(cpu->getProgramCounter(), 0xFFFD + 1);
+    uint8_t status = cpu->getStatus();
+    EXPECT_EQ(status & devices::STATUS_ZERO, 0); // Zero flag should not be set
+    EXPECT_EQ(status & devices::STATUS_NEGATIVE, 0); // Negative flag should not be set
+}
+
+TEST_F(CPUInstructionTest, LDA_ZP_LoadsZeroPageXNegativeValue) 
+{
+    auto opcode = Opcode::LDA_ZPX;
+    auto it = OpcodeMap.find(opcode);
+    ASSERT_NE(it, OpcodeMap.end()) << "Opcode not found in map";
+    auto cycles = it->second.cycles;
+    memory[0xFFFC - MEMORY_OFFSET] = static_cast<uint8_t>(opcode);
+    memory[0xFFFD - MEMORY_OFFSET] = 0x80;
+    cpu->setXRegister(0x0F);
+    rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
+    
+    bus.addSlave(rom.get());
+    auto ram = std::make_unique<devices::SRAM62256>(bus);
+    ram->getMemory()[0x008F] = 0x84; // Zero page address 0x0037 contains value 0x11
+    bus.addSlave(ram.get());
+    
+    for (int i = 0; i < cycles; ++i) 
+    {
+        cpu->handleClockStateChange(core::LOW);
+        cpu->handleClockStateChange(core::HIGH);
+    }
+    EXPECT_EQ(cpu->getAccumulator(), 0x84);
+    EXPECT_EQ(cpu->getProgramCounter(), 0xFFFD + 1);
+    uint8_t status = cpu->getStatus();
+    EXPECT_EQ(status & devices::STATUS_ZERO, 0); // Zero flag should not be set
+    EXPECT_EQ(status & devices::STATUS_NEGATIVE, devices::STATUS_NEGATIVE); // Negative flag should not be set
+}
+
+TEST_F(CPUInstructionTest, LDA_ZP_LoadsZeroPageXZeroValue) 
+{
+    auto opcode = Opcode::LDA_ZPX;
+    auto it = OpcodeMap.find(opcode);
+    ASSERT_NE(it, OpcodeMap.end()) << "Opcode not found in map";
+    auto cycles = it->second.cycles;
+    memory[0xFFFC - MEMORY_OFFSET] = static_cast<uint8_t>(opcode);
+    memory[0xFFFD - MEMORY_OFFSET] = 0x80;
+    cpu->setXRegister(0x0F);
+    rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
+    
+    bus.addSlave(rom.get());
+    auto ram = std::make_unique<devices::SRAM62256>(bus);
+    ram->getMemory()[0x008F] = 0x00;
+    bus.addSlave(ram.get());
+    
+    for (int i = 0; i < cycles; ++i) 
+    {
+        cpu->handleClockStateChange(core::LOW);
+        cpu->handleClockStateChange(core::HIGH);
+    }
+    EXPECT_EQ(cpu->getAccumulator(), 0x00);
+    EXPECT_EQ(cpu->getProgramCounter(), 0xFFFD + 1);
+    uint8_t status = cpu->getStatus();
+    EXPECT_EQ(status & devices::STATUS_ZERO, devices::STATUS_ZERO); // Zero flag should not be set
+    EXPECT_EQ(status & devices::STATUS_NEGATIVE, 0); // Negative flag should not be set
+}
+
+TEST_F(CPUInstructionTest, LDA_ZP_LoadsZeroPageXOverflowValue) 
+{
+    auto opcode = Opcode::LDA_ZPX;
+    auto it = OpcodeMap.find(opcode);
+    ASSERT_NE(it, OpcodeMap.end()) << "Opcode not found in map";
+    auto cycles = it->second.cycles;
+    memory[0xFFFC - MEMORY_OFFSET] = static_cast<uint8_t>(opcode);
+    memory[0xFFFD - MEMORY_OFFSET] = 0x80;
+    cpu->setXRegister(0xFF);
+    rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
+    
+    bus.addSlave(rom.get());
+    auto ram = std::make_unique<devices::SRAM62256>(bus);
+    ram->getMemory()[0x007F] = 0x42;
+    bus.addSlave(ram.get());
+    
+    for (int i = 0; i < cycles; ++i) 
+    {
+        cpu->handleClockStateChange(core::LOW);
+        cpu->handleClockStateChange(core::HIGH);
+    }
+    EXPECT_EQ(cpu->getAccumulator(), 0x42);
+    EXPECT_EQ(cpu->getProgramCounter(), 0xFFFD + 1);
+    uint8_t status = cpu->getStatus();
+    EXPECT_EQ(status & devices::STATUS_ZERO, 0); // Zero flag should not be set
+    EXPECT_EQ(status & devices::STATUS_NEGATIVE, 0); // Negative flag should not be set
+}

@@ -274,16 +274,16 @@ namespace EaterEmulator
         // Stack Operations
         {Opcode::TSX, { Opcode::TSX, AddressingMode::IMP, 2, core::HIGH}},
         {Opcode::TXS, { Opcode::TXS, AddressingMode::IMP, 2, core::HIGH}},
-        {Opcode::PHA, { Opcode::PHA, AddressingMode::IMP, 3, core::HIGH}},
+        {Opcode::PHA, { Opcode::PHA, AddressingMode::IMP, 3, core::LOW}},
         {Opcode::PLA, { Opcode::PLA, AddressingMode::IMP, 4, core::HIGH}},
-        {Opcode::PHP, { Opcode::PHP, AddressingMode::IMP, 3, core::HIGH}},
+        {Opcode::PHP, { Opcode::PHP, AddressingMode::IMP, 3, core::LOW}},
         {Opcode::PLP, { Opcode::PLP, AddressingMode::IMP, 4, core::HIGH}},
 
         // Jump & Calls
         {Opcode::JMP_ABS, { Opcode::JMP_ABS, AddressingMode::ABS, 3, core::HIGH}},
         {Opcode::JMP_IND, { Opcode::JMP_IND, AddressingMode::IND, 5, core::HIGH}},
-        {Opcode::JSR, { Opcode::JSR, AddressingMode::ABS, 6, core::HIGH}},
-        {Opcode::RTS, { Opcode::RTS, AddressingMode::IMP, 6, core::HIGH}},
+        {Opcode::JSR, { Opcode::JSR, AddressingMode::ABS, 6, core::LOW}},
+        {Opcode::RTS, { Opcode::RTS, AddressingMode::IMP, 6, core::LOW}},
 
 
         

@@ -60,6 +60,13 @@ namespace EaterEmulator::devices
 
         void handlePhi2Low();
         void handlePhi2High();
+        
+        // Handle stages
+        void handleOpcode(uint8_t rwb);
+        void handleStage1(const OpcodeInfo& info);
+        void handleStage2(const OpcodeInfo& info);
+        void handleStage3(const OpcodeInfo& info);
+        void handleStage4(const OpcodeInfo& info);
 
         uint8_t fetchByte();
 

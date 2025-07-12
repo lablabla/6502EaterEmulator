@@ -28,7 +28,7 @@ namespace EaterEmulator::devices
     void EEPROM28C256::handleBusNotification(uint16_t address, uint8_t rwb)
     {
         if (!shouldHandleAddress(address)) {
-            spdlog::debug("EEPROM28C256: Address 0x{:#04x} not handled by this device", address);
+            spdlog::debug("EEPROM28C256: Address {:#04x} not handled by this device", address);
             return; // If the pins are not for this device, do nothing
         }
         if (rwb == core::HIGH)
@@ -43,7 +43,7 @@ namespace EaterEmulator::devices
             uint8_t data;
             _bus.getData(data); // Get data from the bus
             _memory[address - _offset] = data; // Write data to the memory
-            spdlog::debug("EEPROM28C256: Written data 0x{:#04x} to address 0x{:#04x}", data, address);
+            spdlog::debug("EEPROM28C256: Written data {:#04x} to address {:#04x}", data, address);
         }
 #endif
     }
