@@ -375,6 +375,29 @@ namespace EaterEmulator::devices
             case Opcode::RTS:
                 _pc++;
                 break;
+            case Opcode::TAX:
+                _x = _a;
+                updateStatusFlags(_x);
+                break;
+            case Opcode::TXA:
+                _a = _x;
+                updateStatusFlags(_a);
+                break;
+            case Opcode::TAY:
+                _y = _a;
+                updateStatusFlags(_y);
+                break;
+            case Opcode::TYA:
+                _a = _y;
+                updateStatusFlags(_a);
+                break;
+            case Opcode::TXS:
+                _sp = _x;
+                break;
+            case Opcode::TSX:
+                _x = _sp;
+                updateStatusFlags(_x);
+                break;
             default:
                 spdlog::error("CPU: Unhandled opcode: {:#04x}", static_cast<int>(opcode));
                 break;
