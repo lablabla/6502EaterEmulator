@@ -295,6 +295,16 @@ namespace EaterEmulator
         {Opcode::JSR, { Opcode::JSR, AddressingMode::ABS, 6, core::LOW}},
         {Opcode::RTS, { Opcode::RTS, AddressingMode::IMP, 6, core::LOW}},
 
+        // Branches
+        {Opcode::BPL, { Opcode::BPL, AddressingMode::REL, 4, core::HIGH}},
+        {Opcode::BMI, { Opcode::BMI, AddressingMode::REL, 4, core::HIGH}},
+        {Opcode::BVC, { Opcode::BVC, AddressingMode::REL, 4, core::HIGH}},
+        {Opcode::BVS, { Opcode::BVS, AddressingMode::REL, 4, core::HIGH}},
+        {Opcode::BCC, { Opcode::BCC, AddressingMode::REL, 4, core::HIGH}},
+        {Opcode::BCS, { Opcode::BCS, AddressingMode::REL, 4, core::HIGH}},
+        {Opcode::BNE, { Opcode::BNE, AddressingMode::REL, 4, core::HIGH}},
+        {Opcode::BEQ, { Opcode::BEQ, AddressingMode::REL, 4, core::HIGH}},
+
 
         
         {Opcode::NOP, {Opcode::NOP, AddressingMode::IMP, 2, core::HIGH}}, // NOP is a no-operation instruction

@@ -67,6 +67,7 @@ namespace EaterEmulator::devices
             switch(it->second.mode) 
             {
                 case AddressingMode::IMM:
+                case AddressingMode::REL:
                     _bus.setAddress(_pc);
                     break;
                 case AddressingMode::ZP: // Zero Page
@@ -182,6 +183,7 @@ namespace EaterEmulator::devices
         {
             uint8_t opcode = fetchByte();
             _ir = static_cast<Opcode>(opcode); // Read the instruction from the data bus
+            spdlog::info("CPU: Fetched opcode: {:#04x} from PC: {:#04x}", static_cast<int>(_ir), static_cast<int>(_pc));
             _pc++; // Increment the program counter
             _stage++; // Move to the next stage
             return;
@@ -278,6 +280,28 @@ namespace EaterEmulator::devices
             case Opcode::JSR:
                 // Internal operation
                 break;
+            case Opcode::BEQ:
+                _adh = fetchByte();
+                if (_status & STATUS_ZERO) 
+                {
+                    int8_t offset = static_cast<int8_t>(_adl);
+                    _pc += offset;
+                } else 
+                {
+                    _stage = -1; // We increment outside this function. TODO: Update
+                }
+                break;
+            case Opcode::BNE:
+                _adh = fetchByte();
+                if (!(_status & STATUS_ZERO))
+                {
+                    int8_t offset = static_cast<int8_t>(_adl);
+                    _pc += offset;
+                } else 
+                {
+                    _stage = -1; // We increment outside this function. TODO: Update
+                }
+                break;
             default:
                 _adh = fetchByte(); // Fetch the high byte of the address                
                 _pc++;
@@ -344,18 +368,24 @@ namespace EaterEmulator::devices
             case Opcode::LDA_ABSY:
                 _a = fetchByte();
                 updateStatusFlags(_a);
-                spdlog::debug("CPU: LDA executed, A = {:#04x}", static_cast<int>(_a));
+                break;
+
+            case Opcode::LDX_IMM:
+            case Opcode::LDX_ZP:
+            case Opcode::LDX_ZPY:
+            case Opcode::LDX_ABS:
+            case Opcode::LDX_ABSY:
+                _x = fetchByte();
+                updateStatusFlags(_x);
                 break;
 
             case Opcode::STA_ABS:
-                _bus.setData(_a); // Write the accumulator to the bus
-                spdlog::debug("CPU: STA_ABS executed, A = {:#04x}", static_cast<int>(_a));
+                _bus.setData(_a);
                 break;
 
             case Opcode::JMP_ABS:
             case Opcode::JSR:
                 _adh = fetchByte();
-                spdlog::debug("CPU: Read address high byte: {:#04x}", _adh);
                 _pc = (_adh << 8) | _adl;
                 break;
 
@@ -446,6 +476,7 @@ namespace EaterEmulator::devices
         switch(it->second.mode)
         {
             case AddressingMode::IMM:
+            case AddressingMode::REL:
             case AddressingMode::ZP:
             case AddressingMode::ZPX:
                 return core::HIGH;
