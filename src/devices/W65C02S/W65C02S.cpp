@@ -429,6 +429,22 @@ namespace EaterEmulator::devices
                 _x = _sp;
                 updateStatusFlags(_x);
                 break;
+            case Opcode::INX:
+                _x++;
+                updateStatusFlags(_x);
+                break;
+            case Opcode::DEX:
+                _x--;
+                updateStatusFlags(_x);
+                break;                
+            case Opcode::INY:
+                _y++;
+                updateStatusFlags(_y);
+                break;
+            case Opcode::DEY:
+                _y--;
+                updateStatusFlags(_y);
+                break;
 
             case Opcode::AND_IMM:
             case Opcode::AND_ZP:

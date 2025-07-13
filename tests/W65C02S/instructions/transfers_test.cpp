@@ -475,3 +475,303 @@ TEST_F(CPUInstructionTest, TXS_TransferZeroValue)
     uint8_t status = cpu->getStatus();
     EXPECT_EQ(status, statusBefore);
 }
+
+TEST_F(CPUInstructionTest, INX_IncrementXValue) 
+{
+    auto opcode = Opcode::INX;
+    auto it = OpcodeMap.find(opcode);
+    ASSERT_NE(it, OpcodeMap.end()) << "Opcode not found in map";
+    auto cycles = it->second.cycles;
+    memory[0xFFFC - MEMORY_OFFSET] = static_cast<uint8_t>(opcode);
+    rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
+    bus.addSlave(rom.get());
+
+    cpu->setXRegister(0x03);
+    
+    for (int i = 0; i < cycles; ++i) 
+    {
+        cpu->handleClockStateChange(core::LOW);
+        cpu->handleClockStateChange(core::HIGH);
+    }
+
+    EXPECT_EQ(cpu->getXRegister(), 0x04);
+    EXPECT_EQ(cpu->getProgramCounter(), 0xFFFD); 
+    uint8_t status = cpu->getStatus();
+    EXPECT_EQ(status & devices::STATUS_ZERO, 0);
+    EXPECT_EQ(status & devices::STATUS_NEGATIVE, 0);  
+}
+
+TEST_F(CPUInstructionTest, INX_IncrementXToNegativeValue) 
+{
+    auto opcode = Opcode::INX;
+    auto it = OpcodeMap.find(opcode);
+    ASSERT_NE(it, OpcodeMap.end()) << "Opcode not found in map";
+    auto cycles = it->second.cycles;
+    memory[0xFFFC - MEMORY_OFFSET] = static_cast<uint8_t>(opcode);
+    rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
+    bus.addSlave(rom.get());
+
+    cpu->setXRegister(0x7F);
+    
+    for (int i = 0; i < cycles; ++i) 
+    {
+        cpu->handleClockStateChange(core::LOW);
+        cpu->handleClockStateChange(core::HIGH);
+    }
+
+    EXPECT_EQ(cpu->getXRegister(), 0x80);
+    EXPECT_EQ(cpu->getProgramCounter(), 0xFFFD); 
+    uint8_t status = cpu->getStatus();
+    EXPECT_EQ(status & devices::STATUS_ZERO, 0);
+    EXPECT_EQ(status & devices::STATUS_NEGATIVE, devices::STATUS_NEGATIVE);  
+}
+
+TEST_F(CPUInstructionTest, INX_IncrementXToZeroValue) 
+{
+    auto opcode = Opcode::INX;
+    auto it = OpcodeMap.find(opcode);
+    ASSERT_NE(it, OpcodeMap.end()) << "Opcode not found in map";
+    auto cycles = it->second.cycles;
+    memory[0xFFFC - MEMORY_OFFSET] = static_cast<uint8_t>(opcode);
+    rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
+    bus.addSlave(rom.get());
+
+    cpu->setXRegister(0xFF);
+    
+    for (int i = 0; i < cycles; ++i) 
+    {
+        cpu->handleClockStateChange(core::LOW);
+        cpu->handleClockStateChange(core::HIGH);
+    }
+
+    EXPECT_EQ(cpu->getXRegister(), 0x00);
+    EXPECT_EQ(cpu->getProgramCounter(), 0xFFFD); 
+    uint8_t status = cpu->getStatus();
+    EXPECT_EQ(status & devices::STATUS_ZERO, devices::STATUS_ZERO);
+    EXPECT_EQ(status & devices::STATUS_NEGATIVE, 0);  
+}
+
+TEST_F(CPUInstructionTest, INY_IncrementXValue) 
+{
+    auto opcode = Opcode::INY;
+    auto it = OpcodeMap.find(opcode);
+    ASSERT_NE(it, OpcodeMap.end()) << "Opcode not found in map";
+    auto cycles = it->second.cycles;
+    memory[0xFFFC - MEMORY_OFFSET] = static_cast<uint8_t>(opcode);
+    rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
+    bus.addSlave(rom.get());
+
+    cpu->setYRegister(0x03);
+    
+    for (int i = 0; i < cycles; ++i) 
+    {
+        cpu->handleClockStateChange(core::LOW);
+        cpu->handleClockStateChange(core::HIGH);
+    }
+
+    EXPECT_EQ(cpu->getYRegister(), 0x04);
+    EXPECT_EQ(cpu->getProgramCounter(), 0xFFFD); 
+    uint8_t status = cpu->getStatus();
+    EXPECT_EQ(status & devices::STATUS_ZERO, 0);
+    EXPECT_EQ(status & devices::STATUS_NEGATIVE, 0);  
+}
+
+TEST_F(CPUInstructionTest, INY_IncrementXToNegativeValue) 
+{
+    auto opcode = Opcode::INY;
+    auto it = OpcodeMap.find(opcode);
+    ASSERT_NE(it, OpcodeMap.end()) << "Opcode not found in map";
+    auto cycles = it->second.cycles;
+    memory[0xFFFC - MEMORY_OFFSET] = static_cast<uint8_t>(opcode);
+    rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
+    bus.addSlave(rom.get());
+
+    cpu->setYRegister(0x7F);
+    
+    for (int i = 0; i < cycles; ++i) 
+    {
+        cpu->handleClockStateChange(core::LOW);
+        cpu->handleClockStateChange(core::HIGH);
+    }
+
+    EXPECT_EQ(cpu->getYRegister(), 0x80);
+    EXPECT_EQ(cpu->getProgramCounter(), 0xFFFD); 
+    uint8_t status = cpu->getStatus();
+    EXPECT_EQ(status & devices::STATUS_ZERO, 0);
+    EXPECT_EQ(status & devices::STATUS_NEGATIVE, devices::STATUS_NEGATIVE);  
+}
+
+TEST_F(CPUInstructionTest, INY_IncrementXToZeroValue) 
+{
+    auto opcode = Opcode::INY;
+    auto it = OpcodeMap.find(opcode);
+    ASSERT_NE(it, OpcodeMap.end()) << "Opcode not found in map";
+    auto cycles = it->second.cycles;
+    memory[0xFFFC - MEMORY_OFFSET] = static_cast<uint8_t>(opcode);
+    rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
+    bus.addSlave(rom.get());
+
+    cpu->setYRegister(0xFF);
+    
+    for (int i = 0; i < cycles; ++i) 
+    {
+        cpu->handleClockStateChange(core::LOW);
+        cpu->handleClockStateChange(core::HIGH);
+    }
+
+    EXPECT_EQ(cpu->getYRegister(), 0x00);
+    EXPECT_EQ(cpu->getProgramCounter(), 0xFFFD); 
+    uint8_t status = cpu->getStatus();
+    EXPECT_EQ(status & devices::STATUS_ZERO, devices::STATUS_ZERO);
+    EXPECT_EQ(status & devices::STATUS_NEGATIVE, 0);  
+}
+
+TEST_F(CPUInstructionTest, DEX_DecrementXValue) 
+{
+    auto opcode = Opcode::DEX;
+    auto it = OpcodeMap.find(opcode);
+    ASSERT_NE(it, OpcodeMap.end()) << "Opcode not found in map";
+    auto cycles = it->second.cycles;
+    memory[0xFFFC - MEMORY_OFFSET] = static_cast<uint8_t>(opcode);
+    rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
+    bus.addSlave(rom.get());
+
+    cpu->setXRegister(0x03);
+    
+    for (int i = 0; i < cycles; ++i) 
+    {
+        cpu->handleClockStateChange(core::LOW);
+        cpu->handleClockStateChange(core::HIGH);
+    }
+
+    EXPECT_EQ(cpu->getXRegister(), 0x02);
+    EXPECT_EQ(cpu->getProgramCounter(), 0xFFFD); 
+    uint8_t status = cpu->getStatus();
+    EXPECT_EQ(status & devices::STATUS_ZERO, 0);
+    EXPECT_EQ(status & devices::STATUS_NEGATIVE, 0);  
+}
+
+TEST_F(CPUInstructionTest, DEX_DecrementXToNegativeValue) 
+{
+    auto opcode = Opcode::DEX;
+    auto it = OpcodeMap.find(opcode);
+    ASSERT_NE(it, OpcodeMap.end()) << "Opcode not found in map";
+    auto cycles = it->second.cycles;
+    memory[0xFFFC - MEMORY_OFFSET] = static_cast<uint8_t>(opcode);
+    rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
+    bus.addSlave(rom.get());
+
+    cpu->setXRegister(0x00);
+    
+    for (int i = 0; i < cycles; ++i) 
+    {
+        cpu->handleClockStateChange(core::LOW);
+        cpu->handleClockStateChange(core::HIGH);
+    }
+
+    EXPECT_EQ(cpu->getXRegister(), 0xFF);
+    EXPECT_EQ(cpu->getProgramCounter(), 0xFFFD); 
+    uint8_t status = cpu->getStatus();
+    EXPECT_EQ(status & devices::STATUS_ZERO, 0);
+    EXPECT_EQ(status & devices::STATUS_NEGATIVE, devices::STATUS_NEGATIVE);  
+}
+
+TEST_F(CPUInstructionTest, DEX_DecrementXToZeroValue) 
+{
+    auto opcode = Opcode::DEX;
+    auto it = OpcodeMap.find(opcode);
+    ASSERT_NE(it, OpcodeMap.end()) << "Opcode not found in map";
+    auto cycles = it->second.cycles;
+    memory[0xFFFC - MEMORY_OFFSET] = static_cast<uint8_t>(opcode);
+    rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
+    bus.addSlave(rom.get());
+
+    cpu->setXRegister(0x01);
+    
+    for (int i = 0; i < cycles; ++i) 
+    {
+        cpu->handleClockStateChange(core::LOW);
+        cpu->handleClockStateChange(core::HIGH);
+    }
+
+    EXPECT_EQ(cpu->getXRegister(), 0x00);
+    EXPECT_EQ(cpu->getProgramCounter(), 0xFFFD); 
+    uint8_t status = cpu->getStatus();
+    EXPECT_EQ(status & devices::STATUS_ZERO, devices::STATUS_ZERO);
+    EXPECT_EQ(status & devices::STATUS_NEGATIVE, 0);  
+}
+
+TEST_F(CPUInstructionTest, DEY_DecrementXValue) 
+{
+    auto opcode = Opcode::DEY;
+    auto it = OpcodeMap.find(opcode);
+    ASSERT_NE(it, OpcodeMap.end()) << "Opcode not found in map";
+    auto cycles = it->second.cycles;
+    memory[0xFFFC - MEMORY_OFFSET] = static_cast<uint8_t>(opcode);
+    rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
+    bus.addSlave(rom.get());
+
+    cpu->setYRegister(0x03);
+    
+    for (int i = 0; i < cycles; ++i) 
+    {
+        cpu->handleClockStateChange(core::LOW);
+        cpu->handleClockStateChange(core::HIGH);
+    }
+
+    EXPECT_EQ(cpu->getYRegister(), 0x02);
+    EXPECT_EQ(cpu->getProgramCounter(), 0xFFFD); 
+    uint8_t status = cpu->getStatus();
+    EXPECT_EQ(status & devices::STATUS_ZERO, 0);
+    EXPECT_EQ(status & devices::STATUS_NEGATIVE, 0);  
+}
+
+TEST_F(CPUInstructionTest, DEY_DecrementXToNegativeValue) 
+{
+    auto opcode = Opcode::DEY;
+    auto it = OpcodeMap.find(opcode);
+    ASSERT_NE(it, OpcodeMap.end()) << "Opcode not found in map";
+    auto cycles = it->second.cycles;
+    memory[0xFFFC - MEMORY_OFFSET] = static_cast<uint8_t>(opcode);
+    rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
+    bus.addSlave(rom.get());
+
+    cpu->setYRegister(0x00);
+    
+    for (int i = 0; i < cycles; ++i) 
+    {
+        cpu->handleClockStateChange(core::LOW);
+        cpu->handleClockStateChange(core::HIGH);
+    }
+
+    EXPECT_EQ(cpu->getYRegister(), 0xFF);
+    EXPECT_EQ(cpu->getProgramCounter(), 0xFFFD); 
+    uint8_t status = cpu->getStatus();
+    EXPECT_EQ(status & devices::STATUS_ZERO, 0);
+    EXPECT_EQ(status & devices::STATUS_NEGATIVE, devices::STATUS_NEGATIVE);  
+}
+
+TEST_F(CPUInstructionTest, DEY_DecrementXToZeroValue) 
+{
+    auto opcode = Opcode::DEY;
+    auto it = OpcodeMap.find(opcode);
+    ASSERT_NE(it, OpcodeMap.end()) << "Opcode not found in map";
+    auto cycles = it->second.cycles;
+    memory[0xFFFC - MEMORY_OFFSET] = static_cast<uint8_t>(opcode);
+    rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
+    bus.addSlave(rom.get());
+
+    cpu->setYRegister(0x01);
+    
+    for (int i = 0; i < cycles; ++i) 
+    {
+        cpu->handleClockStateChange(core::LOW);
+        cpu->handleClockStateChange(core::HIGH);
+    }
+
+    EXPECT_EQ(cpu->getYRegister(), 0x00);
+    EXPECT_EQ(cpu->getProgramCounter(), 0xFFFD); 
+    uint8_t status = cpu->getStatus();
+    EXPECT_EQ(status & devices::STATUS_ZERO, devices::STATUS_ZERO);
+    EXPECT_EQ(status & devices::STATUS_NEGATIVE, 0);  
+}
