@@ -27,8 +27,8 @@ protected:
     std::vector<uint8_t> memory;
     void SetUp() override { 
         spdlog::set_pattern("[%H:%M:%S %z] [%n] [%^---%L---%$] %v");
-        spdlog::set_level(spdlog::level::debug); // Set log level to debug for detailed output
-        memory.resize(0x8000, 0x00); // Initialize memory with 64KB of zeros
+        spdlog::set_level(spdlog::level::info);
+        memory.resize(0x8000, 0x00);
         cpu = std::make_unique<devices::W65C02S>(bus);
         cpu->reset(); 
         cpu->setResetStage(2); // Simulate reset stage to avoid reset vector fetch

@@ -32,6 +32,5 @@ namespace EaterEmulator::devices
 
     private:
         std::array<uint8_t, 0x8000> _memory; // 32K x 8-bit memory
-
     };
 } // namespace EaterEmulator

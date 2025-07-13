@@ -196,7 +196,7 @@ namespace EaterEmulator::devices
     {
         auto it = OpcodeMap.find(_ir);
         if (it == OpcodeMap.end()) {
-            std::cerr << "Unknown opcode: " << static_cast<int>(_ir) << std::endl;
+            spdlog::error("CPU: unknown opcode: {:#04x}", static_cast<int>(_ir));
             return;
         }
         const OpcodeInfo& opcodeInfo = it->second;
@@ -389,6 +389,11 @@ namespace EaterEmulator::devices
                 _pc = (_adh << 8) | _adl;
                 break;
 
+            case Opcode::BEQ:
+            case Opcode::BNE:                
+                break;
+
+
             case Opcode::PHA:
                 _bus.setData(_a);
                 _sp--;
@@ -537,6 +542,7 @@ namespace EaterEmulator::devices
             case AddressingMode::ZPX:
             case AddressingMode::ZPY:
             case AddressingMode::IMP:
+            case AddressingMode::REL:
                 return false; // Do not increment PC for absolute addressing modes
             default:
                 return true; // Increment PC for other addressing modes

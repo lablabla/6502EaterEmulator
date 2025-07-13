@@ -36,16 +36,6 @@ namespace EaterEmulator::devices
             // EEPROM Only handles when clock is HIGH
             _bus.setData(_memory[address - _offset]);
         }
-#ifdef UNIT_TEST
-        else
-        {
-            // Write operation
-            uint8_t data;
-            _bus.getData(data); // Get data from the bus
-            _memory[address - _offset] = data; // Write data to the memory
-            spdlog::debug("EEPROM28C256: Written data {:#04x} to address {:#04x}", data, address);
-        }
-#endif
     }
 
     bool EEPROM28C256::shouldHandleAddress(const uint16_t& address) const
