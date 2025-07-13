@@ -267,6 +267,7 @@ namespace EaterEmulator::devices
             case Opcode::LDA_ZPX:
             case Opcode::LDY_ZPX:
             case Opcode::STY_ZPX:
+            case Opcode::AND_ZPX:
                 _adh = _adl + _x;
                 break;
             case Opcode::PLA:
@@ -398,6 +399,21 @@ namespace EaterEmulator::devices
                 _x = _sp;
                 updateStatusFlags(_x);
                 break;
+
+            case Opcode::AND_IMM:
+            case Opcode::AND_ZP:
+            case Opcode::AND_ZPX:
+            case Opcode::AND_ABS:
+            case Opcode::AND_ABSX:
+            case Opcode::AND_ABSY:
+            case Opcode::AND_INDX:
+            case Opcode::AND_INDY:
+            {
+                uint8_t value = fetchByte();
+                _a &= value; // Perform AND operation with the accumulator
+                updateStatusFlags(_a);
+            }
+            break;
             default:
                 spdlog::error("CPU: Unhandled opcode: {:#04x}", static_cast<int>(opcode));
                 break;

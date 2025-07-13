@@ -271,6 +271,16 @@ namespace EaterEmulator
         {Opcode::DEY, { Opcode::DEY, AddressingMode::IMP, 2, core::HIGH}},
         {Opcode::INY, { Opcode::INY, AddressingMode::IMP, 2, core::HIGH}},
 
+        // Logical Operations
+        {Opcode::AND_IMM, { Opcode::AND_IMM, AddressingMode::IMM, 2, core::HIGH}},
+        {Opcode::AND_ZP, { Opcode::AND_ZP, AddressingMode::ZP, 3, core::HIGH}},
+        {Opcode::AND_ZPX, { Opcode::AND_ZPX, AddressingMode::ZPX, 4, core::HIGH}},
+        {Opcode::AND_ABS, { Opcode::AND_ABS, AddressingMode::ABS, 4, core::HIGH}},
+        {Opcode::AND_ABSX, { Opcode::AND_ABSX, AddressingMode::ABSX, 4, core::HIGH}},
+        {Opcode::AND_ABSY, { Opcode::AND_ABSY, AddressingMode::ABSY, 4, core::HIGH}},
+        {Opcode::AND_INDX, { Opcode::AND_INDX, AddressingMode::INDX, 6, core::HIGH}},
+        {Opcode::AND_INDY, { Opcode::AND_INDY, AddressingMode::INDY, 5, core::HIGH}},
+
         // Stack Operations
         {Opcode::TSX, { Opcode::TSX, AddressingMode::IMP, 2, core::HIGH}},
         {Opcode::TXS, { Opcode::TXS, AddressingMode::IMP, 2, core::HIGH}},
