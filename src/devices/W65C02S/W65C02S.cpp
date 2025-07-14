@@ -1,6 +1,5 @@
 
 #include "devices/W65C02S/W65C02S.h"
-#include "core/clocked_device.h"
 #include "devices/W65C02S/opcodes.h"
 #include "spdlog/spdlog.h"
 
@@ -183,7 +182,6 @@ namespace EaterEmulator::devices
         {
             uint8_t opcode = fetchByte();
             _ir = static_cast<Opcode>(opcode); // Read the instruction from the data bus
-            spdlog::info("CPU: Fetched opcode: {:#04x} from PC: {:#04x}", static_cast<int>(_ir), static_cast<int>(_pc));
             _pc++; // Increment the program counter
             _stage++; // Move to the next stage
             return;

@@ -6,6 +6,7 @@
 
 #include "core/bus.h"
 
+#include "devices/ArduinoMega/ArduinoMega.h"
 #include "devices/EEPROM28C256/EEPROM28C256.h"
 #include "devices/SRAM62256/SRAM62256.h"
 #include "devices/W65C02S/W65C02S.h"
@@ -46,6 +47,8 @@ int main(int argc, char* argv[]) {
     bus.addSlave(&rom28C256); // Add the ROM to the bus
     devices::SRAM62256 ram62256(bus);
     bus.addSlave(&ram62256);
+    devices::ArduinoMega arduinoMega(bus);
+    bus.addSlave(&arduinoMega); // Add the Arduino Mega to the bus
 
     while (true)
     {
