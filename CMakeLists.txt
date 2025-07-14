@@ -31,10 +31,11 @@ if (${BUILD_TESTS})
     # GoogleTest
     FetchContent_Declare(
       googletest
-      URL https://github.com/google/googletest/archive/refs/tags/v1.14.0.zip
+      URL https://github.com/google/googletest/archive/refs/tags/v1.17.0.zip
     )
     FetchContent_MakeAvailable(googletest)
 
+    include(GoogleTest)
     enable_testing()
     target_compile_definitions(${LIB_NAME} PRIVATE UNIT_TEST)
     add_subdirectory(tests)
