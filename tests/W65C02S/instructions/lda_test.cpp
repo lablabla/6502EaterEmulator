@@ -254,7 +254,7 @@ TEST_F(CPUInstructionTest, LDA_ABSY_LoadsAbsoluteYValue)
     EXPECT_EQ(status & devices::STATUS_NEGATIVE, 0); // Negative flag should not be set
 }
 
-TEST_F(CPUInstructionTest, LDA_ABSX_LoadsAbsoluteNegativeYValue) 
+TEST_F(CPUInstructionTest, LDA_ABSX_LoadsAbsoluteYNegativeValue) 
 {
     auto opcode = Opcode::LDA_ABSY;
     auto it = OpcodeMap.find(opcode);
