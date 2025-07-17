@@ -60,6 +60,22 @@ namespace EaterEmulator::devices
 
         void handlePhi2Low();
         void handlePhi2High();
+
+        void handlePhi2LowAddressing();
+        void handlePhi2HighAddressing();
+        void handleReset();
+
+        [[nodiscard]]bool handleImmediateAddressing(const OpcodeInfo& info,  core::ClockState clockState);
+        [[nodiscard]]bool handleImmediateLow(const OpcodeInfo& info);
+        [[nodiscard]]bool handleImmediateHigh(const OpcodeInfo& info);
+
+        [[nodiscard]]bool handleAbsoluteAddressing(const OpcodeInfo& info, core::ClockState clockState);
+        [[nodiscard]]bool handleAbsoluteLow(const OpcodeInfo& info);
+        [[nodiscard]]bool handleAbsoluteHigh(const OpcodeInfo& info);
+
+        [[nodiscard]]bool handleZeroPageAddressing(const OpcodeInfo& info, core::ClockState clockState);
+        [[nodiscard]]bool handleZeroPageLow(const OpcodeInfo& info);
+        [[nodiscard]]bool handleZeroPageHigh(const OpcodeInfo& info);
         
         // Handle stages
         void handleOpcode(uint8_t rwb);
@@ -69,6 +85,7 @@ namespace EaterEmulator::devices
         void handleStage4(const OpcodeInfo& info);
 
         uint8_t fetchByte();
+        void writeByte(uint8_t data);
 
         void executeInstruction(Opcode opcode);
         void updateStatusFlags(uint8_t value);
@@ -88,6 +105,7 @@ namespace EaterEmulator::devices
         uint8_t _adh; // Address High Byte
 
         int _stage = 0; // Current stage of instruction execution
+        int _cycle = 0;
 
         bool _started = false;
         uint8_t _resetStage = 0;

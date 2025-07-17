@@ -1,5 +1,6 @@
 
 #include "devices/W65C02S/W65C02S.h"
+#include "core/defines.h"
 #include "devices/W65C02S/opcodes.h"
 #include "spdlog/spdlog.h"
 
@@ -37,9 +38,9 @@ namespace EaterEmulator::devices
     {
         if (state == core::HIGH) 
         {
-            handlePhi2High();
+            handlePhi2HighAddressing();
         } else {            
-            handlePhi2Low();
+            handlePhi2LowAddressing();
         }
     }
 
@@ -48,9 +49,341 @@ namespace EaterEmulator::devices
         _bus.notifySlaves(rwb);
     }
 
+
+    void W65C02S::handlePhi2LowAddressing()
+    {
+         // Based on IR, we need to get the addressing mode and handle
+        auto it = OpcodeMap.find(_ir);
+        if (it == OpcodeMap.end()) {
+            std::cerr << "Unknown opcode: " << static_cast<int>(_ir) << std::endl;
+            return;
+        }
+        const auto opcodeInfo = it->second;
+        const auto addressingMode = opcodeInfo.addressingMode;   
+        if (_cycle == 0)
+        {
+            _bus.setAddress(_pc);
+            _started = true; // Make sure we start the CPU on the PHI2 low
+        }
+        else
+        {
+            bool handled = false;
+            switch (addressingMode)
+            {
+                case AddressingMode::IMM:
+                    handled = handleImmediateAddressing(opcodeInfo, core::LOW);
+                    break;
+
+                case AddressingMode::ABS:
+                    handled = handleAbsoluteAddressing(opcodeInfo, core::LOW);
+                    break;
+
+                case AddressingMode::ZP:
+                    handled = handleZeroPageAddressing(opcodeInfo, core::LOW);
+                    break;
+                default:
+                    handled = false;
+                    break;
+            }
+            if (!handled)
+            {
+                spdlog::error("Unhandled immediate addressing opcode: {:#04x}", static_cast<int>(opcodeInfo.opcode));
+            }
+        }
+    }
+
+    void W65C02S::handlePhi2HighAddressing()
+    {
+        if (!_started)
+        {
+            return;
+        }
+        bool inReset = _resetStage < 2;
+        if (inReset)
+        {
+            handleReset();
+        }
+        else if (_cycle == 0)
+        {
+
+            uint8_t opcode = fetchByte();
+            _ir = static_cast<Opcode>(opcode); // Read the instruction from the data bus
+            _pc++;
+            _cycle++;
+        }
+        else
+        {
+            auto it = OpcodeMap.find(_ir);
+            if (it == OpcodeMap.end()) {
+                std::cerr << "Unknown opcode: " << static_cast<int>(_ir) << std::endl;
+                return;
+            }
+            const auto opcodeInfo = it->second;
+            const auto addressingMode = opcodeInfo.addressingMode;
+            bool handled = false;
+            switch (addressingMode)
+            {
+                case AddressingMode::IMM:
+                    handled = handleImmediateAddressing(opcodeInfo, core::HIGH);
+                    break;
+
+                case AddressingMode::ABS:
+                    handled = handleAbsoluteAddressing(opcodeInfo, core::HIGH);
+                    break;
+
+                case AddressingMode::ZP:
+                    handled = handleZeroPageAddressing(opcodeInfo, core::HIGH);
+                    break;
+                default:
+                    handled = false;
+                    break;
+            }
+            if (!handled)
+            {
+                spdlog::error("Unhandled immediate addressing opcode: {:#04x}", static_cast<int>(opcodeInfo.opcode));
+            }
+            _cycle++;
+            if(_cycle == opcodeInfo.cycles)
+            {
+                _cycle = 0;
+            }
+        }
+    }
+
+    void W65C02S::handleReset()
+    {
+        if (_resetStage == 0)
+        {
+            _adl = fetchByte(); // Read low byte of reset vector
+            spdlog::debug("CPU: Read reset vector low byte: {:#04x}", _adl);
+            _resetStage++;
+            _pc++;
+        }
+        else
+        {
+            _adh = fetchByte(); // Read high byte of reset vector
+            spdlog::debug("CPU: Read reset vector high byte: {:#04x}", _adh);
+            _resetStage++;
+            _pc = (_adh << 8) | _adl; // Set program counter to reset vector
+            spdlog::debug("CPU: Reset complete, PC set to {:#04x}", _pc);
+        }
+    }
+
+
+    bool W65C02S::handleImmediateAddressing(const OpcodeInfo& info, core::ClockState clockState)
+    {
+        if (clockState == core::LOW)
+        {
+            return handleImmediateLow(info);
+        }
+        return handleImmediateHigh(info);
+    }   
+    
+    bool W65C02S::handleImmediateLow([[maybe_unused]]const OpcodeInfo& info)
+    {
+        if (_cycle == 1)
+        {
+            // fetch low byte of address, increment PC
+            _bus.setAddress(_pc++);
+            return true;
+        }
+        return false;        
+    }
+    
+    bool W65C02S::handleImmediateHigh(const OpcodeInfo& info)
+    {
+        if (_cycle == 1)
+        {
+            switch(info.opcode)
+            {
+                case Opcode::LDA_IMM:
+                    _a = fetchByte();
+                    updateStatusFlags(_a);
+                    break;
+                case Opcode::LDX_IMM:
+                    _x = fetchByte();
+                    updateStatusFlags(_x);
+                    break;
+                case Opcode::LDY_IMM:
+                    _y= fetchByte();
+                    updateStatusFlags(_y);
+                    break;
+                default:
+                    return false;
+            }
+            return true;
+        }
+        return false;
+    }
+
+    bool W65C02S::handleAbsoluteAddressing(const OpcodeInfo& info, core::ClockState clockState)
+    {
+        if (clockState == core::LOW)
+        {
+            return handleAbsoluteLow(info);
+        }
+        return handleAbsoluteHigh(info);
+    }
+    bool W65C02S::handleAbsoluteLow(const OpcodeInfo& info)
+    {
+        if (_cycle == 1)
+        {
+            // fetch low byte of address, increment PC
+            _bus.setAddress(_pc++);
+        }
+        else if (_cycle == 2)
+        {
+            // fetch high byte of address, increment PC
+            _bus.setAddress(_pc++);
+        }
+        else if (_cycle == 3)
+        {
+            // read from effective address
+            _bus.setAddress((_adh << 8) | _adl);
+        }
+        else
+        {
+            spdlog::error("Unhandled cycle {} for ABS low clock, opcode: {:#04x}", _cycle, static_cast<int>(info.opcode));
+            return false;
+        }
+        return true;
+    }
+    bool W65C02S::handleAbsoluteHigh(const OpcodeInfo& info)
+    {
+        if (_cycle == 1)
+        {
+            // fetch low byte of address, increment PC
+            _adl = fetchByte();
+        }
+        else if (_cycle == 2)
+        {
+            // fetch high byte of address, increment PC
+            _adh = fetchByte();
+        }
+        else if (_cycle == 3)
+        {
+            switch (info.opcode)
+            {
+                // Read instructions
+                case Opcode::LDA_ABS:
+                    _a = fetchByte();
+                    updateStatusFlags(_a);
+                    break;
+                case Opcode::LDX_ABS:
+                    _a = fetchByte();
+                    updateStatusFlags(_a);
+                    break;
+                case Opcode::LDY_ABS:
+                    _y = fetchByte();
+                    updateStatusFlags(_y);
+                    break;
+
+                // Read-modify-write instructions
+                // Write instructions
+                case Opcode::STA_ABS:
+                    writeByte(_a);
+                    break;
+                case Opcode::STX_ABS:
+                    writeByte(_x);
+                    break;
+                case Opcode::STY_ABS:
+                    writeByte(_y);
+                    break;
+                default:                    
+                    spdlog::error("Unhandled opcode for ABS low clock, opcode: {:#04x}", static_cast<int>(info.opcode));
+                    return false;
+            }
+        }
+        else
+        {
+            spdlog::error("Unhandled cycle {} for ABS low clock, opcode: {:#04x}", _cycle, static_cast<int>(info.opcode));
+            return false;
+        }
+        return true;
+    }
+
+    bool W65C02S::handleZeroPageAddressing(const OpcodeInfo& info, core::ClockState clockState)
+    {
+        if (clockState == core::LOW)
+        {
+            return handleZeroPageLow(info);
+        }
+        return handleZeroPageHigh(info);
+    }
+    bool W65C02S::handleZeroPageLow(const OpcodeInfo& info)
+    {
+        if (_cycle == 1)
+        {
+            // fetch low byte of address, increment PC
+            _bus.setAddress(_pc++);
+        }
+        else if (_cycle == 2)
+        {
+            // read from effective address
+            _bus.setAddress( _adl);
+        }
+        else
+        {
+            spdlog::error("Unhandled cycle {} for ZP low clock, opcode: {:#04x}", _cycle, static_cast<int>(info.opcode));
+            return false;
+        }
+        return true;
+    }
+    bool W65C02S::handleZeroPageHigh(const OpcodeInfo& info)
+    {
+        if (_cycle == 1)
+        {
+            // fetch address, increment PC
+            _adl = fetchByte();
+        }
+        else if (_cycle == 2)
+        {
+            switch (info.opcode)
+            {
+                // Read instructions
+                case Opcode::LDA_ZP:
+                    _a = fetchByte();
+                    updateStatusFlags(_a);
+                    break;
+                case Opcode::LDX_ZP:
+                    _a = fetchByte();
+                    updateStatusFlags(_a);
+                    break;
+                case Opcode::LDY_ZP:
+                    _y = fetchByte();
+                    updateStatusFlags(_y);
+                    break;
+
+                // Read-modify-write instructions
+                // Write instructions
+                case Opcode::STA_ZP:
+                    writeByte(_a);
+                    break;
+                case Opcode::STX_ZP:
+                    writeByte(_x);
+                    break;
+                case Opcode::STY_ZP:
+                    writeByte(_y);
+                    break;
+                default:                    
+                    spdlog::error("Unhandled opcode for ZP low clock, opcode: {:#04x}", static_cast<int>(info.opcode));
+                    return false;
+            }
+        }
+        else
+        {
+            spdlog::error("Unhandled cycle {} for ZP low clock, opcode: {:#04x}", _cycle, static_cast<int>(info.opcode));
+            return false;
+        }
+        return true;
+    }
+
+
+
+
     void W65C02S::handlePhi2Low()
     {
-        if (_stage < 2) // For any opcode with more than 2 cycles, the first 2 cycles are reading opcode and first operand from PC.
+        if (_stage < 2) // For any opcode, the first 2 cycles are reading opcode and first operand from PC.
         {
             _bus.setAddress(_pc);
             _started = true; // Make sure we start the CPU on the PHI2 low
@@ -63,7 +396,7 @@ namespace EaterEmulator::devices
                 std::cerr << "Unknown opcode: " << static_cast<int>(_ir) << std::endl;
                 return;
             }
-            switch(it->second.mode) 
+            switch(it->second.addressingMode) 
             {
                 case AddressingMode::IMM:
                 case AddressingMode::REL:
@@ -202,7 +535,7 @@ namespace EaterEmulator::devices
         {
             executeInstruction(opcodeInfo.opcode);
             _stage = 0; // Reset stage for next instruction
-            if (shouldIncrementPC(opcodeInfo.mode))
+            if (shouldIncrementPC(opcodeInfo.addressingMode))
             {
                 _pc++;
             }
@@ -349,9 +682,16 @@ namespace EaterEmulator::devices
 
     uint8_t W65C02S::fetchByte()
     {
+        _bus.notifySlaves(core::READ);
         uint8_t data;
         _bus.getData(data); // Get data from the bus
         return data;
+    }
+
+    void W65C02S::writeByte(uint8_t data)
+    {
+        _bus.setData(data); // Set data on the bus
+        _bus.notifySlaves(core::WRITE);
     }
 
     void W65C02S::executeInstruction(Opcode opcode)
@@ -492,7 +832,7 @@ namespace EaterEmulator::devices
             std::cerr << "Unknown opcode: " << static_cast<int>(_ir) << std::endl;
             return 0;
         }
-        switch(it->second.mode)
+        switch(it->second.addressingMode)
         {
             case AddressingMode::IMM:
             case AddressingMode::REL:
