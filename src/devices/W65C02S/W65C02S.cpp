@@ -235,6 +235,11 @@ namespace EaterEmulator::devices
             _bus.setAddress(0x0100 + _sp);
             return true;
         }
+        else
+        {
+            spdlog::error("Unhandled cycle in implied low addressing: {}", _cycle);
+            return false;
+        }
         return false;
     }
     bool W65C02S::handleImpliedHigh(const OpcodeInfo& info)
@@ -381,6 +386,11 @@ namespace EaterEmulator::devices
                     break; 
             }
             return true;
+        }
+        else
+        {
+            spdlog::error("Unhandled cycle in implied low addressing: {}", _cycle);
+            return false;
         }
         return false;  
     }    
@@ -664,6 +674,7 @@ namespace EaterEmulator::devices
         if (_cycle == 1)
         {
             _adl = fetchByte();
+            _pc++;
         }
         else if (_cycle == 2)
         {
@@ -675,19 +686,11 @@ namespace EaterEmulator::devices
                     {
                         _pc += static_cast<int8_t>(_adl);
                     }
-                    else
-                    {
-                        _pc++;
-                    }
                     break;
                 case Opcode::BNE:
                     if (!isZero)
                     {
                         _pc += static_cast<int8_t>(_adl);
-                    }
-                    else
-                    {
-                        _pc++;
                     }
                     break;
                 case Opcode::BCS:
@@ -709,7 +712,7 @@ namespace EaterEmulator::devices
                 case Opcode::BCC:
                 case Opcode::BVS:
                 case Opcode::BVC:
-                    _pc++;
+                    // _pc++;
                     break;
                 default:
                     return true;

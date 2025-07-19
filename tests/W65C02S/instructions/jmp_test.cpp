@@ -72,8 +72,9 @@ TEST_F(CPUInstructionTest, RTS)
     auto opcode = Opcode::RTS;
     auto it = OpcodeMap.find(opcode);
     ASSERT_NE(it, OpcodeMap.end()) << "Opcode not found in map";
-    auto cycles = it->second.cycles;
-    memory[0xFFFC - MEMORY_OFFSET] = 0x05;
+    cpu->setResetStage(0); // Not enough room to start from reset vector, perform full reset
+    auto cycles = it->second.cycles + 2; // + 2 for the reset stages.
+    memory[0xFFFC - MEMORY_OFFSET] = 0x0A;
     memory[0xFFFD - MEMORY_OFFSET] = 0xFF;
 
     memory[0xFF0A - MEMORY_OFFSET] = static_cast<uint8_t>(opcode);
@@ -88,7 +89,6 @@ TEST_F(CPUInstructionTest, RTS)
     ramMemory[0x01FF] = 0xFF;
     ramMemory[0x01FF-1] = 0x07;
     cpu->setStackPointer(0xFF - 2);
-    cpu->setProgramCounter(0xFF0A);
     
     for (int i = 0; i < cycles; ++i) 
     {
