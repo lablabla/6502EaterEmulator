@@ -15,7 +15,7 @@ namespace EaterEmulator::devices
 
     SRAM62256::~SRAM62256() 
     {
-        spdlog::info("SRAM62256 destroyed.");
+        spdlog::debug("SRAM62256 destroyed.");
     }
 
     void SRAM62256::handleBusNotification(uint16_t address, uint8_t rwb)

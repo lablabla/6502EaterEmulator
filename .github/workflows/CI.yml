@@ -3,10 +3,13 @@
 name: CMake on multiple platforms
 
 on:
-  push:
   pull_request:
-    types: [opened, created, edited]
-    branches: [ "main" ]
+    types: 
+      - opened
+      - synchronize
+      - reopened
+    branches:
+      - 'main'
 
 jobs:
   build:
@@ -37,6 +40,8 @@ jobs:
           - os: ubuntu-latest
             c_compiler: clang
             cpp_compiler: clang++
+          - build_type: Release
+            build_tests: OFF
         # exclude:
         #   - os: windows-latest
         #     c_compiler: gcc
