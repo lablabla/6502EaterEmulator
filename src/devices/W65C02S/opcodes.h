@@ -217,6 +217,12 @@ namespace EaterEmulator
         REL, // Relative
     };
 
+    enum class IndexingRegisters : uint8_t 
+    {
+        X,
+        Y
+    };
+
     struct OpcodeInfo 
     {
         Opcode opcode; // The opcode value

@@ -77,9 +77,17 @@ namespace EaterEmulator::devices
                 case AddressingMode::ABS:
                     handled = handleAbsoluteAddressing(opcodeInfo, core::LOW);
                     break;
+                case AddressingMode::ABSX:
+                case AddressingMode::ABSY:
+                    handled = handleAbsoluteIndexedAddressing(opcodeInfo, core::LOW);
+                    break;
 
                 case AddressingMode::ZP:
                     handled = handleZeroPageAddressing(opcodeInfo, core::LOW);
+                    break;
+                case AddressingMode::ZPX:
+                case AddressingMode::ZPY:
+                    handled = handleZeroPageIndexedAddressing(opcodeInfo, core::LOW);
                     break;
                 default:
                     handled = false;
@@ -87,7 +95,7 @@ namespace EaterEmulator::devices
             }
             if (!handled)
             {
-                spdlog::error("Unhandled immediate addressing opcode: {:#04x}", static_cast<int>(opcodeInfo.opcode));
+                spdlog::error("Unhandled addressing opcode: {:#04x}", static_cast<int>(opcodeInfo.opcode));
             }
         }
     }
@@ -130,9 +138,17 @@ namespace EaterEmulator::devices
                 case AddressingMode::ABS:
                     handled = handleAbsoluteAddressing(opcodeInfo, core::HIGH);
                     break;
+                case AddressingMode::ABSX:
+                case AddressingMode::ABSY:
+                    handled = handleAbsoluteIndexedAddressing(opcodeInfo, core::HIGH);
+                    break;
 
                 case AddressingMode::ZP:
                     handled = handleZeroPageAddressing(opcodeInfo, core::HIGH);
+                    break;
+                case AddressingMode::ZPX:
+                case AddressingMode::ZPY:
+                    handled = handleZeroPageIndexedAddressing(opcodeInfo, core::HIGH);
                     break;
                 default:
                     handled = false;
@@ -140,7 +156,7 @@ namespace EaterEmulator::devices
             }
             if (!handled)
             {
-                spdlog::error("Unhandled immediate addressing opcode: {:#04x}", static_cast<int>(opcodeInfo.opcode));
+                spdlog::error("Unhandled addressing opcode: {:#04x}", static_cast<int>(opcodeInfo.opcode));
             }
             _cycle++;
             if(_cycle == opcodeInfo.cycles)
@@ -266,14 +282,18 @@ namespace EaterEmulator::devices
             {
                 // Read instructions
                 case Opcode::LDA_ABS:
+                case Opcode::LDA_ABSX:
+                case Opcode::LDA_ABSY:
                     _a = fetchByte();
                     updateStatusFlags(_a);
                     break;
                 case Opcode::LDX_ABS:
-                    _a = fetchByte();
-                    updateStatusFlags(_a);
+                case Opcode::LDX_ABSY:
+                    _x = fetchByte();
+                    updateStatusFlags(_x);
                     break;
                 case Opcode::LDY_ABS:
+                case Opcode::LDY_ABSX:
                     _y = fetchByte();
                     updateStatusFlags(_y);
                     break;
@@ -281,12 +301,16 @@ namespace EaterEmulator::devices
                 // Read-modify-write instructions
                 // Write instructions
                 case Opcode::STA_ABS:
+                case Opcode::STA_ABSX:
+                case Opcode::STA_ABSY:
                     writeByte(_a);
                     break;
                 case Opcode::STX_ABS:
+                case Opcode::STX_ZPY:
                     writeByte(_x);
                     break;
                 case Opcode::STY_ABS:
+                case Opcode::STY_ZPX:
                     writeByte(_y);
                     break;
                 default:                    
@@ -301,6 +325,48 @@ namespace EaterEmulator::devices
         }
         return true;
     }
+
+    bool W65C02S::handleAbsoluteIndexedAddressing(const OpcodeInfo& info, core::ClockState clockState)
+    {
+        if (clockState == core::LOW)
+        {
+            return handleAbsoluteIndexedLow(info);
+        }
+        return handleAbsoluteIndexedHigh(info);
+    }
+
+    bool W65C02S::handleAbsoluteIndexedLow(const OpcodeInfo& info)
+    {
+        uint8_t& indexingRegister = info.addressingMode == AddressingMode::ABSX ? _x : _y;
+        if (_cycle == 1)
+        {
+            // fetch low byte of address, increment PC
+            _bus.setAddress(_pc++);
+        }
+        else if (_cycle == 2)
+        {
+            // fetch high byte of address, increment PC
+            _bus.setAddress(_pc++);
+        }
+        else if (_cycle == 3)
+        {
+            // read from effective address
+            _bus.setAddress(((_adh << 8) | _adl) + indexingRegister);
+        }
+        else
+        {
+            // TODO: Handle page crossing
+            spdlog::error("Unhandled cycle {} for ABS Indexed low clock, opcode: {:#04x}", _cycle, static_cast<int>(info.opcode));
+            return false;
+        }
+        return true;
+    }
+
+    bool W65C02S::handleAbsoluteIndexedHigh(const OpcodeInfo& info)
+    {
+        return handleAbsoluteHigh(info); // Same as absolute high, just with indexing register added
+    }
+
 
     bool W65C02S::handleZeroPageAddressing(const OpcodeInfo& info, core::ClockState clockState)
     {
@@ -342,14 +408,17 @@ namespace EaterEmulator::devices
             {
                 // Read instructions
                 case Opcode::LDA_ZP:
+                case Opcode::LDA_ZPX:
                     _a = fetchByte();
                     updateStatusFlags(_a);
                     break;
                 case Opcode::LDX_ZP:
-                    _a = fetchByte();
-                    updateStatusFlags(_a);
+                case Opcode::LDX_ZPY:
+                    _x = fetchByte();
+                    updateStatusFlags(_x);
                     break;
                 case Opcode::LDY_ZP:
+                case Opcode::LDY_ZPX:
                     _y = fetchByte();
                     updateStatusFlags(_y);
                     break;
@@ -357,12 +426,15 @@ namespace EaterEmulator::devices
                 // Read-modify-write instructions
                 // Write instructions
                 case Opcode::STA_ZP:
+                case Opcode::STA_ZPX:
                     writeByte(_a);
                     break;
                 case Opcode::STX_ZP:
+                case Opcode::STX_ZPY:
                     writeByte(_x);
                     break;
                 case Opcode::STY_ZP:
+                case Opcode::STY_ZPX:
                     writeByte(_y);
                     break;
                 default:                    
@@ -377,6 +449,91 @@ namespace EaterEmulator::devices
         }
         return true;
     }
+
+        bool W65C02S::handleZeroPageIndexedAddressing(const OpcodeInfo& info, core::ClockState clockState)
+        {
+        if (clockState == core::LOW)
+        {
+            return handleZeroPageIndexedLow(info);
+        }
+        return handleZeroPageIndexedHigh(info);
+        }        
+        bool W65C02S::handleZeroPageIndexedLow(const OpcodeInfo& info)
+        {
+            if (_cycle == 1)
+            {
+                // fetch low byte of address, increment PC
+                _bus.setAddress(_pc++);
+            }
+            else if (_cycle == 2)
+            {
+                // read from effective address
+                _bus.setAddress( _adl);
+            }
+            else if (_cycle == 3)
+            {
+                _bus.setAddress(_adh);
+            }
+            else
+            {
+                spdlog::error("Unhandled cycle {} for ZP indexed low clock, opcode: {:#04x}", _cycle, static_cast<int>(info.opcode));
+                return false;
+            }
+            return true;
+        }
+        bool W65C02S::handleZeroPageIndexedHigh(const OpcodeInfo& info)
+        {
+        if (_cycle == 1)
+        {
+            // fetch address, increment PC
+            _adl = fetchByte();
+        }
+        else if (_cycle == 2)
+        {
+            // read from effective address
+            _adh = _adl + (info.addressingMode == AddressingMode::ZPX ? _x : _y);
+        }
+        else if (_cycle == 3)
+        {
+            switch (info.opcode)
+            {
+                // Read instructions
+                case Opcode::LDA_ZPX:
+                    _a = fetchByte();
+                    updateStatusFlags(_a);
+                    break;
+                case Opcode::LDX_ZPY:
+                    _x = fetchByte();
+                    updateStatusFlags(_x);
+                    break;
+                case Opcode::LDY_ZPX:
+                    _y = fetchByte();
+                    updateStatusFlags(_y);
+                    break;
+
+                // Read-modify-write instructions
+                // Write instructions
+                case Opcode::STA_ZPX:
+                    writeByte(_a);
+                    break;
+                case Opcode::STX_ZPY:
+                    writeByte(_x);
+                    break;
+                case Opcode::STY_ZPX:
+                    writeByte(_y);
+                    break;
+                default:                    
+                    spdlog::error("Unhandled opcode for ZP low clock, opcode: {:#04x}", static_cast<int>(info.opcode));
+                    return false;
+            }
+        }
+        else
+        {
+            spdlog::error("Unhandled cycle {} for ZP low clock, opcode: {:#04x}", _cycle, static_cast<int>(info.opcode));
+            return false;
+        }
+        return true;
+        }
 
 
 
