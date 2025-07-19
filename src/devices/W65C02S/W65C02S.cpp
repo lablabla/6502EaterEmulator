@@ -70,6 +70,10 @@ namespace EaterEmulator::devices
             bool handled = false;
             switch (addressingMode)
             {
+                case AddressingMode::IMP:
+                    handled = handleImpliedAddressing(opcodeInfo, core::LOW);
+                    break;
+                    
                 case AddressingMode::IMM:
                     handled = handleImmediateAddressing(opcodeInfo, core::LOW);
                     break;
@@ -131,6 +135,10 @@ namespace EaterEmulator::devices
             bool handled = false;
             switch (addressingMode)
             {
+                case AddressingMode::IMP:
+                    handled = handleImpliedAddressing(opcodeInfo, core::HIGH);
+                    break;
+
                 case AddressingMode::IMM:
                     handled = handleImmediateAddressing(opcodeInfo, core::HIGH);
                     break;
@@ -185,6 +193,93 @@ namespace EaterEmulator::devices
         }
     }
 
+    bool W65C02S::handleImpliedAddressing(const OpcodeInfo& info, core::ClockState clockState)
+    {
+        if (clockState == core::HIGH)
+        {
+            return handleImpliedHigh(info);
+        }
+        return true;
+    }    
+    bool W65C02S::handleImpliedHigh(const OpcodeInfo& info)
+    {
+        if (_cycle == 1)
+        {
+            switch (info.opcode)
+            {
+                case Opcode::NOP:
+                    break;
+                case Opcode::CLC:
+                    _status &= ~devices::STATUS_CARRY; // Clear carry flag
+                    break;
+                case Opcode::SEC:
+                    _status |= devices::STATUS_CARRY; // Set carry flag
+                    break;
+                case Opcode::CLI:
+                    _status &= ~devices::STATUS_INTERRUPT; // Clear interrupt disable flag
+                    break;
+                case Opcode::SEI:
+                    _status |= devices::STATUS_INTERRUPT; // Set interrupt disable flag
+                    break;
+                case Opcode::CLV:
+                    _status &= ~devices::STATUS_OVERFLOW; // Clear overflow flag
+                    break;
+                case Opcode::CLD:
+                    _status &= ~devices::STATUS_DECIMAL; // Clear decimal mode flag
+                    break;
+                case Opcode::SED:
+                    _status |= devices::STATUS_DECIMAL; // Set decimal mode flag
+                    break;
+
+                case Opcode::TAX:
+                    _x = _a;
+                    updateStatusFlags(_x);
+                    break;
+                case Opcode::TXA:
+                    _a = _x;
+                    updateStatusFlags(_a);
+                    break;
+                case Opcode::TAY:
+                    _y = _a;
+                    updateStatusFlags(_y);
+                    break;
+                case Opcode::TYA:
+                    _a = _y;
+                    updateStatusFlags(_a);
+                    break;
+                case Opcode::TXS:
+                    _sp = _x;
+                    break;
+                case Opcode::TSX:
+                    _x = _sp;
+                    updateStatusFlags(_x);
+                    break;
+                case Opcode::INX:
+                    _x++;
+                    updateStatusFlags(_x);
+                    break;
+                case Opcode::DEX:
+                    _x--;
+                    updateStatusFlags(_x);
+                    break;                
+                case Opcode::INY:
+                    _y++;
+                    updateStatusFlags(_y);
+                    break;
+                case Opcode::DEY:
+                    _y--;
+                    updateStatusFlags(_y);
+                    break;
+                
+                default:
+                    spdlog::error("Unhandled opcode for implied high clock, opcode: {:#04x}", static_cast<int>(info.opcode));
+                    return false;
+            
+            }
+            return true;
+        }
+        return false;  
+    }    
 
     bool W65C02S::handleImmediateAddressing(const OpcodeInfo& info, core::ClockState clockState)
     {
@@ -224,6 +319,16 @@ namespace EaterEmulator::devices
                     _y= fetchByte();
                     updateStatusFlags(_y);
                     break;
+                case Opcode::AND_IMM:
+                    doAND();
+                    break;
+                case Opcode::ORA_IMM:
+                    doORA();
+                    break;
+                case Opcode::EOR_IMM:
+                    doEOR();
+                    updateStatusFlags(_a);
+                    break;
                 default:
                     return false;
             }
@@ -240,7 +345,7 @@ namespace EaterEmulator::devices
         }
         return handleAbsoluteHigh(info);
     }
-    bool W65C02S::handleAbsoluteLow(const OpcodeInfo& info)
+    bool W65C02S::handleAbsoluteLow([[maybe_unused]]const OpcodeInfo& info)
     {
         if (_cycle == 1)
         {
@@ -249,18 +354,38 @@ namespace EaterEmulator::devices
         }
         else if (_cycle == 2)
         {
-            // fetch high byte of address, increment PC
-            _bus.setAddress(_pc++);
+            switch (info.opcode)
+            {
+                case Opcode::JSR:
+                    _bus.setAddress(0x0100 + _sp);
+                    break;
+                default:
+                    // fetch high byte of address, increment PC
+                    _bus.setAddress(_pc++);
+                    break;
+            }
         }
         else if (_cycle == 3)
         {
-            // read from effective address
-            _bus.setAddress((_adh << 8) | _adl);
+            switch (info.opcode)
+            {
+                case Opcode::JSR:
+                    _bus.setAddress(0x0100 + _sp);
+                    break;
+                default:
+                    // read from effective address
+                    _bus.setAddress((_adh << 8) | _adl);
+                    break;
+            }
+            
         }
-        else
+        else if (_cycle == 4)
         {
-            spdlog::error("Unhandled cycle {} for ABS low clock, opcode: {:#04x}", _cycle, static_cast<int>(info.opcode));
-            return false;
+            _bus.setAddress(0x0100 + _sp); // Push to stack
+        }
+        else if (_cycle == 5)
+        {
+            _bus.setAddress(_pc);
         }
         return true;
     }
@@ -273,13 +398,29 @@ namespace EaterEmulator::devices
         }
         else if (_cycle == 2)
         {
-            // fetch high byte of address, increment PC
-            _adh = fetchByte();
+            
+            switch (info.opcode)
+            {
+                case Opcode::JSR:                
+                    break;
+                case Opcode::JMP_ABS:
+                    _pc = (_adh << 8) | _adl;
+                    break;
+                default:
+                    // fetch high byte of address, increment PC
+                    _adh = fetchByte();
+                    break;
+            }
         }
         else if (_cycle == 3)
         {
             switch (info.opcode)
             {
+                case Opcode::JSR:
+                    writeByte(_pc >> 8); // Push PCH on stack
+                    _sp--;
+                    break;
+
                 // Read instructions
                 case Opcode::LDA_ABS:
                 case Opcode::LDA_ABSX:
@@ -297,6 +438,21 @@ namespace EaterEmulator::devices
                     _y = fetchByte();
                     updateStatusFlags(_y);
                     break;
+                case Opcode::AND_ABS:
+                case Opcode::AND_ABSX:
+                case Opcode::AND_ABSY:
+                    doAND();
+                    break;
+                case Opcode::ORA_ABS:
+                case Opcode::ORA_ABSX:
+                case Opcode::ORA_ABSY:
+                    doORA();
+                    break;
+                case Opcode::EOR_ABS:
+                case Opcode::EOR_ABSX:
+                case Opcode::EOR_ABSY:
+                    doEOR();
+                    break;
 
                 // Read-modify-write instructions
                 // Write instructions
@@ -313,15 +469,33 @@ namespace EaterEmulator::devices
                 case Opcode::STY_ZPX:
                     writeByte(_y);
                     break;
-                default:                    
-                    spdlog::error("Unhandled opcode for ABS low clock, opcode: {:#04x}", static_cast<int>(info.opcode));
-                    return false;
+
+                default:
+                    break;
             }
         }
-        else
+        else if (_cycle == 4)
         {
-            spdlog::error("Unhandled cycle {} for ABS low clock, opcode: {:#04x}", _cycle, static_cast<int>(info.opcode));
-            return false;
+            switch (info.opcode)
+            {
+                case Opcode::JSR:
+                    writeByte(static_cast<uint8_t>(_pc)); // Push PCL on stack
+                    _sp--;
+                    break;
+                default:
+                    break;
+            }
+        }
+        else if (_cycle == 5)
+        {
+            switch (info.opcode)
+            {
+                case Opcode::JSR:
+                    _pc = fetchByte() << 8 | _adl;
+                    break;
+                default:
+                    break;
+            }
         }
         return true;
     }
@@ -422,6 +596,18 @@ namespace EaterEmulator::devices
                     _y = fetchByte();
                     updateStatusFlags(_y);
                     break;
+                case Opcode::AND_ZP:
+                case Opcode::AND_ZPX:
+                    doAND();
+                    break;
+                case Opcode::ORA_ZP:
+                case Opcode::ORA_ZPX:
+                    doORA();
+                    break;
+                case Opcode::EOR_ZP:
+                case Opcode::EOR_ZPX:
+                    doEOR();
+                    break;
 
                 // Read-modify-write instructions
                 // Write instructions
@@ -511,6 +697,16 @@ namespace EaterEmulator::devices
                     updateStatusFlags(_y);
                     break;
 
+                case Opcode::AND_ZPX:
+                    doAND();
+                    break;
+                case Opcode::ORA_ZPX:
+                    doORA();
+                    break;
+                case Opcode::EOR_ZPX:
+                    doEOR();
+                    break;
+
                 // Read-modify-write instructions
                 // Write instructions
                 case Opcode::STA_ZPX:
@@ -535,6 +731,30 @@ namespace EaterEmulator::devices
         return true;
         }
 
+
+    void W65C02S::doAND()
+    {
+        _a &= fetchByte();
+        updateStatusFlags(_a);
+    }
+    void W65C02S::doORA()
+    {
+        _a |= fetchByte();
+        updateStatusFlags(_a);
+    }
+    void W65C02S::doEOR()
+    {
+        _a ^= fetchByte();
+        updateStatusFlags(_a);
+    }
+    void W65C02S::doADC()
+    {
+
+    }
+    void W65C02S::doSBC()
+    {
+
+    }
 
 
 

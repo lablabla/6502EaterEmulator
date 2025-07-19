@@ -9,6 +9,9 @@ namespace EaterEmulator::devices
     // Status flags bits
     static constexpr uint8_t STATUS_CARRY = 0x01; // Carry Flag
     static constexpr uint8_t STATUS_ZERO = 0x02; // Zero Flag
+    static constexpr uint8_t STATUS_INTERRUPT = 0x04; // Interrupt Disable Flag
+    static constexpr uint8_t STATUS_DECIMAL = 0x08; // Decimal Mode Flag
+    static constexpr uint8_t STATUS_BREAK = 0x10; // Break Command Flag
     static constexpr uint8_t STATUS_OVERFLOW = 0x40; // Overflow Flag
     static constexpr uint8_t STATUS_NEGATIVE = 0x80; // Negative Flag
 
@@ -65,6 +68,10 @@ namespace EaterEmulator::devices
         void handlePhi2HighAddressing();
         void handleReset();
 
+        // Implied addressing modes
+        [[nodiscard]]bool handleImpliedAddressing(const OpcodeInfo& info, core::ClockState clockState);
+        [[nodiscard]]bool handleImpliedHigh(const OpcodeInfo& info);
+
         // Immediate
         [[nodiscard]]bool handleImmediateAddressing(const OpcodeInfo& info,  core::ClockState clockState);
         [[nodiscard]]bool handleImmediateLow(const OpcodeInfo& info);
@@ -87,6 +94,16 @@ namespace EaterEmulator::devices
         [[nodiscard]]bool handleZeroPageIndexedAddressing(const OpcodeInfo& info, core::ClockState clockState);
         [[nodiscard]]bool handleZeroPageIndexedLow(const OpcodeInfo& info);
         [[nodiscard]]bool handleZeroPageIndexedHigh(const OpcodeInfo& info);
+
+
+
+
+        // Math
+        void doAND();
+        void doORA();
+        void doEOR();
+        void doADC();
+        void doSBC();
         
         // Handle stages
         void handleOpcode(uint8_t rwb);
