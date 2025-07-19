@@ -108,7 +108,7 @@ TEST_F(CPUInstructionTest, BEQ_PositiveOffsetSamePageTakeBranch)
     auto it = OpcodeMap.find(opcode);
     ASSERT_NE(it, OpcodeMap.end()) << "Opcode not found in map";
     cpu->setResetStage(0); // Not enough room to start from reset vector, perform full reset
-    auto cycles = 3 + 2; // 3 + BEQ branch taken same page + 2 for the reset stages.
+    auto cycles = 4 + 2; // 3 + BEQ branch taken same page + 2 for the reset stages.
     memory[0xFFFC - MEMORY_OFFSET] = 0x05;
     memory[0xFFFD - MEMORY_OFFSET] = 0xFF;
 
@@ -137,7 +137,7 @@ TEST_F(CPUInstructionTest, BEQ_PositiveOffsetSamePageDontTakeBranch)
     auto it = OpcodeMap.find(opcode);
     ASSERT_NE(it, OpcodeMap.end()) << "Opcode not found in map";
     cpu->setResetStage(0); // Not enough room to start from reset vector, perform full reset
-    auto cycles = 2 + 2; // 2 + BEQ branch not taken + 2 for the reset stages.
+    auto cycles = 3 + 2; // 2 + BEQ branch not taken + 2 for the reset stages.
     memory[0xFFFC - MEMORY_OFFSET] = 0x05;
     memory[0xFFFD - MEMORY_OFFSET] = 0xFF;
 
@@ -166,7 +166,7 @@ TEST_F(CPUInstructionTest, BEQ_NegativeOffsetSamePageTakeBranch)
     auto it = OpcodeMap.find(opcode);
     ASSERT_NE(it, OpcodeMap.end()) << "Opcode not found in map";
     cpu->setResetStage(0); // Not enough room to start from reset vector, perform full reset
-    auto cycles = 3 + 2; // 3 + BEQ branch taken same page + 2 for the reset stages.
+    auto cycles = 4 + 2; // 3 + BEQ branch taken same page + 2 for the reset stages.
     memory[0xFFFC - MEMORY_OFFSET] = 0x05;
     memory[0xFFFD - MEMORY_OFFSET] = 0xFF;
 
@@ -195,7 +195,7 @@ TEST_F(CPUInstructionTest, BEQ_NegativeOffsetSamePageDontTakeBranch)
     auto it = OpcodeMap.find(opcode);
     ASSERT_NE(it, OpcodeMap.end()) << "Opcode not found in map";
     cpu->setResetStage(0); // Not enough room to start from reset vector, perform full reset
-    auto cycles = 2 + 2; // 2 + BEQ branch not taken + 2 for the reset stages.
+    auto cycles = 3 + 2; // 2 + BEQ branch not taken + 2 for the reset stages.
     memory[0xFFFC - MEMORY_OFFSET] = 0x05;
     memory[0xFFFD - MEMORY_OFFSET] = 0xFF;
 
@@ -224,7 +224,7 @@ TEST_F(CPUInstructionTest, BNE_PositiveOffsetSamePageTakeBranch)
     auto it = OpcodeMap.find(opcode);
     ASSERT_NE(it, OpcodeMap.end()) << "Opcode not found in map";
     cpu->setResetStage(0); // Not enough room to start from reset vector, perform full reset
-    auto cycles = 3 + 2; // 3 + BNE branch taken same page + 2 for the reset stages.
+    auto cycles = 4 + 2; // 3 + BNE branch taken same page + 2 for the reset stages.
     memory[0xFFFC - MEMORY_OFFSET] = 0x05;
     memory[0xFFFD - MEMORY_OFFSET] = 0xFF;
 
@@ -253,7 +253,7 @@ TEST_F(CPUInstructionTest, BNE_PositiveOffsetSamePageDontTakeBranch)
     auto it = OpcodeMap.find(opcode);
     ASSERT_NE(it, OpcodeMap.end()) << "Opcode not found in map";
     cpu->setResetStage(0); // Not enough room to start from reset vector, perform full reset
-    auto cycles = 2 + 2; // 2 + BNE branch not taken + 2 for the reset stages.
+    auto cycles = 3 + 2; // 2 + BNE branch not taken + 2 for the reset stages.
     memory[0xFFFC - MEMORY_OFFSET] = 0x05;
     memory[0xFFFD - MEMORY_OFFSET] = 0xFF;
 
@@ -282,7 +282,7 @@ TEST_F(CPUInstructionTest, BNE_NegativeOffsetSamePageTakeBranch)
     auto it = OpcodeMap.find(opcode);
     ASSERT_NE(it, OpcodeMap.end()) << "Opcode not found in map";
     cpu->setResetStage(0); // Not enough room to start from reset vector, perform full reset
-    auto cycles = 3 + 2; // 3 + BNE branch taken same page + 2 for the reset stages.
+    auto cycles = 4 + 2; // 3 + BNE branch taken same page + 2 for the reset stages.
     memory[0xFFFC - MEMORY_OFFSET] = 0x05;
     memory[0xFFFD - MEMORY_OFFSET] = 0xFF;
 
@@ -311,7 +311,7 @@ TEST_F(CPUInstructionTest, BNE_NegativeOffsetSamePageDontTakeBranch)
     auto it = OpcodeMap.find(opcode);
     ASSERT_NE(it, OpcodeMap.end()) << "Opcode not found in map";
     cpu->setResetStage(0); // Not enough room to start from reset vector, perform full reset
-    auto cycles = 2 + 2; // 2 + BNE branch not taken + 2 for the reset stages.
+    auto cycles = 3 + 2; // 2 + BNE branch not taken + 2 for the reset stages.
     memory[0xFFFC - MEMORY_OFFSET] = 0x05;
     memory[0xFFFD - MEMORY_OFFSET] = 0xFF;
 

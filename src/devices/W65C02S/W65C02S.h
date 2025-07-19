@@ -70,6 +70,7 @@ namespace EaterEmulator::devices
 
         // Implied addressing modes
         [[nodiscard]]bool handleImpliedAddressing(const OpcodeInfo& info, core::ClockState clockState);
+        [[nodiscard]]bool handleImpliedLow(const OpcodeInfo& info);
         [[nodiscard]]bool handleImpliedHigh(const OpcodeInfo& info);
 
         // Immediate
@@ -85,6 +86,11 @@ namespace EaterEmulator::devices
         [[nodiscard]]bool handleAbsoluteIndexedAddressing(const OpcodeInfo& info, core::ClockState clockState);
         [[nodiscard]]bool handleAbsoluteIndexedLow(const OpcodeInfo& info);
         [[nodiscard]]bool handleAbsoluteIndexedHigh(const OpcodeInfo& info);
+
+        // Relative
+        [[nodiscard]]bool handleRelativeAddressing(const OpcodeInfo& info, core::ClockState clockState);
+        [[nodiscard]]bool handleRelativeLow(const OpcodeInfo& info);
+        [[nodiscard]]bool handleRelativeHigh(const OpcodeInfo& info);
 
         // Zero Page
         [[nodiscard]]bool handleZeroPageAddressing(const OpcodeInfo& info, core::ClockState clockState);

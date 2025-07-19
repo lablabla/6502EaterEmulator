@@ -86,6 +86,10 @@ namespace EaterEmulator::devices
                     handled = handleAbsoluteIndexedAddressing(opcodeInfo, core::LOW);
                     break;
 
+                case AddressingMode::REL:
+                    handled = handleRelativeAddressing(opcodeInfo, core::LOW);
+                    break;
+
                 case AddressingMode::ZP:
                     handled = handleZeroPageAddressing(opcodeInfo, core::LOW);
                     break;
@@ -151,6 +155,10 @@ namespace EaterEmulator::devices
                     handled = handleAbsoluteIndexedAddressing(opcodeInfo, core::HIGH);
                     break;
 
+                case AddressingMode::REL:
+                    handled = handleRelativeAddressing(opcodeInfo, core::HIGH);
+                    break;
+
                 case AddressingMode::ZP:
                     handled = handleZeroPageAddressing(opcodeInfo, core::HIGH);
                     break;
@@ -195,12 +203,40 @@ namespace EaterEmulator::devices
 
     bool W65C02S::handleImpliedAddressing(const OpcodeInfo& info, core::ClockState clockState)
     {
-        if (clockState == core::HIGH)
+        if (clockState == core::LOW)
         {
-            return handleImpliedHigh(info);
+            return handleImpliedLow(info);
         }
-        return true;
-    }    
+        return handleImpliedHigh(info);
+    }
+    bool W65C02S::handleImpliedLow([[maybe_unused]]const OpcodeInfo& info)
+    {
+        if (_cycle == 1)
+        {
+            return true;
+        }
+        else if (_cycle == 2)
+        {
+            _bus.setAddress(0x0100 + _sp);
+            return true;
+        }
+        else if (_cycle == 3)
+        {
+            _bus.setAddress(0x0100 + _sp);
+            return true;
+        }
+        else if (_cycle == 4)
+        {
+            _bus.setAddress(0x0100 + _sp);
+            return true;
+        }
+        else if (_cycle == 5)
+        {
+            _bus.setAddress(0x0100 + _sp);
+            return true;
+        }
+        return false;
+    }
     bool W65C02S::handleImpliedHigh(const OpcodeInfo& info)
     {
         if (_cycle == 1)
@@ -272,9 +308,77 @@ namespace EaterEmulator::devices
                     break;
                 
                 default:
-                    spdlog::error("Unhandled opcode for implied high clock, opcode: {:#04x}", static_cast<int>(info.opcode));
-                    return false;
+                    break;
             
+            }
+            return true;
+        }
+        else if (_cycle == 2)
+        {
+            switch (info.opcode)
+            {
+                case Opcode::PHA:
+                    writeByte(_a); // Push accumulator to stack
+                    _sp--;
+                    break;
+                case Opcode::PLA:
+                case Opcode::PLP:
+                case Opcode::RTS:
+                case Opcode::RTI:
+                    _sp++;
+                    break;
+                case Opcode::PHP:
+                    writeByte(_status);
+                    _sp--;
+                    break;
+                default:
+                    break;
+            
+            }
+            return true;
+        }
+        else if (_cycle == 3)
+        {
+            switch (info.opcode)
+            {                
+                case Opcode::PLA:
+                    _a = fetchByte(); // Pull accumulator from stack
+                    updateStatusFlags(_a);
+                    break;
+                case Opcode::PLP:
+                    _status = fetchByte(); // Pull status from stack
+                    _status &= ~devices::STATUS_BREAK; // Clear break flag
+                    break;
+                case Opcode::RTS:
+                    _adl = fetchByte();
+                    _sp++;
+                    break;
+                default:
+                    break;
+            }
+            return true;
+        }
+        else if (_cycle == 4)
+        {
+            switch (info.opcode)
+            {
+                case Opcode::RTS:
+                    _pc = (fetchByte() << 8) | _adl;
+                    break;
+                default:
+                    break; 
+            }
+            return true;
+        }
+        else if (_cycle == 5)
+        {
+            switch (info.opcode)
+            {
+                case Opcode::RTS:
+                    _pc++;
+                    break;
+                default:
+                    break; 
             }
             return true;
         }
@@ -345,7 +449,7 @@ namespace EaterEmulator::devices
         }
         return handleAbsoluteHigh(info);
     }
-    bool W65C02S::handleAbsoluteLow([[maybe_unused]]const OpcodeInfo& info)
+    bool W65C02S::handleAbsoluteLow(const OpcodeInfo& info)
     {
         if (_cycle == 1)
         {
@@ -381,7 +485,7 @@ namespace EaterEmulator::devices
         }
         else if (_cycle == 4)
         {
-            _bus.setAddress(0x0100 + _sp); // Push to stack
+            _bus.setAddress(0x0100 + _sp);
         }
         else if (_cycle == 5)
         {
@@ -404,7 +508,8 @@ namespace EaterEmulator::devices
                 case Opcode::JSR:                
                     break;
                 case Opcode::JMP_ABS:
-                    _pc = (_adh << 8) | _adl;
+                    // copy low address byte to PCL, fetch high address byte to PCH
+                    _pc = (fetchByte() << 8) | _adl;
                     break;
                 default:
                     // fetch high byte of address, increment PC
@@ -539,6 +644,83 @@ namespace EaterEmulator::devices
     bool W65C02S::handleAbsoluteIndexedHigh(const OpcodeInfo& info)
     {
         return handleAbsoluteHigh(info); // Same as absolute high, just with indexing register added
+    }
+
+    bool W65C02S::handleRelativeAddressing(const OpcodeInfo& info, core::ClockState clockState)
+    {
+        if (clockState == core::LOW)
+        {
+            return handleRelativeLow(info);
+        }
+        return handleRelativeHigh(info);
+    }
+    bool W65C02S::handleRelativeLow([[maybe_unused]]const OpcodeInfo& info)
+    {
+        _bus.setAddress(_pc);
+        return true;
+    }
+    bool W65C02S::handleRelativeHigh(const OpcodeInfo& info)
+    {
+        if (_cycle == 1)
+        {
+            _adl = fetchByte();
+        }
+        else if (_cycle == 2)
+        {
+            bool isZero = _status & devices::STATUS_ZERO;
+            switch (info.opcode)
+            {
+                case Opcode::BEQ:
+                    if (isZero)
+                    {
+                        _pc += static_cast<int8_t>(_adl);
+                    }
+                    else
+                    {
+                        _pc++;
+                    }
+                    break;
+                case Opcode::BNE:
+                    if (!isZero)
+                    {
+                        _pc += static_cast<int8_t>(_adl);
+                    }
+                    else
+                    {
+                        _pc++;
+                    }
+                    break;
+                case Opcode::BCS:
+                case Opcode::BCC:
+                case Opcode::BVS:
+                case Opcode::BVC:
+                    break;
+                default:
+                    break;
+            }
+        }
+        else if (_cycle == 3)
+        {
+            switch (info.opcode)
+            {
+                case Opcode::BEQ:
+                case Opcode::BNE:
+                case Opcode::BCS:
+                case Opcode::BCC:
+                case Opcode::BVS:
+                case Opcode::BVC:
+                    _pc++;
+                    break;
+                default:
+                    return true;
+            }
+        }
+        else
+        {
+            spdlog::error("Unhandled cycle {} for relative addressing, opcode: {:#04x}", _cycle, static_cast<int>(info.opcode));
+            return false;
+        }
+        return true;
     }
 
 
@@ -795,7 +977,7 @@ namespace EaterEmulator::devices
                         }
                         else
                         {
-                            _bus.setAddress(0x0100 + _sp); // Push to stack
+                            _bus.setAddress(0x0100 + _sp);
                         }
                     }
                     else if (_stage == 2)
@@ -834,14 +1016,14 @@ namespace EaterEmulator::devices
                 break;
                 case AddressingMode::IMP:
                 {                    
-                    _bus.setAddress(0x0100 + _sp); // Push to stack
+                    _bus.setAddress(0x0100 + _sp);
                     // switch(it->second.opcode)
                     // {
                     //     case Opcode::PHA:
                     //     case Opcode::PLA:
                     //     case Opcode::PHP:
                     //     case Opcode::PLP:
-                    //         _bus.setAddress(0x0100 + _sp); // Push to stack
+                    //         _bus.setAddress(0x0100 + _sp);
                     //         break;
                     //     default:
                     //         spdlog::error("Unhandled implied addressing mode for opcode: {:#04x}", static_cast<int>(it->second.opcode));

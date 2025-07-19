@@ -71,6 +71,7 @@ TEST_F(CPUInstructionTest, PHP_PushStatus)
     ASSERT_NE(it, OpcodeMap.end()) << "Opcode not found in map";
     auto cycles = it->second.cycles;
     memory[0xFFFC - MEMORY_OFFSET] = static_cast<uint8_t>(opcode);
+    cpu->setStatus(devices::STATUS_NEGATIVE | devices::STATUS_ZERO);
     uint8_t statusBefore = cpu->getStatus();
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
     bus.addSlave(rom.get());
