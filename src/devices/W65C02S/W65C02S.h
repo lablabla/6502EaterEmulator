@@ -121,7 +121,6 @@ namespace EaterEmulator::devices
         uint8_t _adl; // Address Low Byte
         uint8_t _adh; // Address High Byte
 
-        int _stage = 0; // Current stage of instruction execution
         int _cycle = 0;
 
         bool _started = false;
