@@ -17,12 +17,12 @@ namespace EaterEmulator::devices
         }
         // Initialize memory with the contents of the ROM
         std::copy(rom.begin(), rom.end(), _memory.begin());
-        spdlog::info("EEPROM28C256 initialized with ROM data.");
+        spdlog::debug("EEPROM28C256 initialized with ROM data.");
     }
 
     EEPROM28C256::~EEPROM28C256() 
     {
-        spdlog::info("EEPROM28C256 destroyed.");
+        spdlog::debug("EEPROM28C256 destroyed.");
     }
 
     void EEPROM28C256::handleBusNotification(uint16_t address, uint8_t rwb)

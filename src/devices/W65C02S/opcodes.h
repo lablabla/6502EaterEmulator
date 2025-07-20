@@ -217,10 +217,16 @@ namespace EaterEmulator
         REL, // Relative
     };
 
+    enum class IndexingRegisters : uint8_t 
+    {
+        X,
+        Y
+    };
+
     struct OpcodeInfo 
     {
         Opcode opcode; // The opcode value
-        AddressingMode mode; // The addressing mode used by the opcode
+        AddressingMode addressingMode; // The addressing mode used by the opcode
         uint8_t cycles; // Number of cycles required to execute the opcode
         uint8_t rwb; // Read/Write flag (0 for read, 1 for write)
     };   

@@ -11,12 +11,12 @@ namespace EaterEmulator::devices
     ArduinoMega::ArduinoMega(core::Bus& bus) 
         : core::BusSlave(bus, 0x0000)
     {
-        spdlog::info("ArduinoMega initialized.");
+        spdlog::debug("ArduinoMega initialized.");
     }
 
     ArduinoMega::~ArduinoMega() 
     {
-        spdlog::info("ArduinoMega destroyed.");
+        spdlog::debug("ArduinoMega destroyed.");
     }
 
     void ArduinoMega::handleBusNotification(uint16_t address, uint8_t rwb)
