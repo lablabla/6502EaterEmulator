@@ -42,7 +42,7 @@ namespace EaterEmulator::devices
     bool SRAM62256::shouldHandleAddress(const uint16_t& address) const
     {
         // Decode address from the address bus and check if it falls within the range of this SRAM
-        // SRAM is mapped to addresses 0x0000 to 0x7FFF so only if A14 and A15 are LOW
+        // SRAM is mapped to addresses 0x0000 to 0x3FFF so only if A14 and A15 are LOW
         return (address & (1 << 15)) == 0 && (address & (1 << 14)) == 0; 
     }
 } // namespace EaterEmulator

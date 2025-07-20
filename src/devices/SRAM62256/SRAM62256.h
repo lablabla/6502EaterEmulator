@@ -3,7 +3,6 @@
 #include "core/bus_slave.h"
 
 #include <array>
-#include <vector>
 
 namespace EaterEmulator::devices
 {
