@@ -16,7 +16,7 @@ namespace EaterEmulator::devices
     static constexpr uint8_t STATUS_NEGATIVE = 0x80; // Negative Flag
 
     static constexpr uint16_t RESET_VECTOR = 0xFFFC; // Reset vector address
-    static constexpr uint16_t IRQ_VECTOR = 0xFFFE; // IRQ vector address
+    static constexpr uint16_t IRQ_BRK_VECTOR = 0xFFFE; // IRQ vector address
     static constexpr uint16_t NMI_VECTOR = 0xFFFA; // NMI vector address
 
 
@@ -123,7 +123,7 @@ namespace EaterEmulator::devices
         uint16_t _pc; // Program Counter
         uint8_t _status; // Processor Status
 
-        uint16_t _resetVector = RESET_VECTOR;
+        uint16_t _interruptVector = RESET_VECTOR;
 
         Opcode _ir; // Instruction Register
         uint8_t _adl; // Address Low Byte

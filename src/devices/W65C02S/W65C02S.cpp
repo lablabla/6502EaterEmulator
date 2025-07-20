@@ -138,18 +138,20 @@ namespace EaterEmulator::devices
                 // Inject BRK to IR
                 _ir = Opcode::BRK;
                 // Set reset vector to NMI vector
-                _resetVector = NMI_VECTOR;
+                _interruptVector = NMI_VECTOR;
             }
             // Check if interrupt (IRQ) was requested and interrupt bit is cleared
             else if (_irq == core::LOW && (_status & devices::STATUS_INTERRUPT) == 0)            
             {
                 // Inject BRK to IR
                 // Set reset vector to IRQ vector
-                _resetVector = IRQ_VECTOR;
+                _interruptVector = IRQ_BRK_VECTOR;
                 _ir = Opcode::BRK;
             }
             else
             {
+                // Set reset vector to IRQ vector (Same vector for BRK)
+                _interruptVector = IRQ_BRK_VECTOR;
                 uint8_t opcode = fetchByte();
                 _ir = static_cast<Opcode>(opcode); // Read the instruction from the data bus
                 _pc++;
@@ -264,7 +266,7 @@ namespace EaterEmulator::devices
             switch (info.opcode)
             {
                 case Opcode::BRK:
-                    _bus.setAddress(static_cast<uint8_t>((_resetVector >> 8)));
+                    _bus.setAddress(_interruptVector);
                     break;
                 default:
                     _bus.setAddress(0x0100 + _sp);
@@ -277,7 +279,7 @@ namespace EaterEmulator::devices
             switch (info.opcode)
             {
                 case Opcode::BRK:
-                    _bus.setAddress(static_cast<uint8_t>((_resetVector)));
+                    _bus.setAddress(_interruptVector + 1);
                     break;
                 default:
                     break;
@@ -452,7 +454,7 @@ namespace EaterEmulator::devices
             }
             return true;
         }
-        else if (_cycle == 5)
+        else if (_cycle == 6)
         {
             switch (info.opcode)
             {
