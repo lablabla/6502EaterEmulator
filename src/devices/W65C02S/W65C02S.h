@@ -63,9 +63,6 @@ namespace EaterEmulator::devices
 
         void handlePhi2Low();
         void handlePhi2High();
-
-        void handlePhi2LowAddressing();
-        void handlePhi2HighAddressing();
         void handleReset();
 
         // Implied addressing modes
@@ -101,30 +98,16 @@ namespace EaterEmulator::devices
         [[nodiscard]]bool handleZeroPageIndexedLow(const OpcodeInfo& info);
         [[nodiscard]]bool handleZeroPageIndexedHigh(const OpcodeInfo& info);
 
-
-
-
         // Math
         void doAND();
         void doORA();
         void doEOR();
         void doADC();
         void doSBC();
-        
-        // Handle stages
-        void handleOpcode(uint8_t rwb);
-        void handleStage1(const OpcodeInfo& info);
-        void handleStage2(const OpcodeInfo& info);
-        void handleStage3(const OpcodeInfo& info);
-        void handleStage4(const OpcodeInfo& info);
-
         uint8_t fetchByte();
         void writeByte(uint8_t data);
 
-        void executeInstruction(Opcode opcode);
         void updateStatusFlags(uint8_t value);
-        uint8_t getRWB() const;
-        bool shouldIncrementPC(AddressingMode mode) const;
 
         // Registers
         uint8_t _a; // Accumulator
