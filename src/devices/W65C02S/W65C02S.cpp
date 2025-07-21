@@ -27,14 +27,14 @@ namespace EaterEmulator::devices
         _x = 0; // X Register
         _y = 0; // Y Register
         _sp = 0xFF; // Stack Pointer
-        _pc = 0xFFFC; // Program Counter - Reset vector
+        _pc = RESET_VECTOR; // Program Counter - Reset vector
         _status = 0; // Processor Status
         _adl = 0; // Address Low Byte
         _adh = 0; // Address High Byte
         _resetStage = 0;
     }
 
-    void W65C02S::handleClockStateChange(core::ClockState state)
+    void W65C02S::handleClockStateChange(core::State state)
     {
         if (state == core::HIGH) 
         {
@@ -47,6 +47,16 @@ namespace EaterEmulator::devices
     void W65C02S::notifyBus(uint8_t rwb)
     {
         _bus.notifySlaves(rwb);
+    }
+
+    void W65C02S::setIRQ(core::State state)
+    {
+        _irq = state;
+    }
+
+    void W65C02S::setNMI(core::State state)
+    {
+        _nmi = state;
     }
 
 
@@ -62,7 +72,7 @@ namespace EaterEmulator::devices
         const auto addressingMode = opcodeInfo.addressingMode;   
         if (_cycle == 0)
         {
-            _bus.setAddress(_pc);
+            _bus.setAddress(_pc);            
             _started = true; // Make sure we start the CPU on the PHI2 low
         }
         else
@@ -122,9 +132,32 @@ namespace EaterEmulator::devices
         else if (_cycle == 0)
         {
 
-            uint8_t opcode = fetchByte();
-            _ir = static_cast<Opcode>(opcode); // Read the instruction from the data bus
-            _pc++;
+            // Check if interrupt (NMI) was requested
+            if (_nmi == core::LOW)
+            {
+                // Inject BRK to IR
+                _ir = Opcode::BRK;
+                // Set reset vector to NMI vector
+                _interruptVector = NMI_VECTOR;
+            }
+            // Check if interrupt (IRQ) was requested and interrupt bit is cleared
+            else if (_irq == core::LOW && (_status & devices::STATUS_INTERRUPT) == 0)            
+            {
+                // Inject BRK to IR
+                // Set reset vector to IRQ vector
+                _interruptVector = IRQ_BRK_VECTOR;
+                _ir = Opcode::BRK;
+                _interruptFromSW = false;
+            }
+            else
+            {
+                // Set reset vector to IRQ vector (Same vector for BRK)
+                _interruptVector = IRQ_BRK_VECTOR;
+                _interruptFromSW = true;
+                uint8_t opcode = fetchByte();
+                _ir = static_cast<Opcode>(opcode); // Read the instruction from the data bus
+                _pc++;
+            }
             _cycle++;
         }
         else
@@ -201,7 +234,7 @@ namespace EaterEmulator::devices
         }
     }
 
-    bool W65C02S::handleImpliedAddressing(const OpcodeInfo& info, core::ClockState clockState)
+    bool W65C02S::handleImpliedAddressing(const OpcodeInfo& info, core::State clockState)
     {
         if (clockState == core::LOW)
         {
@@ -209,7 +242,7 @@ namespace EaterEmulator::devices
         }
         return handleImpliedHigh(info);
     }
-    bool W65C02S::handleImpliedLow([[maybe_unused]]const OpcodeInfo& info)
+    bool W65C02S::handleImpliedLow(const OpcodeInfo& info)
     {
         if (_cycle == 1)
         {
@@ -232,7 +265,27 @@ namespace EaterEmulator::devices
         }
         else if (_cycle == 5)
         {
-            _bus.setAddress(0x0100 + _sp);
+            switch (info.opcode)
+            {
+                case Opcode::BRK:
+                    _bus.setAddress(_interruptVector);
+                    break;
+                default:
+                    _bus.setAddress(0x0100 + _sp);
+                    break;
+            }
+            return true;
+        }
+        else if (_cycle == 6)
+        {
+            switch (info.opcode)
+            {
+                case Opcode::BRK:
+                    _bus.setAddress(_interruptVector + 1);
+                    break;
+                default:
+                    break;
+            }
             return true;
         }
         else
@@ -248,6 +301,8 @@ namespace EaterEmulator::devices
         {
             switch (info.opcode)
             {
+                case Opcode::BRK: // Internal operation
+                case Opcode::RTI:
                 case Opcode::NOP:
                     break;
                 case Opcode::CLC:
@@ -322,6 +377,10 @@ namespace EaterEmulator::devices
         {
             switch (info.opcode)
             {
+                case Opcode::BRK:
+                    writeByte(static_cast<uint8_t>(_pc >> 8)); // Push return address high byte
+                    _sp--;
+                    break;
                 case Opcode::PHA:
                     writeByte(_a); // Push accumulator to stack
                     _sp--;
@@ -345,7 +404,11 @@ namespace EaterEmulator::devices
         else if (_cycle == 3)
         {
             switch (info.opcode)
-            {                
+            {
+                case Opcode::BRK:
+                    writeByte(static_cast<uint8_t>(_pc)); // Push return address low byte
+                    _sp--;
+                    break;
                 case Opcode::PLA:
                     _a = fetchByte(); // Pull accumulator from stack
                     updateStatusFlags(_a);
@@ -358,6 +421,10 @@ namespace EaterEmulator::devices
                     _adl = fetchByte();
                     _sp++;
                     break;
+                case Opcode::RTI:
+                    _status = fetchByte();
+                    _sp++;
+                    break;
                 default:
                     break;
             }
@@ -367,8 +434,19 @@ namespace EaterEmulator::devices
         {
             switch (info.opcode)
             {
+                case Opcode::BRK:
+                    {
+                        auto status = _interruptFromSW ? _status | devices::STATUS_BREAK : _status;
+                        writeByte(status); // Push status register
+                        _sp--;
+                    }
+                    break;
                 case Opcode::RTS:
                     _pc = (fetchByte() << 8) | _adl;
+                    break;
+                case Opcode::RTI:
+                    _adl = fetchByte();
+                    _sp++;
                     break;
                 default:
                     break; 
@@ -379,11 +457,33 @@ namespace EaterEmulator::devices
         {
             switch (info.opcode)
             {
+                case Opcode::BRK:
+                    _adl = fetchByte();
+                    break;
                 case Opcode::RTS:
                     _pc++;
                     break;
+                case Opcode::RTI:
+                    _pc = (fetchByte() << 8) | _adl;
+                    break;
                 default:
                     break; 
+            }
+            return true;
+        }
+        else if (_cycle == 6)
+        {
+            switch (info.opcode)
+            {
+                case Opcode::BRK:
+                    _pc = (fetchByte() << 8) | _adl;
+                    if (_interruptVector == IRQ_BRK_VECTOR)
+                    {
+                        _status |= devices::STATUS_INTERRUPT;
+                    }
+                    break;
+                default:
+                    break;
             }
             return true;
         }
@@ -395,7 +495,7 @@ namespace EaterEmulator::devices
         return false;  
     }    
 
-    bool W65C02S::handleImmediateAddressing(const OpcodeInfo& info, core::ClockState clockState)
+    bool W65C02S::handleImmediateAddressing(const OpcodeInfo& info, core::State clockState)
     {
         if (clockState == core::LOW)
         {
@@ -451,7 +551,7 @@ namespace EaterEmulator::devices
         return false;
     }
 
-    bool W65C02S::handleAbsoluteAddressing(const OpcodeInfo& info, core::ClockState clockState)
+    bool W65C02S::handleAbsoluteAddressing(const OpcodeInfo& info, core::State clockState)
     {
         if (clockState == core::LOW)
         {
@@ -615,7 +715,7 @@ namespace EaterEmulator::devices
         return true;
     }
 
-    bool W65C02S::handleAbsoluteIndexedAddressing(const OpcodeInfo& info, core::ClockState clockState)
+    bool W65C02S::handleAbsoluteIndexedAddressing(const OpcodeInfo& info, core::State clockState)
     {
         if (clockState == core::LOW)
         {
@@ -656,7 +756,7 @@ namespace EaterEmulator::devices
         return handleAbsoluteHigh(info); // Same as absolute high, just with indexing register added
     }
 
-    bool W65C02S::handleRelativeAddressing(const OpcodeInfo& info, core::ClockState clockState)
+    bool W65C02S::handleRelativeAddressing(const OpcodeInfo& info, core::State clockState)
     {
         if (clockState == core::LOW)
         {
@@ -727,7 +827,7 @@ namespace EaterEmulator::devices
     }
 
 
-    bool W65C02S::handleZeroPageAddressing(const OpcodeInfo& info, core::ClockState clockState)
+    bool W65C02S::handleZeroPageAddressing(const OpcodeInfo& info, core::State clockState)
     {
         if (clockState == core::LOW)
         {
@@ -821,7 +921,7 @@ namespace EaterEmulator::devices
         return true;
     }
 
-        bool W65C02S::handleZeroPageIndexedAddressing(const OpcodeInfo& info, core::ClockState clockState)
+        bool W65C02S::handleZeroPageIndexedAddressing(const OpcodeInfo& info, core::State clockState)
         {
         if (clockState == core::LOW)
         {
