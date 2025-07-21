@@ -53,9 +53,15 @@ TEST_F(InterruptTest, BRK_ExecutesCorrectly) {
     bus.addSlave(rom.get());
     
     // Set initial state
-    uint16_t initialPC = cpu->getProgramCounter();
     uint8_t initialStatus = cpu->getStatus();
     uint8_t initialSP = cpu->getStackPointer();
+    
+    // Reset
+    for (int i = 0; i < 2; ++i) 
+    {
+        cpu->handleClockStateChange(core::LOW);
+        cpu->handleClockStateChange(core::HIGH);
+    }
     
     // Execute BRK instruction
     for (int i = 0; i < cycles; ++i) {
@@ -69,12 +75,14 @@ TEST_F(InterruptTest, BRK_ExecutesCorrectly) {
     
     // Verify stack contents (return address and status)
     auto& stackMemory = ram->getMemory();
-    EXPECT_EQ(stackMemory[0x0100 + initialSP], static_cast<uint8_t>((initialPC + 1) >> 8)); // Return address high
-    EXPECT_EQ(stackMemory[0x0100 + initialSP - 1], static_cast<uint8_t>(initialPC + 1)); // Return address low  
-    EXPECT_EQ(stackMemory[0x0100 + initialSP - 2], initialStatus);
+    EXPECT_EQ(stackMemory[0x0100 + initialSP], static_cast<uint8_t>(0x8001 >> 8)); // Return address high
+    EXPECT_EQ(stackMemory[0x0100 + initialSP - 1], static_cast<uint8_t>(0x8001)); // Return address low
+    uint8_t pushedStatus = stackMemory[0x0100 + initialSP - 2];
+    EXPECT_EQ(pushedStatus, initialStatus | devices::STATUS_BREAK);
     
     // Verify interrupt disable flag is set
-    EXPECT_EQ(cpu->getStatus(), initialStatus);
+    EXPECT_EQ(cpu->getStatus() & devices::STATUS_INTERRUPT, devices::STATUS_INTERRUPT);
+    EXPECT_EQ(pushedStatus & devices::STATUS_BREAK, devices::STATUS_BREAK);
 }
 
 TEST_F(InterruptTest, BRK_SetsBreakFlag) {
@@ -90,6 +98,13 @@ TEST_F(InterruptTest, BRK_SetsBreakFlag) {
     bus.addSlave(rom.get());
     
     uint8_t initialSP = cpu->getStackPointer();
+    
+    // Reset
+    for (int i = 0; i < 2; ++i) 
+    {
+        cpu->handleClockStateChange(core::LOW);
+        cpu->handleClockStateChange(core::HIGH);
+    }
     
     for (int i = 0; i < cycles; ++i) {
         cpu->handleClockStateChange(core::LOW);
@@ -141,9 +156,11 @@ TEST_F(InterruptTest, IRQ_TriggersWhenEnabled) {
     auto& stackMemory = ram->getMemory();
     EXPECT_EQ(stackMemory[0x0100 + initialSP], static_cast<uint8_t>(0x8001 >> 8)); // Return address high
     EXPECT_EQ(stackMemory[0x0100 + initialSP - 1], static_cast<uint8_t>(0x8001)); // Return address low
+    uint8_t pushedStatus = stackMemory[0x0100 + initialSP - 2];
     
     // Verify interrupt disable flag is set
     EXPECT_EQ(cpu->getStatus() & devices::STATUS_INTERRUPT, devices::STATUS_INTERRUPT);
+    EXPECT_EQ(pushedStatus & devices::STATUS_BREAK, 0);
 }
 
 TEST_F(InterruptTest, IRQ_IgnoredWhenDisabled) {
@@ -151,27 +168,39 @@ TEST_F(InterruptTest, IRQ_IgnoredWhenDisabled) {
     
     // Set up NOP instruction at reset vector
     memory[0x8000 - MEMORY_OFFSET] = static_cast<uint8_t>(Opcode::NOP);
+    memory[0x8001 - MEMORY_OFFSET] = static_cast<uint8_t>(Opcode::NOP);
+    memory[0x8002 - MEMORY_OFFSET] = static_cast<uint8_t>(Opcode::NOP);
+    memory[0x8003 - MEMORY_OFFSET] = static_cast<uint8_t>(Opcode::NOP);
+    memory[0x8004 - MEMORY_OFFSET] = static_cast<uint8_t>(Opcode::NOP);
+    memory[0x8005 - MEMORY_OFFSET] = static_cast<uint8_t>(Opcode::NOP);
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
     bus.addSlave(rom.get());
     
     // Disable interrupts
     cpu->setStatus(cpu->getStatus() | devices::STATUS_INTERRUPT);
-    
-    uint16_t initialPC = cpu->getProgramCounter();
     uint8_t initialSP = cpu->getStackPointer();
     
-    // Trigger IRQ
-    cpu->setIRQ(core::LOW);
-    
-    // Execute NOP instruction (2 cycles)
-    for (int i = 0; i < 2; ++i) {
+    // Reset
+    for (int i = 0; i < 2; ++i) 
+    {
         cpu->handleClockStateChange(core::LOW);
         cpu->handleClockStateChange(core::HIGH);
     }
+
+    // 2 NOP and then 7 cycles total for IRQ handling which should be ignored and should execute the NOPs
+    for (int i = 0; i < 2 + 7; ++i) 
+    {
+        cpu->handleClockStateChange(core::LOW);
+        cpu->handleClockStateChange(core::HIGH);
+        if (i == 1)
+        {
+            cpu->setIRQ(core::LOW);
+        }
+    }
     
     // Verify IRQ was ignored
-    EXPECT_EQ(cpu->getProgramCounter(), initialPC + 1); // Should have executed NOP normally
-    EXPECT_EQ(cpu->getStackPointer(), initialSP); // Stack should be unchanged
+    EXPECT_EQ(cpu->getProgramCounter(), 0x8000 + 5); // Should have executed NOP normally
+    EXPECT_EQ(cpu->getStackPointer(), initialSP);
 }
 
 TEST_F(InterruptTest, NMI_TriggersRegardlessOfInterruptFlag) {
@@ -185,20 +214,24 @@ TEST_F(InterruptTest, NMI_TriggersRegardlessOfInterruptFlag) {
     // Disable interrupts (NMI should still work)
     cpu->setStatus(cpu->getStatus() | devices::STATUS_INTERRUPT);
     
-    uint16_t initialPC = cpu->getProgramCounter();
     uint8_t initialSP = cpu->getStackPointer();
-    
-    // Trigger NMI
-    cpu->setNMI(core::LOW);
-    
-    // Execute one instruction cycle - should detect NMI during instruction fetch
-    cpu->handleClockStateChange(core::LOW);
-    cpu->handleClockStateChange(core::HIGH);
-    
-    // Continue for BRK cycles (7 cycles total for NMI handling)
-    for (int i = 1; i < 7; ++i) {
+        
+    // Reset
+    for (int i = 0; i < 2; ++i) 
+    {
         cpu->handleClockStateChange(core::LOW);
         cpu->handleClockStateChange(core::HIGH);
+    }
+
+    // 2 NOP and then 7 cycles total for NMI handling
+    for (int i = 0; i < 2 + 7; ++i) 
+    {
+        cpu->handleClockStateChange(core::LOW);
+        cpu->handleClockStateChange(core::HIGH);
+        if (i == 1)
+        {
+            cpu->setNMI(core::LOW);
+        }
     }
     
     // Verify NMI was handled
@@ -207,8 +240,8 @@ TEST_F(InterruptTest, NMI_TriggersRegardlessOfInterruptFlag) {
     
     // Verify stack contents
     auto& stackMemory = ram->getMemory();
-    EXPECT_EQ(stackMemory[0x0100 + initialSP], static_cast<uint8_t>(initialPC >> 8)); // Return address high
-    EXPECT_EQ(stackMemory[0x0100 + initialSP - 1], static_cast<uint8_t>(initialPC)); // Return address low
+    EXPECT_EQ(stackMemory[0x0100 + initialSP], static_cast<uint8_t>(0x8001 >> 8)); // Return address high
+    EXPECT_EQ(stackMemory[0x0100 + initialSP - 1], static_cast<uint8_t>(0x8001)); // Return address low
     
     // Verify interrupt disable flag is set
     EXPECT_EQ(cpu->getStatus() & devices::STATUS_INTERRUPT, devices::STATUS_INTERRUPT);
@@ -238,6 +271,7 @@ TEST_F(InterruptTest, RTI_RestoresStateCorrectly) {
     
     // Set PC to RTI instruction
     cpu->setProgramCounter(0x9000);
+    cpu->setResetStage(2);
     
     // Execute RTI instruction (6 cycles)
     auto it = OpcodeMap.find(Opcode::RTI);
@@ -263,19 +297,29 @@ TEST_F(InterruptTest, InterruptPriority_NMI_OverIRQ) {
     
     // Enable interrupts
     cpu->setStatus(cpu->getStatus() & ~devices::STATUS_INTERRUPT);
+        
+    // Reset
+    for (int i = 0; i < 2; ++i) 
+    {
+        cpu->handleClockStateChange(core::LOW);
+        cpu->handleClockStateChange(core::HIGH);
+    }
     
-    // Trigger both NMI and IRQ simultaneously
-    cpu->setNMI(core::LOW);
-    cpu->setIRQ(core::LOW);
     
     // Execute one instruction cycle
     cpu->handleClockStateChange(core::LOW);
     cpu->handleClockStateChange(core::HIGH);
     
     // Continue for interrupt handling cycles
-    for (int i = 1; i < 7; ++i) {
+    for (int i = 1; i < 2 + 7; ++i) {
         cpu->handleClockStateChange(core::LOW);
         cpu->handleClockStateChange(core::HIGH);
+        if (i == 1)
+        {
+            // Trigger both NMI and IRQ simultaneously
+            cpu->setNMI(core::LOW);
+            cpu->setIRQ(core::LOW);
+        }
     }
     
     // Verify NMI took priority (should jump to NMI vector, not IRQ vector)

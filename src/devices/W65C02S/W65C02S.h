@@ -124,6 +124,7 @@ namespace EaterEmulator::devices
         uint8_t _status; // Processor Status
 
         uint16_t _interruptVector = RESET_VECTOR;
+        bool _interruptFromSW = true;
 
         Opcode _ir; // Instruction Register
         uint8_t _adl; // Address Low Byte

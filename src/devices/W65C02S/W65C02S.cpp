@@ -147,11 +147,13 @@ namespace EaterEmulator::devices
                 // Set reset vector to IRQ vector
                 _interruptVector = IRQ_BRK_VECTOR;
                 _ir = Opcode::BRK;
+                _interruptFromSW = false;
             }
             else
             {
                 // Set reset vector to IRQ vector (Same vector for BRK)
                 _interruptVector = IRQ_BRK_VECTOR;
+                _interruptFromSW = true;
                 uint8_t opcode = fetchByte();
                 _ir = static_cast<Opcode>(opcode); // Read the instruction from the data bus
                 _pc++;
@@ -240,7 +242,7 @@ namespace EaterEmulator::devices
         }
         return handleImpliedHigh(info);
     }
-    bool W65C02S::handleImpliedLow([[maybe_unused]]const OpcodeInfo& info)
+    bool W65C02S::handleImpliedLow(const OpcodeInfo& info)
     {
         if (_cycle == 1)
         {
@@ -299,7 +301,8 @@ namespace EaterEmulator::devices
         {
             switch (info.opcode)
             {
-                case Opcode::BRK: // Internal operation                    
+                case Opcode::BRK: // Internal operation
+                case Opcode::RTI:
                 case Opcode::NOP:
                     break;
                 case Opcode::CLC:
@@ -418,6 +421,10 @@ namespace EaterEmulator::devices
                     _adl = fetchByte();
                     _sp++;
                     break;
+                case Opcode::RTI:
+                    _status = fetchByte();
+                    _sp++;
+                    break;
                 default:
                     break;
             }
@@ -428,11 +435,18 @@ namespace EaterEmulator::devices
             switch (info.opcode)
             {
                 case Opcode::BRK:
-                    writeByte(_status); // Push status register
-                    _sp--;
+                    {
+                        auto status = _interruptFromSW ? _status | devices::STATUS_BREAK : _status;
+                        writeByte(status); // Push status register
+                        _sp--;
+                    }
                     break;
                 case Opcode::RTS:
                     _pc = (fetchByte() << 8) | _adl;
+                    break;
+                case Opcode::RTI:
+                    _adl = fetchByte();
+                    _sp++;
                     break;
                 default:
                     break; 
@@ -449,6 +463,9 @@ namespace EaterEmulator::devices
                 case Opcode::RTS:
                     _pc++;
                     break;
+                case Opcode::RTI:
+                    _pc = (fetchByte() << 8) | _adl;
+                    break;
                 default:
                     break; 
             }
@@ -460,6 +477,10 @@ namespace EaterEmulator::devices
             {
                 case Opcode::BRK:
                     _pc = (fetchByte() << 8) | _adl;
+                    if (_interruptVector == IRQ_BRK_VECTOR)
+                    {
+                        _status |= devices::STATUS_INTERRUPT;
+                    }
                     break;
                 default:
                     break;
