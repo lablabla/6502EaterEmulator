@@ -12,6 +12,7 @@ namespace EaterEmulator::devices
     static constexpr uint8_t STATUS_INTERRUPT = 0x04; // Interrupt Disable Flag
     static constexpr uint8_t STATUS_DECIMAL = 0x08; // Decimal Mode Flag
     static constexpr uint8_t STATUS_BREAK = 0x10; // Break Command Flag
+    static constexpr uint8_t STATUS_UNUSED = 0x20; // Unused Flag (always 1)
     static constexpr uint8_t STATUS_OVERFLOW = 0x40; // Overflow Flag
     static constexpr uint8_t STATUS_NEGATIVE = 0x80; // Negative Flag
 
@@ -71,6 +72,11 @@ namespace EaterEmulator::devices
         void handlePhi2High();
         void handleReset();
 
+        // Accumulator addressing modes
+        [[nodiscard]]bool handleAccumulatorAddressing(const OpcodeInfo& info, core::State clockState);
+        [[nodiscard]]bool handleAccumulatorLow(const OpcodeInfo& info);
+        [[nodiscard]]bool handleAccumulatorHigh(const OpcodeInfo& info);
+
         // Implied addressing modes
         [[nodiscard]]bool handleImpliedAddressing(const OpcodeInfo& info, core::State clockState);
         [[nodiscard]]bool handleImpliedLow(const OpcodeInfo& info);
@@ -110,6 +116,13 @@ namespace EaterEmulator::devices
         void doEOR();
         void doADC();
         void doSBC();
+
+        void doBIT();
+        void doASL();
+        void doLSR();
+        void doROL();
+        void doROR();
+
         uint8_t fetchByte();
         void writeByte(uint8_t data);
 
