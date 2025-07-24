@@ -233,6 +233,48 @@ namespace EaterEmulator::devices
             spdlog::debug("CPU: Reset complete, PC set to {:#04x}", _pc);
         }
     }
+    bool W65C02S::handleAccumulatorAddressing(const OpcodeInfo& info, core::State clockState)
+    {
+        if (clockState == core::LOW)
+        {
+            return handleAccumulatorLow(info);
+        }
+        return handleAccumulatorHigh(info);
+    }
+    bool W65C02S::handleAccumulatorLow(const OpcodeInfo& info)
+    {
+        return handleImpliedLow(info);
+    }
+    bool W65C02S::handleAccumulatorHigh(const OpcodeInfo& info)
+    {
+        if (_cycle == 1)
+        {
+            switch (info.opcode)
+            {
+                case Opcode::ASL_ACC:
+                    doASL();
+                    break;
+                case Opcode::LSR_ACC:
+                    doLSR();
+                    break;
+                case Opcode::ROL_ACC:
+                    doROL();
+                    break;
+                case Opcode::ROR_ACC:
+                    doROR();
+                    break;
+                default:
+                    return false;
+            }
+            return true;
+        }
+        else
+        {
+            spdlog::error("Unhandled cycle in accumulator high addressing: {}", _cycle);
+            return false;
+        }
+        return false;
+    }
 
     bool W65C02S::handleImpliedAddressing(const OpcodeInfo& info, core::State clockState)
     {
@@ -530,7 +572,7 @@ namespace EaterEmulator::devices
                     updateStatusFlags(_x);
                     break;
                 case Opcode::LDY_IMM:
-                    _y= fetchByte();
+                    _y = fetchByte();
                     updateStatusFlags(_y);
                     break;
                 case Opcode::AND_IMM:
@@ -541,7 +583,12 @@ namespace EaterEmulator::devices
                     break;
                 case Opcode::EOR_IMM:
                     doEOR();
-                    updateStatusFlags(_a);
+                    break;
+                case Opcode::ADC_IMM:
+                    doADC();
+                    break;
+                case Opcode::SBC_IMM:
+                    doSBC();
                     break;
                 default:
                     return false;
@@ -668,6 +715,37 @@ namespace EaterEmulator::devices
                 case Opcode::EOR_ABSY:
                     doEOR();
                     break;
+                case Opcode::ADC_ABS:
+                case Opcode::ADC_ABSX:
+                case Opcode::ADC_ABSY:
+                    doADC();
+                    break;
+                case Opcode::SBC_ABS:
+                case Opcode::SBC_ABSX:
+                case Opcode::SBC_ABSY:
+                    doSBC();
+                    break;
+
+                case Opcode::BIT_ABS:
+                    doBIT();
+                    break;
+
+                case Opcode::ASL_ABS:
+                case Opcode::ASL_ABSX:
+                    doASL();
+                    break;
+                case Opcode::LSR_ABS:
+                case Opcode::LSR_ABSX:
+                    doLSR();
+                    break;
+                case Opcode::ROL_ABS:
+                case Opcode::ROL_ABSX:
+                    doROL();
+                    break;
+                case Opcode::ROR_ABS:
+                case Opcode::ROR_ABSX:
+                    doROR();
+                    break;
 
                 // Read-modify-write instructions
                 // Write instructions
@@ -677,11 +755,9 @@ namespace EaterEmulator::devices
                     writeByte(_a);
                     break;
                 case Opcode::STX_ABS:
-                case Opcode::STX_ZPY:
                     writeByte(_x);
                     break;
                 case Opcode::STY_ABS:
-                case Opcode::STY_ZPX:
                     writeByte(_y);
                     break;
 
@@ -867,45 +943,58 @@ namespace EaterEmulator::devices
             {
                 // Read instructions
                 case Opcode::LDA_ZP:
-                case Opcode::LDA_ZPX:
                     _a = fetchByte();
                     updateStatusFlags(_a);
                     break;
                 case Opcode::LDX_ZP:
-                case Opcode::LDX_ZPY:
                     _x = fetchByte();
                     updateStatusFlags(_x);
                     break;
                 case Opcode::LDY_ZP:
-                case Opcode::LDY_ZPX:
                     _y = fetchByte();
                     updateStatusFlags(_y);
                     break;
                 case Opcode::AND_ZP:
-                case Opcode::AND_ZPX:
                     doAND();
                     break;
                 case Opcode::ORA_ZP:
-                case Opcode::ORA_ZPX:
                     doORA();
                     break;
                 case Opcode::EOR_ZP:
-                case Opcode::EOR_ZPX:
                     doEOR();
+                    break;
+                case Opcode::ADC_ZP:
+                    doADC();
+                    break;
+                case Opcode::SBC_ZP:
+                    doSBC();
+                    break;
+
+                case Opcode::BIT_ZP:
+                    doBIT();
+                    break;
+                case Opcode::ASL_ZP:
+                    doASL();
+                    break;
+                case Opcode::LSR_ZP:
+                    doLSR();
+                    break;
+                case Opcode::ROL_ZP:
+                    doROL();
+                    break;
+                case Opcode::ROR_ZP:
+                    doROR();
                     break;
 
                 // Read-modify-write instructions
                 // Write instructions
                 case Opcode::STA_ZP:
-                case Opcode::STA_ZPX:
                     writeByte(_a);
                     break;
                 case Opcode::STX_ZP:
-                case Opcode::STX_ZPY:
                     writeByte(_x);
                     break;
                 case Opcode::STY_ZP:
-                case Opcode::STY_ZPX:
                     writeByte(_y);
                     break;
                 default:                    
@@ -991,6 +1080,25 @@ namespace EaterEmulator::devices
                 case Opcode::EOR_ZPX:
                     doEOR();
                     break;
+                case Opcode::ADC_ZPX:
+                    doADC();
+                    break;
+                case Opcode::SBC_ZPX:
+                    doSBC();
+                    break;
+                    
+                case Opcode::ASL_ZPX:
+                    doASL();
+                    break;
+                case Opcode::LSR_ZPX:
+                    doLSR();
+                    break;
+                case Opcode::ROL_ZPX:
+                    doROL();
+                    break;
+                case Opcode::ROR_ZPX:
+                    doROR();
+                    break;
 
                 // Read-modify-write instructions
                 // Write instructions
@@ -1034,12 +1142,87 @@ namespace EaterEmulator::devices
     }
     void W65C02S::doADC()
     {
-
+        uint8_t operand = fetchByte();
+        uint16_t result = static_cast<uint16_t>(_a) + static_cast<uint16_t>(operand) + static_cast<uint16_t>(_status & STATUS_CARRY);
+        _a = static_cast<uint8_t>(result);
+        if (result > 0xFF) {
+            _status |= STATUS_CARRY; // Set carry flag if overflow
+        } else {
+            _status &= ~STATUS_CARRY;
+        }
+        updateStatusFlags(_a);
     }
     void W65C02S::doSBC()
     {
-
+        uint8_t operand = fetchByte();
+        uint16_t result = static_cast<uint16_t>(_a) - static_cast<uint16_t>(operand) - (1 - static_cast<uint16_t>(_status & STATUS_CARRY));
+        _a = static_cast<uint8_t>(result);
+        if (result > 0xFF) {
+            _status &= ~STATUS_CARRY; // Clear carry flag if overflow
+        } else {
+            _status |= STATUS_CARRY;
+        }
+        updateStatusFlags(_a);
     }
+
+    void W65C02S::doBIT()
+    {
+        uint8_t value = fetchByte();
+        _status &= ~(STATUS_OVERFLOW | STATUS_ZERO | STATUS_NEGATIVE);
+        _status |= (value & 0x40) ? STATUS_OVERFLOW : 0;
+        _status |= (value & 0x80) ? STATUS_NEGATIVE : 0;
+        if ((value & _a) == 0) {
+            _status |= STATUS_ZERO;
+        }
+        spdlog::debug("CPU: BIT operation, status updated: {:#04x}", static_cast<int>(_status));
+    }
+
+    void W65C02S::doASL()
+    {
+        uint8_t value = fetchByte();
+        _status &= ~(STATUS_ZERO | STATUS_NEGATIVE);
+        _status |= (value & 0x80) ? STATUS_CARRY : 0;
+        value <<= 1;
+        _a = value;
+        updateStatusFlags(_a);
+    }
+
+    void W65C02S::doLSR()
+    {
+        uint8_t value = fetchByte();
+        _status &= ~(STATUS_ZERO | STATUS_NEGATIVE);
+        _status |= (value & 0x01) ? STATUS_CARRY : 0;
+        value >>= 1;
+        _a = value;
+        updateStatusFlags(_a);
+    }
+
+    void W65C02S::doROL()
+    {
+        uint8_t value = fetchByte();
+        bool carry = value & 0x80; // Check if the highest bit is set
+        value = (value << 1) | (_status & STATUS_CARRY); // Shift left and add carry
+        _status &= ~STATUS_CARRY; // Clear carry flag
+        if (carry) {
+            _status |= STATUS_CARRY; // Set carry flag if it was set before
+        }
+        _a = value;
+        updateStatusFlags(_a);
+    }
+
+    void W65C02S::doROR()
+    {
+        uint8_t value = fetchByte();
+        bool carry = value & 0x01; // Check if the lowest bit is set
+        value = (_status & STATUS_CARRY) << 7 | (value >> 1); // Shift right and add carry
+        _status &= ~STATUS_CARRY; // Clear carry flag
+        if (carry) {
+            _status |= STATUS_CARRY; // Set carry flag if it was set before
+        }
+        _a = value;
+        updateStatusFlags(_a);
+    }
+
 
     uint8_t W65C02S::fetchByte()
     {
