@@ -12,8 +12,13 @@ namespace EaterEmulator::devices
     static constexpr uint8_t STATUS_INTERRUPT = 0x04; // Interrupt Disable Flag
     static constexpr uint8_t STATUS_DECIMAL = 0x08; // Decimal Mode Flag
     static constexpr uint8_t STATUS_BREAK = 0x10; // Break Command Flag
+    static constexpr uint8_t STATUS_UNUSED = 0x20; // Unused Flag (always 1)
     static constexpr uint8_t STATUS_OVERFLOW = 0x40; // Overflow Flag
     static constexpr uint8_t STATUS_NEGATIVE = 0x80; // Negative Flag
+
+    static constexpr uint16_t RESET_VECTOR = 0xFFFC; // Reset vector address
+    static constexpr uint16_t IRQ_BRK_VECTOR = 0xFFFE; // IRQ vector address
+    static constexpr uint16_t NMI_VECTOR = 0xFFFA; // NMI vector address
 
 
     // W65C02S CPU device class
@@ -32,8 +37,10 @@ namespace EaterEmulator::devices
         // Reset the CPU
         void reset();
 
-        void handleClockStateChange(core::ClockState state) override;
+        void handleClockStateChange(core::State state) override;
         void notifyBus(uint8_t rwb) override;
+        void setIRQ(core::State state);
+        void setNMI(core::State state);
 
         std::string getName() const override { return "W65C02S"; }
 
@@ -65,36 +72,41 @@ namespace EaterEmulator::devices
         void handlePhi2High();
         void handleReset();
 
+        // Accumulator addressing modes
+        [[nodiscard]]bool handleAccumulatorAddressing(const OpcodeInfo& info, core::State clockState);
+        [[nodiscard]]bool handleAccumulatorLow(const OpcodeInfo& info);
+        [[nodiscard]]bool handleAccumulatorHigh(const OpcodeInfo& info);
+
         // Implied addressing modes
-        [[nodiscard]]bool handleImpliedAddressing(const OpcodeInfo& info, core::ClockState clockState);
+        [[nodiscard]]bool handleImpliedAddressing(const OpcodeInfo& info, core::State clockState);
         [[nodiscard]]bool handleImpliedLow(const OpcodeInfo& info);
         [[nodiscard]]bool handleImpliedHigh(const OpcodeInfo& info);
 
         // Immediate
-        [[nodiscard]]bool handleImmediateAddressing(const OpcodeInfo& info,  core::ClockState clockState);
+        [[nodiscard]]bool handleImmediateAddressing(const OpcodeInfo& info,  core::State clockState);
         [[nodiscard]]bool handleImmediateLow(const OpcodeInfo& info);
         [[nodiscard]]bool handleImmediateHigh(const OpcodeInfo& info);
 
         // Absolute
-        [[nodiscard]]bool handleAbsoluteAddressing(const OpcodeInfo& info, core::ClockState clockState);
+        [[nodiscard]]bool handleAbsoluteAddressing(const OpcodeInfo& info, core::State clockState);
         [[nodiscard]]bool handleAbsoluteLow(const OpcodeInfo& info);
         [[nodiscard]]bool handleAbsoluteHigh(const OpcodeInfo& info);
 
-        [[nodiscard]]bool handleAbsoluteIndexedAddressing(const OpcodeInfo& info, core::ClockState clockState);
+        [[nodiscard]]bool handleAbsoluteIndexedAddressing(const OpcodeInfo& info, core::State clockState);
         [[nodiscard]]bool handleAbsoluteIndexedLow(const OpcodeInfo& info);
         [[nodiscard]]bool handleAbsoluteIndexedHigh(const OpcodeInfo& info);
 
         // Relative
-        [[nodiscard]]bool handleRelativeAddressing(const OpcodeInfo& info, core::ClockState clockState);
+        [[nodiscard]]bool handleRelativeAddressing(const OpcodeInfo& info, core::State clockState);
         [[nodiscard]]bool handleRelativeLow(const OpcodeInfo& info);
         [[nodiscard]]bool handleRelativeHigh(const OpcodeInfo& info);
 
         // Zero Page
-        [[nodiscard]]bool handleZeroPageAddressing(const OpcodeInfo& info, core::ClockState clockState);
+        [[nodiscard]]bool handleZeroPageAddressing(const OpcodeInfo& info, core::State clockState);
         [[nodiscard]]bool handleZeroPageLow(const OpcodeInfo& info);
         [[nodiscard]]bool handleZeroPageHigh(const OpcodeInfo& info);
 
-        [[nodiscard]]bool handleZeroPageIndexedAddressing(const OpcodeInfo& info, core::ClockState clockState);
+        [[nodiscard]]bool handleZeroPageIndexedAddressing(const OpcodeInfo& info, core::State clockState);
         [[nodiscard]]bool handleZeroPageIndexedLow(const OpcodeInfo& info);
         [[nodiscard]]bool handleZeroPageIndexedHigh(const OpcodeInfo& info);
 
@@ -104,6 +116,13 @@ namespace EaterEmulator::devices
         void doEOR();
         void doADC();
         void doSBC();
+
+        void doBIT();
+        void doASL();
+        void doLSR();
+        void doROL();
+        void doROR();
+
         uint8_t fetchByte();
         void writeByte(uint8_t data);
 
@@ -117,10 +136,15 @@ namespace EaterEmulator::devices
         uint16_t _pc; // Program Counter
         uint8_t _status; // Processor Status
 
+        uint16_t _interruptVector = RESET_VECTOR;
+        bool _interruptFromSW = true;
+
         Opcode _ir; // Instruction Register
         uint8_t _adl; // Address Low Byte
         uint8_t _adh; // Address High Byte
 
+        core::State _irq = core::HIGH;
+        core::State _nmi = core::HIGH;
         int _cycle = 0;
 
         bool _started = false;

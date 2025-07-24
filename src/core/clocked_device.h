@@ -26,7 +26,7 @@ namespace EaterEmulator::core
             stop();
         }
 
-        void onClockStateChange(core::ClockState state) override {
+        void onClockStateChange(core::State state) override {
             // Queue the clock state change to be handled in the background thread
             {
                 std::lock_guard<std::mutex> lock(_queueMutex);
@@ -44,12 +44,12 @@ namespace EaterEmulator::core
 
     protected:
         // Override this method to handle clock state changes
-        virtual void handleClockStateChange(core::ClockState state) = 0;
+        virtual void handleClockStateChange(core::State state) = 0;
 
     private:
         void cpuLoop(std::stop_token stop_token) {
             while (!stop_token.stop_requested()) {
-                core::ClockState state;
+                core::State state;
                 
                 // Wait for a clock state change
                 {
@@ -70,7 +70,7 @@ namespace EaterEmulator::core
         }
 
         std::jthread _cpuThread;
-        std::queue<core::ClockState> _stateQueue;
+        std::queue<core::State> _stateQueue;
         std::mutex _queueMutex;
         std::condition_variable _cv;
     };

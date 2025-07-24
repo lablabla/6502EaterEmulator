@@ -85,7 +85,7 @@ namespace EaterEmulator::core
             }
         }
 
-        void notifyObservers(ClockState new_state) {
+        void notifyObservers(State new_state) {
             std::shared_lock lock(_observerMutex);
             
             // Use ranges for-each
@@ -98,7 +98,7 @@ namespace EaterEmulator::core
         mutable std::shared_mutex _observerMutex;
         
         std::vector<ClockObserver*> _observers;
-        std::atomic<ClockState> _state{LOW};
+        std::atomic<State> _state{LOW};
         std::atomic<bool> _running{false};
         std::jthread _clockThread;
     };
@@ -107,6 +107,6 @@ namespace EaterEmulator::core
     class ClockObserver {
     public:
         virtual ~ClockObserver() = default;
-        virtual void onClockStateChange(ClockState newState) = 0;
+        virtual void onClockStateChange(State newState) = 0;
     };
 }
