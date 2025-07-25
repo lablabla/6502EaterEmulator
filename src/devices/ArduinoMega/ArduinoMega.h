@@ -2,13 +2,15 @@
 
 #include "core/bus_slave.h"
 
+#include <memory>
+
 namespace EaterEmulator::devices
 {
     // Arduino Mega used for logging
     class ArduinoMega : public core::BusSlave
     {
     public:
-        ArduinoMega(core::Bus& bus);
+        ArduinoMega(std::shared_ptr<core::Bus> bus);
         virtual ~ArduinoMega();
 
         ArduinoMega(const ArduinoMega&) = delete;

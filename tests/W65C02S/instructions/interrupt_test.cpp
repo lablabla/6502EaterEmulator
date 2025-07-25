@@ -12,7 +12,7 @@ protected:
     void SetUp() override {
         CPUInstructionTest::SetUp();
         ram = std::make_unique<devices::SRAM62256>(bus);
-        bus.addSlave(ram.get());
+        bus->addSlave(ram.get());
         cpu->setResetStage(0);
     }
     
@@ -50,7 +50,7 @@ TEST_F(InterruptTest, BRK_ExecutesCorrectly) {
     memory[0x8001 - MEMORY_OFFSET] = 0x00; // BRK operand (ignored)
     
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     
     // Set initial state
     uint8_t initialStatus = cpu->getStatus();
@@ -95,7 +95,7 @@ TEST_F(InterruptTest, BRK_SetsBreakFlag) {
     
     memory[0x8000 - MEMORY_OFFSET] = static_cast<uint8_t>(opcode);
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     
     uint8_t initialSP = cpu->getStackPointer();
     
@@ -123,7 +123,7 @@ TEST_F(InterruptTest, IRQ_TriggersWhenEnabled) {
     // Set up NOP instruction at reset vector
     memory[0x8000 - MEMORY_OFFSET] = static_cast<uint8_t>(Opcode::NOP);
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     
     // Ensure interrupt flag is clear (interrupts enabled)
     cpu->setStatus(cpu->getStatus() & ~devices::STATUS_INTERRUPT);
@@ -174,7 +174,7 @@ TEST_F(InterruptTest, IRQ_IgnoredWhenDisabled) {
     memory[0x8004 - MEMORY_OFFSET] = static_cast<uint8_t>(Opcode::NOP);
     memory[0x8005 - MEMORY_OFFSET] = static_cast<uint8_t>(Opcode::NOP);
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     
     // Disable interrupts
     cpu->setStatus(cpu->getStatus() | devices::STATUS_INTERRUPT);
@@ -209,7 +209,7 @@ TEST_F(InterruptTest, NMI_TriggersRegardlessOfInterruptFlag) {
     // Set up NOP instruction at reset vector
     memory[0x8000 - MEMORY_OFFSET] = static_cast<uint8_t>(Opcode::NOP);
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     
     // Disable interrupts (NMI should still work)
     cpu->setStatus(cpu->getStatus() | devices::STATUS_INTERRUPT);
@@ -256,7 +256,7 @@ TEST_F(InterruptTest, RTI_RestoresStateCorrectly) {
     // Set up initial instruction at reset vector
     memory[0x8000 - MEMORY_OFFSET] = static_cast<uint8_t>(Opcode::NOP);
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     
     // Manually set up stack as if we came from an interrupt
     uint16_t returnAddress = 0x8001;
@@ -293,7 +293,7 @@ TEST_F(InterruptTest, InterruptPriority_NMI_OverIRQ) {
     // Set up NOP instruction at reset vector
     memory[0x8000 - MEMORY_OFFSET] = static_cast<uint8_t>(Opcode::NOP);
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     
     // Enable interrupts
     cpu->setStatus(cpu->getStatus() & ~devices::STATUS_INTERRUPT);

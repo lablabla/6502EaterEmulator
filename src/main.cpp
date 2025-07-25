@@ -43,26 +43,26 @@ int main(int argc, char* argv[]) {
         spdlog::error("Error reading ROM file: {}", argv[1]);
         return 1;
     }
-    core::Bus bus;
+    auto bus = std::make_shared<core::Bus>();
     
     devices::W65C02S cpu6502(bus);
     cpu6502.reset();
     devices::EEPROM28C256 rom28C256(rom, bus);
-    bus.addSlave(&rom28C256);
+    bus->addSlave(&rom28C256);
     devices::SRAM62256 ram62256(bus);
-    bus.addSlave(&ram62256);
+    bus->addSlave(&ram62256);
     devices::W65C22S w65c22s(bus);
-    bus.addSlave(&w65c22s);
+    bus->addSlave(&w65c22s);
     // devices::ArduinoMega arduinoMega(bus);
-    // bus.addSlave(&arduinoMega);
+    // bus->addSlave(&arduinoMega);
 
     auto lcd = std::make_shared<devices::HD44780LCD>();
     devices::LCDAdapter lcdAdapter(lcd);
     w65c22s.connect(devices::W65C22S::Port::A, lcdAdapter, devices::LCDAdapter::CONTROL_PORT);
     w65c22s.connect(devices::W65C22S::Port::B, lcdAdapter, devices::LCDAdapter::DATA_PORT);
 
-    // devices::CPUAdapter cpuAdapter(std::make_shared<devices::W65C02S>(cpu6502));
-    // w65c22s.connect(devices::W65C22S::Port::CB2, cpuAdapter, devices::CPUAdapter::IRQ_PORT);
+    devices::CPUAdapter cpuAdapter(std::make_shared<devices::W65C02S>(cpu6502));
+    w65c22s.connect(devices::W65C22S::Port::CB2, cpuAdapter, devices::CPUAdapter::IRQ_PORT);
 
     while (true)
     {

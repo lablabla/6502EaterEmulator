@@ -3,6 +3,7 @@
 #include "core/bus_slave.h"
 
 #include <array>
+#include <memory>
 
 namespace EaterEmulator::devices
 {
@@ -10,7 +11,7 @@ namespace EaterEmulator::devices
     class SRAM62256 : public core::BusSlave
     {
     public:
-        SRAM62256(core::Bus& bus);
+        SRAM62256(std::shared_ptr<core::Bus> bus);
         virtual ~SRAM62256();
 
         SRAM62256(const SRAM62256&) = delete;

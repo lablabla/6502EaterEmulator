@@ -8,7 +8,7 @@
 
 namespace EaterEmulator::devices
 {
-    ArduinoMega::ArduinoMega(core::Bus& bus) 
+    ArduinoMega::ArduinoMega(std::shared_ptr<core::Bus> bus) 
         : core::BusSlave(bus, 0x0000)
     {
         spdlog::debug("ArduinoMega initialized.");
@@ -22,7 +22,7 @@ namespace EaterEmulator::devices
     void ArduinoMega::handleBusNotification(uint16_t address, uint8_t rwb)
     {
         uint8_t data;
-        _bus.getData(data);
+        _bus->getData(data);
         spdlog::info("{:016b}   {:04x}  {} {:02x}   {:08b}", address, address, rwb == core::HIGH ? 'r' : 'W', data, data);
     }
 

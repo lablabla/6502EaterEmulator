@@ -8,7 +8,7 @@
 
 namespace EaterEmulator::devices
 {
-    EEPROM28C256::EEPROM28C256(const std::vector<uint8_t>& rom, core::Bus& bus) 
+    EEPROM28C256::EEPROM28C256(const std::vector<uint8_t>& rom, std::shared_ptr<core::Bus> bus) 
         : core::BusSlave(bus, 0x8000), _memory{}
     {
         if (rom.size() != 0x8000) 
@@ -34,7 +34,7 @@ namespace EaterEmulator::devices
         if (rwb == core::HIGH)
         {
             // EEPROM Only handles when clock is HIGH
-            _bus.setData(_memory[address - _offset]);
+            _bus->setData(_memory[address - _offset]);
         }
     }
 

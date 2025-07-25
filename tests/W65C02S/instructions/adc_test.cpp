@@ -18,7 +18,7 @@ TEST_F(CPUInstructionTest, ADC_IMM_AddsImmediateValue)
     memory[0xFFFC - MEMORY_OFFSET] = static_cast<uint8_t>(opcode);
     memory[0xFFFD - MEMORY_OFFSET] = 0x20; // Add 0x20
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     
     for (int i = 0; i < cycles; ++i) 
     {
@@ -48,7 +48,7 @@ TEST_F(CPUInstructionTest, ADC_IMM_AddsWithCarryFlag)
     memory[0xFFFC - MEMORY_OFFSET] = static_cast<uint8_t>(opcode);
     memory[0xFFFD - MEMORY_OFFSET] = 0x20; // Add 0x20
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     
     for (int i = 0; i < cycles; ++i) 
     {
@@ -77,7 +77,7 @@ TEST_F(CPUInstructionTest, ADC_IMM_SetsCarryFlag)
     memory[0xFFFC - MEMORY_OFFSET] = static_cast<uint8_t>(opcode);
     memory[0xFFFD - MEMORY_OFFSET] = 0x01; // Add 0x01
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     
     for (int i = 0; i < cycles; ++i) 
     {
@@ -106,7 +106,7 @@ TEST_F(CPUInstructionTest, ADC_IMM_SetsNegativeFlag)
     memory[0xFFFC - MEMORY_OFFSET] = static_cast<uint8_t>(opcode);
     memory[0xFFFD - MEMORY_OFFSET] = 0x20; // Add 0x20
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     
     for (int i = 0; i < cycles; ++i) 
     {
@@ -136,10 +136,10 @@ TEST_F(CPUInstructionTest, ADC_ZP_AddsZeroPageValue)
     memory[0xFFFC - MEMORY_OFFSET] = static_cast<uint8_t>(opcode);
     memory[0xFFFD - MEMORY_OFFSET] = 0x42; // Zero page address
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     
     auto sram = std::make_unique<devices::SRAM62256>(bus);
-    bus.addSlave(sram.get());
+    bus->addSlave(sram.get());
     
     auto& sramData = sram->getMemory();
     sramData[0x42] = 0x25; // Value at zero page address $42
@@ -173,10 +173,10 @@ TEST_F(CPUInstructionTest, ADC_ABS_AddsAbsoluteValue)
     memory[0xFFFD - MEMORY_OFFSET] = 0x34; // Low byte of address
     memory[0xFFFE - MEMORY_OFFSET] = 0x12; // High byte of address
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     
     auto sram = std::make_unique<devices::SRAM62256>( bus);
-    bus.addSlave(sram.get());
+    bus->addSlave(sram.get());
     
     auto& sramData = sram->getMemory();
     sramData[0x1234 - 0x0000] = 0x40; // Value at address $1234

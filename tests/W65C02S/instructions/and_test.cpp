@@ -16,7 +16,7 @@ TEST_F(CPUInstructionTest, AND_IMM_Value)
     memory[0xFFFD - MEMORY_OFFSET] = 0x37; // 00110111
     cpu->setAccumulator(0x42); // 01000010
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     
     for (int i = 0; i < cycles; ++i) 
     {
@@ -41,7 +41,7 @@ TEST_F(CPUInstructionTest, AND_IMM_ZeroValue)
     memory[0xFFFD - MEMORY_OFFSET] = 0x37; // 00110111
     cpu->setAccumulator(0x48); // 01001000
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     
     for (int i = 0; i < cycles; ++i) 
     {
@@ -66,7 +66,7 @@ TEST_F(CPUInstructionTest, AND_IMM_NegativeValue)
     memory[0xFFFD - MEMORY_OFFSET] = 0xB7; // 10110111
     cpu->setAccumulator(0xC8); // 11001000
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     
     for (int i = 0; i < cycles; ++i) 
     {
@@ -93,7 +93,7 @@ TEST_F(CPUInstructionTest, AND_ABS_Value)
     memory[0xFFF0 - MEMORY_OFFSET] = 0x37; // 00110111
     cpu->setAccumulator(0x42); // 01000010
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     
     for (int i = 0; i < cycles; ++i) 
     {
@@ -120,7 +120,7 @@ TEST_F(CPUInstructionTest, AND_ABS_ZeroValue)
     memory[0xFFF0 - MEMORY_OFFSET] = 0x37; // 00110111
     cpu->setAccumulator(0x48); // 01001000
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     
     for (int i = 0; i < cycles; ++i) 
     {
@@ -147,7 +147,7 @@ TEST_F(CPUInstructionTest, AND_ABS_NegativeValue)
     memory[0xFFF0 - MEMORY_OFFSET] = 0xB7; // 10110111
     cpu->setAccumulator(0xC8); // 11001000
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     
     for (int i = 0; i < cycles; ++i) 
     {
@@ -175,7 +175,7 @@ TEST_F(CPUInstructionTest, AND_ABSX_Value)
     cpu->setXRegister(0x02);
     cpu->setAccumulator(0x42); // 01000010
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     
     for (int i = 0; i < cycles; ++i) 
     {
@@ -203,7 +203,7 @@ TEST_F(CPUInstructionTest, AND_ABSX_ZeroValue)
     cpu->setXRegister(0x02);
     cpu->setAccumulator(0x48); // 01001000
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     
     for (int i = 0; i < cycles; ++i) 
     {
@@ -231,7 +231,7 @@ TEST_F(CPUInstructionTest, AND_ABSX_NegativeValue)
     cpu->setXRegister(0x02);
     cpu->setAccumulator(0xC8); // 11001000
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     
     for (int i = 0; i < cycles; ++i) 
     {
@@ -259,7 +259,7 @@ TEST_F(CPUInstructionTest, AND_ABSY_Value)
     cpu->setYRegister(0x02);
     cpu->setAccumulator(0x42); // 01000010
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     
     for (int i = 0; i < cycles; ++i) 
     {
@@ -287,7 +287,7 @@ TEST_F(CPUInstructionTest, AND_ABSY_ZeroValue)
     cpu->setYRegister(0x02);
     cpu->setAccumulator(0x48); // 01001000
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     
     for (int i = 0; i < cycles; ++i) 
     {
@@ -315,7 +315,7 @@ TEST_F(CPUInstructionTest, AND_ABSY_NegativeValue)
     cpu->setYRegister(0x02);
     cpu->setAccumulator(0xC8); // 11001000
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     
     for (int i = 0; i < cycles; ++i) 
     {
@@ -340,9 +340,9 @@ TEST_F(CPUInstructionTest, AND_ZP_Value)
     memory[0xFFFD - MEMORY_OFFSET] = 0xF0;
     cpu->setAccumulator(0x42); // 01000010
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     auto ram = std::make_unique<devices::SRAM62256>(bus);
-    bus.addSlave(ram.get());
+    bus->addSlave(ram.get());
     auto& ramMemory = ram->getMemory();
     ramMemory[0x00F0] = 0x37; // 00110111
     
@@ -369,9 +369,9 @@ TEST_F(CPUInstructionTest, AND_ZP_ZeroValue)
     memory[0xFFFD - MEMORY_OFFSET] = 0xF0;
     cpu->setAccumulator(0x48); // 01001000
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     auto ram = std::make_unique<devices::SRAM62256>(bus);
-    bus.addSlave(ram.get());
+    bus->addSlave(ram.get());
     auto& ramMemory = ram->getMemory();
     ramMemory[0x00F0] = 0x37; // 00110111
     
@@ -398,9 +398,9 @@ TEST_F(CPUInstructionTest, AND_ZP_NegativeValue)
     memory[0xFFFD - MEMORY_OFFSET] = 0xF0;
     cpu->setAccumulator(0xC8); // 11001000
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     auto ram = std::make_unique<devices::SRAM62256>(bus);
-    bus.addSlave(ram.get());
+    bus->addSlave(ram.get());
     auto& ramMemory = ram->getMemory();
     ramMemory[0x00F0] = 0xB7; // 10110111
     
@@ -428,9 +428,9 @@ TEST_F(CPUInstructionTest, AND_ZPX_Value)
     cpu->setAccumulator(0x42); // 01000010
     cpu->setXRegister(0x0F);
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     auto ram = std::make_unique<devices::SRAM62256>(bus);
-    bus.addSlave(ram.get());
+    bus->addSlave(ram.get());
     auto& ramMemory = ram->getMemory();
     ramMemory[0x008F] = 0x37; // 00110111
     
@@ -458,9 +458,9 @@ TEST_F(CPUInstructionTest, AND_ZPX_ZeroValue)
     cpu->setAccumulator(0x48); // 01001000
     cpu->setXRegister(0x0F);
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     auto ram = std::make_unique<devices::SRAM62256>(bus);
-    bus.addSlave(ram.get());
+    bus->addSlave(ram.get());
     auto& ramMemory = ram->getMemory();
     ramMemory[0x008F] = 0x37; // 00110111
     
@@ -488,9 +488,9 @@ TEST_F(CPUInstructionTest, AND_ZPX_NegativeValue)
     cpu->setAccumulator(0xC8); // 11001000
     cpu->setXRegister(0x0F);
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     auto ram = std::make_unique<devices::SRAM62256>(bus);
-    bus.addSlave(ram.get());
+    bus->addSlave(ram.get());
     auto& ramMemory = ram->getMemory();
     ramMemory[0x008F] = 0xB7; // 10110111
     
@@ -518,9 +518,9 @@ TEST_F(CPUInstructionTest, AND_ZPX_OverflowValue)
     cpu->setAccumulator(0x42); // 01000010
     cpu->setXRegister(0xFF);
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     auto ram = std::make_unique<devices::SRAM62256>(bus);
-    bus.addSlave(ram.get());
+    bus->addSlave(ram.get());
     auto& ramMemory = ram->getMemory();
     ramMemory[0x007F] = 0x37; // 00110111
     

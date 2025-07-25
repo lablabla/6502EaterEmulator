@@ -18,7 +18,7 @@ TEST_F(CPUInstructionTest, ORA_IMM_OrsImmediateValue)
     memory[0xFFFC - MEMORY_OFFSET] = static_cast<uint8_t>(opcode);
     memory[0xFFFD - MEMORY_OFFSET] = 0xF0; // OR with 0xF0
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     
     for (int i = 0; i < cycles; ++i) 
     {
@@ -46,7 +46,7 @@ TEST_F(CPUInstructionTest, ORA_IMM_SetsZeroFlag)
     memory[0xFFFC - MEMORY_OFFSET] = static_cast<uint8_t>(opcode);
     memory[0xFFFD - MEMORY_OFFSET] = 0x00; // OR with 0x00
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     
     for (int i = 0; i < cycles; ++i) 
     {
@@ -74,7 +74,7 @@ TEST_F(CPUInstructionTest, ORA_IMM_PreservesExistingBits)
     memory[0xFFFC - MEMORY_OFFSET] = static_cast<uint8_t>(opcode);
     memory[0xFFFD - MEMORY_OFFSET] = 0xAA; // OR with 0xAA
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     
     for (int i = 0; i < cycles; ++i) 
     {
@@ -102,7 +102,7 @@ TEST_F(CPUInstructionTest, ORA_IMM_SetsNegativeFlag)
     memory[0xFFFC - MEMORY_OFFSET] = static_cast<uint8_t>(opcode);
     memory[0xFFFD - MEMORY_OFFSET] = 0x80; // OR with 0x80 (negative bit)
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     
     for (int i = 0; i < cycles; ++i) 
     {
@@ -131,10 +131,10 @@ TEST_F(CPUInstructionTest, ORA_ZP_OrsZeroPageValue)
     memory[0xFFFC - MEMORY_OFFSET] = static_cast<uint8_t>(opcode);
     memory[0xFFFD - MEMORY_OFFSET] = 0x42; // Zero page address
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     
     auto sram = std::make_unique<devices::SRAM62256>(bus);
-    bus.addSlave(sram.get());
+    bus->addSlave(sram.get());
 
     auto& sramData = sram->getMemory();
     sramData[0x42] = 0x22; // Value at zero page address $42
@@ -167,10 +167,10 @@ TEST_F(CPUInstructionTest, ORA_ABS_OrsAbsoluteValue)
     memory[0xFFFD - MEMORY_OFFSET] = 0x34; // Low byte of address
     memory[0xFFFE - MEMORY_OFFSET] = 0x12; // High byte of address
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     
     auto sram = std::make_unique<devices::SRAM62256>(bus);
-    bus.addSlave(sram.get());
+    bus->addSlave(sram.get());
     
     auto& sramData = sram->getMemory();
     sramData[0x1234 - 0x0000] = 0x70; // Value at address $1234
@@ -203,10 +203,10 @@ TEST_F(CPUInstructionTest, ORA_ZPX_OrsZeroPageXValue)
     memory[0xFFFC - MEMORY_OFFSET] = static_cast<uint8_t>(opcode);
     memory[0xFFFD - MEMORY_OFFSET] = 0x40; // Zero page base address
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
 
     auto sram = std::make_unique<devices::SRAM62256>(bus);
-    bus.addSlave(sram.get());
+    bus->addSlave(sram.get());
         
     auto& sramData = sram->getMemory();
     sramData[0x43] = 0x04; // Value at zero page address $43

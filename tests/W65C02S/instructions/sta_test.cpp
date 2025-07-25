@@ -18,9 +18,9 @@ TEST_F(CPUInstructionTest, STA_ABS_StoreValue)
     cpu->setAccumulator(0x42);
     uint8_t statusBefore = cpu->getStatus();
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     auto ram = std::make_unique<devices::SRAM62256>(bus);
-    bus.addSlave(ram.get());
+    bus->addSlave(ram.get());
     
     for (int i = 0; i < cycles; ++i) 
     {

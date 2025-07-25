@@ -4,6 +4,7 @@
 
 #include <array>
 #include <vector>
+#include <memory>
 
 namespace EaterEmulator::devices
 {
@@ -11,7 +12,7 @@ namespace EaterEmulator::devices
     class EEPROM28C256 : public core::BusSlave
     {
     public:
-        EEPROM28C256(const std::vector<uint8_t>& rom, core::Bus& bus);
+        EEPROM28C256(const std::vector<uint8_t>& rom, std::shared_ptr<core::Bus> bus);
         virtual ~EEPROM28C256();
 
         EEPROM28C256(const EEPROM28C256&) = delete;

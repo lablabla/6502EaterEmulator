@@ -9,7 +9,7 @@
 
 namespace EaterEmulator::devices
 {
-    W65C02S::W65C02S(core::Bus& bus)
+    W65C02S::W65C02S(std::shared_ptr<core::Bus> bus)
         : core::Device(bus)        
     {
         // Constructor implementation
@@ -67,7 +67,7 @@ namespace EaterEmulator::devices
         const auto addressingMode = opcodeInfo.addressingMode;   
         if (_cycle == 0)
         {
-            _bus.setAddress(_pc);            
+            _bus->setAddress(_pc);            
             _started = true; // Make sure we start the CPU on the PHI2 low
         }
         else
@@ -287,17 +287,17 @@ namespace EaterEmulator::devices
         }
         else if (_cycle == 2)
         {
-            _bus.setAddress(0x0100 + _sp);
+            _bus->setAddress(0x0100 + _sp);
             return true;
         }
         else if (_cycle == 3)
         {
-            _bus.setAddress(0x0100 + _sp);
+            _bus->setAddress(0x0100 + _sp);
             return true;
         }
         else if (_cycle == 4)
         {
-            _bus.setAddress(0x0100 + _sp);
+            _bus->setAddress(0x0100 + _sp);
             return true;
         }
         else if (_cycle == 5)
@@ -305,10 +305,10 @@ namespace EaterEmulator::devices
             switch (info.opcode)
             {
                 case Opcode::BRK:
-                    _bus.setAddress(_interruptVector);
+                    _bus->setAddress(_interruptVector);
                     break;
                 default:
-                    _bus.setAddress(0x0100 + _sp);
+                    _bus->setAddress(0x0100 + _sp);
                     break;
             }
             return true;
@@ -318,7 +318,7 @@ namespace EaterEmulator::devices
             switch (info.opcode)
             {
                 case Opcode::BRK:
-                    _bus.setAddress(_interruptVector + 1);
+                    _bus->setAddress(_interruptVector + 1);
                     break;
                 default:
                     break;
@@ -546,7 +546,7 @@ namespace EaterEmulator::devices
         if (_cycle == 1)
         {
             // fetch low byte of address, increment PC
-            _bus.setAddress(_pc++);
+            _bus->setAddress(_pc++);
             return true;
         }
         return false;        
@@ -606,18 +606,18 @@ namespace EaterEmulator::devices
         if (_cycle == 1)
         {
             // fetch low byte of address, increment PC
-            _bus.setAddress(_pc++);
+            _bus->setAddress(_pc++);
         }
         else if (_cycle == 2)
         {
             switch (info.opcode)
             {
                 case Opcode::JSR:
-                    _bus.setAddress(0x0100 + _sp);
+                    _bus->setAddress(0x0100 + _sp);
                     break;
                 default:
                     // fetch high byte of address, increment PC
-                    _bus.setAddress(_pc++);
+                    _bus->setAddress(_pc++);
                     break;
             }
         }
@@ -626,22 +626,22 @@ namespace EaterEmulator::devices
             switch (info.opcode)
             {
                 case Opcode::JSR:
-                    _bus.setAddress(0x0100 + _sp);
+                    _bus->setAddress(0x0100 + _sp);
                     break;
                 default:
                     // read from effective address
-                    _bus.setAddress((_adh << 8) | _adl);
+                    _bus->setAddress((_adh << 8) | _adl);
                     break;
             }
             
         }
         else if (_cycle == 4)
         {
-            _bus.setAddress(0x0100 + _sp);
+            _bus->setAddress(0x0100 + _sp);
         }
         else if (_cycle == 5)
         {
-            _bus.setAddress(_pc);
+            _bus->setAddress(_pc);
         }
         return true;
     }
@@ -801,17 +801,17 @@ namespace EaterEmulator::devices
         if (_cycle == 1)
         {
             // fetch low byte of address, increment PC
-            _bus.setAddress(_pc++);
+            _bus->setAddress(_pc++);
         }
         else if (_cycle == 2)
         {
             // fetch high byte of address, increment PC
-            _bus.setAddress(_pc++);
+            _bus->setAddress(_pc++);
         }
         else if (_cycle == 3)
         {
             // read from effective address
-            _bus.setAddress(((_adh << 8) | _adl) + indexingRegister);
+            _bus->setAddress(((_adh << 8) | _adl) + indexingRegister);
         }
         else
         {
@@ -837,7 +837,7 @@ namespace EaterEmulator::devices
     }
     bool W65C02S::handleRelativeLow([[maybe_unused]]const OpcodeInfo& info)
     {
-        _bus.setAddress(_pc);
+        _bus->setAddress(_pc);
         return true;
     }
     bool W65C02S::handleRelativeHigh(const OpcodeInfo& info)
@@ -911,12 +911,12 @@ namespace EaterEmulator::devices
         if (_cycle == 1)
         {
             // fetch low byte of address, increment PC
-            _bus.setAddress(_pc++);
+            _bus->setAddress(_pc++);
         }
         else if (_cycle == 2)
         {
             // read from effective address
-            _bus.setAddress( _adl);
+            _bus->setAddress( _adl);
         }
         else
         {
@@ -1018,16 +1018,16 @@ namespace EaterEmulator::devices
             if (_cycle == 1)
             {
                 // fetch low byte of address, increment PC
-                _bus.setAddress(_pc++);
+                _bus->setAddress(_pc++);
             }
             else if (_cycle == 2)
             {
                 // read from effective address
-                _bus.setAddress( _adl);
+                _bus->setAddress( _adl);
             }
             else if (_cycle == 3)
             {
-                _bus.setAddress(_adh);
+                _bus->setAddress(_adh);
             }
             else
             {
@@ -1221,16 +1221,16 @@ namespace EaterEmulator::devices
 
     uint8_t W65C02S::fetchByte()
     {
-        _bus.notifySlaves(core::READ);
+        _bus->notifySlaves(core::READ);
         uint8_t data;
-        _bus.getData(data); // Get data from the bus
+        _bus->getData(data); // Get data from the bus
         return data;
     }
 
     void W65C02S::writeByte(uint8_t data)
     {
-        _bus.setData(data); // Set data on the bus
-        _bus.notifySlaves(core::WRITE);
+        _bus->setData(data); // Set data on the bus
+        _bus->notifySlaves(core::WRITE);
     }
 
     void W65C02S::updateStatusFlags(uint8_t value)

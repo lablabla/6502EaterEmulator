@@ -2,12 +2,14 @@
 
 #include "core/device.h"
 
+#include <memory>
+
 namespace EaterEmulator::core
 {
     class BusSlave : public Device
     {
     public:
-        BusSlave(Bus& bus, uint16_t offset = 0) : Device(bus, offset) {}
+        BusSlave(std::shared_ptr<Bus> bus, uint16_t offset = 0) : Device(bus, offset) {}
         virtual ~BusSlave() = default;
 
         // Non-copyable, movable
@@ -20,7 +22,7 @@ namespace EaterEmulator::core
 
         void addBusSlave(BusSlave* slave)
         {
-            _bus.addSlave(slave);
+            _bus->addSlave(slave);
         }
     };
 }

@@ -26,11 +26,12 @@ namespace EaterEmulator::devices
     class W65C02S : public core::Device, public core::ClockObserver
     {
     public:
-        W65C02S(core::Bus& bus);
+        W65C02S(std::shared_ptr<core::Bus> bus);
+        W65C02S() = default;
         virtual ~W65C02S();
 
-        W65C02S(const W65C02S&) = delete;
-        W65C02S& operator=(const W65C02S&) = delete;
+        W65C02S(const W65C02S&) = default;
+        W65C02S& operator=(const W65C02S&) = default;
         W65C02S(W65C02S&&) = delete;
         W65C02S& operator=(W65C02S&&) = delete;
 

@@ -17,7 +17,7 @@ TEST_F(CPUInstructionTest, JMP_ABS)
     memory[0xFFFE - MEMORY_OFFSET] = 0x80;
     uint8_t statusBefore = cpu->getStatus();
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     
     for (int i = 0; i < cycles; ++i) 
     {
@@ -46,9 +46,9 @@ TEST_F(CPUInstructionTest, JSR)
 
     uint8_t statusBefore = cpu->getStatus();
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     auto ram = std::make_unique<devices::SRAM62256>(bus);
-    bus.addSlave(ram.get());
+    bus->addSlave(ram.get());
 
     cpu->setStackPointer(0xFF);
     
@@ -81,9 +81,9 @@ TEST_F(CPUInstructionTest, RTS)
 
     uint8_t statusBefore = cpu->getStatus();
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     auto ram = std::make_unique<devices::SRAM62256>(bus);
-    bus.addSlave(ram.get());
+    bus->addSlave(ram.get());
 
     auto& ramMemory = ram->getMemory();
     ramMemory[0x01FF] = 0xFF;
@@ -118,7 +118,7 @@ TEST_F(CPUInstructionTest, BEQ_PositiveOffsetSamePageTakeBranch)
     cpu->setStatus(devices::STATUS_ZERO);
     uint8_t statusBefore = cpu->getStatus();
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     
     for (int i = 0; i < cycles; ++i) 
     {
@@ -147,7 +147,7 @@ TEST_F(CPUInstructionTest, BEQ_PositiveOffsetSamePageDontTakeBranch)
     cpu->setStatus(0);
     uint8_t statusBefore = cpu->getStatus();
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     
     for (int i = 0; i < cycles; ++i) 
     {
@@ -176,7 +176,7 @@ TEST_F(CPUInstructionTest, BEQ_NegativeOffsetSamePageTakeBranch)
     cpu->setStatus(devices::STATUS_ZERO);
     uint8_t statusBefore = cpu->getStatus();
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     
     for (int i = 0; i < cycles; ++i) 
     {
@@ -205,7 +205,7 @@ TEST_F(CPUInstructionTest, BEQ_NegativeOffsetSamePageDontTakeBranch)
     cpu->setStatus(0);
     uint8_t statusBefore = cpu->getStatus();
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     
     for (int i = 0; i < cycles; ++i) 
     {
@@ -234,7 +234,7 @@ TEST_F(CPUInstructionTest, BNE_PositiveOffsetSamePageTakeBranch)
     cpu->setStatus(0);
     uint8_t statusBefore = cpu->getStatus();
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     
     for (int i = 0; i < cycles; ++i) 
     {
@@ -263,7 +263,7 @@ TEST_F(CPUInstructionTest, BNE_PositiveOffsetSamePageDontTakeBranch)
     cpu->setStatus(devices::STATUS_ZERO);
     uint8_t statusBefore = cpu->getStatus();
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     
     for (int i = 0; i < cycles; ++i) 
     {
@@ -292,7 +292,7 @@ TEST_F(CPUInstructionTest, BNE_NegativeOffsetSamePageTakeBranch)
     cpu->setStatus(0);
     uint8_t statusBefore = cpu->getStatus();
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     
     for (int i = 0; i < cycles; ++i) 
     {
@@ -321,7 +321,7 @@ TEST_F(CPUInstructionTest, BNE_NegativeOffsetSamePageDontTakeBranch)
     cpu->setStatus(devices::STATUS_ZERO);
     uint8_t statusBefore = cpu->getStatus();
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     
     for (int i = 0; i < cycles; ++i) 
     {

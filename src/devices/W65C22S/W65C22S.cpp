@@ -9,7 +9,7 @@
 
 namespace EaterEmulator::devices
 {
-    W65C22S::W65C22S(core::Bus& bus) 
+    W65C22S::W65C22S(std::shared_ptr<core::Bus> bus) 
         : core::BusSlave(bus, 0x6000)
     {
     }
@@ -47,7 +47,7 @@ namespace EaterEmulator::devices
     bool W65C22S::handleRead(Register reg)
     {
         uint8_t data = readRegister(reg);
-        _bus.setData(data);
+        _bus->setData(data);
         return true;
     }
 
@@ -56,7 +56,7 @@ namespace EaterEmulator::devices
         Port viaPort = Port::A;
         uint8_t data;
         uint8_t ddrMask = 0xFF;
-        _bus.getData(data);
+        _bus->getData(data);
 
         switch(reg)
         {
