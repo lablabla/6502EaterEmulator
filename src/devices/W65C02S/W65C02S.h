@@ -28,9 +28,8 @@ namespace EaterEmulator::devices
         W65C02S(core::Bus& bus);
         virtual ~W65C02S();
 
-        // Non-copyable, Non-movable
-        W65C02S(const W65C02S&) = delete;
-        W65C02S& operator=(const W65C02S&) = delete;
+        W65C02S(const W65C02S&) = default;
+        W65C02S& operator=(const W65C02S&) = default;
         W65C02S(W65C02S&&) = delete;
         W65C02S& operator=(W65C02S&&) = delete;
 

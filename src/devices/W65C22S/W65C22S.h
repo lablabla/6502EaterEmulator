@@ -4,6 +4,7 @@
 #include "core/defines.h"
 
 #include "devices/HD44780LCD/LCDAdapter.h"
+#include "devices/W65C02S/CPUAdapter.h"
 
 #include <map>
 #include <variant>
@@ -38,8 +39,12 @@ namespace EaterEmulator::devices
 
         enum class Port
         {
-            A = 0,
-            B = 1
+            A,
+            B,
+            CB1,
+            CB2,
+            CA1,
+            CA2
         };
 
         W65C22S(core::Bus& bus);

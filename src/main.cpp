@@ -11,6 +11,7 @@
 #include "devices/HD44780LCD/HD44780LCD.h"
 #include "devices/HD44780LCD/LCDAdapter.h"
 #include "devices/SRAM62256/SRAM62256.h"
+#include "devices/W65C02S/CPUAdapter.h"
 #include "devices/W65C02S/W65C02S.h"
 #include "devices/W65C22S/W65C22S.h"
 #include "spdlog/spdlog.h"
@@ -59,6 +60,9 @@ int main(int argc, char* argv[]) {
     devices::LCDAdapter lcdAdapter(lcd);
     w65c22s.connect(devices::W65C22S::Port::A, lcdAdapter, devices::LCDAdapter::CONTROL_PORT);
     w65c22s.connect(devices::W65C22S::Port::B, lcdAdapter, devices::LCDAdapter::DATA_PORT);
+
+    // devices::CPUAdapter cpuAdapter(std::make_shared<devices::W65C02S>(cpu6502));
+    // w65c22s.connect(devices::W65C22S::Port::CB2, cpuAdapter, devices::CPUAdapter::IRQ_PORT);
 
     while (true)
     {

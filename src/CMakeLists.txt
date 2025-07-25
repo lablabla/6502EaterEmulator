@@ -3,6 +3,7 @@ add_library(${LIB_NAME} STATIC
     ${CMAKE_SOURCE_DIR}/src/core/bus.cpp
     
     ${CMAKE_SOURCE_DIR}/src/devices/W65C02S/W65C02S.cpp
+    ${CMAKE_SOURCE_DIR}/src/devices/W65C02S/CPUAdapter.cpp
     ${CMAKE_SOURCE_DIR}/src/devices/EEPROM28C256/EEPROM28C256.cpp
     ${CMAKE_SOURCE_DIR}/src/devices/HD44780LCD/HD44780LCD.cpp
     ${CMAKE_SOURCE_DIR}/src/devices/HD44780LCD/LCDAdapter.cpp
