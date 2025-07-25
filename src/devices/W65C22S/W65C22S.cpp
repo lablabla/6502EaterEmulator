@@ -53,27 +53,32 @@ namespace EaterEmulator::devices
 
     bool W65C22S::handleWrite(Register reg)
     {
+        Port viaPort = Port::A;
         uint8_t data;
+        uint8_t ddrMask = 0xFF;
         _bus.getData(data);
+
         switch(reg)
         {
             case Register::DATA_B:
-                _dataB = data;
-                writeData(Port::B);
-                break;
-            case Register::DATA_A:
-            case Register::DATA_A2:
-                _dataA = data;
-                writeData(Port::A);
+                viaPort = Port::B;
+                ddrMask = _ddrB;
                 break;
             case Register::DDR_B:
+                viaPort = Port::B;
                 _ddrB = data;
-                writeData(Port::B);
+                ddrMask = _ddrB;
+                return true;
+            case Register::DATA_A:
+            case Register::DATA_A2:
+                viaPort = Port::A;
+                ddrMask = _ddrA;
                 break;
             case Register::DDR_A:
+                viaPort = Port::A;
                 _ddrA = data;
-                writeData(Port::A);
-                break;
+                ddrMask = _ddrA;
+                return true;
             case Register::T1CL:
             case Register::T1CH:
             case Register::T1LL:
@@ -85,38 +90,23 @@ namespace EaterEmulator::devices
             case Register::PCR:
             case Register::IFR:
             case Register::IER:
-                break;
+                return false;
             default:
                 spdlog::error("W65C22S: Invalid register for write operation: {:#04x}", static_cast<int>(reg));
                 return false;
         }
+
+        data = data & ddrMask;
+        if (connections.count(viaPort)) 
+        {
+            auto& conn = connections.at(viaPort);
+            // Use std::visit to call writeToPort on the active type in the variant
+            std::visit([&](auto& device) {
+                device.writeToPort(conn.peripheralPortId, data);
+            }, conn.device);
+        }
+
         return true;
-    }
-
-
-    void W65C22S::writeData(Port port)
-    {
-        core::Bus& bus = (port == Port::A) ? _busA : _busB;
-        uint8_t data = (port == Port::A) ? _dataA : _dataB;
-        uint8_t ddr = (port == Port::A) ? _ddrA : _ddrB;
-
-        uint8_t dataToWrite = data & ddr;
-        bus.setData(dataToWrite);
-        bus.notifySlaves(core::WRITE);
-    }
-
-    uint8_t W65C22S::readData(Port port)
-    {
-        const core::Bus& bus = (port == Port::A) ? _busA : _busB;
-        uint8_t& data = (port == Port::A) ? _dataA : _dataB;
-        uint8_t ddr = (port == Port::A) ? _ddrA : _ddrB;
-
-        uint8_t dataToRead = 0;
-        bus.notifySlaves(core::READ);
-        bus.getData(dataToRead);
-
-        data = dataToRead & ddr;
-        return data;
     }
 
     uint8_t W65C22S::readRegister(Register reg)

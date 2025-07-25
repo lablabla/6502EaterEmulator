@@ -1,10 +1,17 @@
 #pragma once
 
 #include "core/bus_slave.h"
+#include "core/defines.h"
+
+#include "devices/HD44780LCD/LCDAdapter.h"
+
+#include <map>
+#include <variant>
 
 namespace EaterEmulator::devices
 {
-    
+    using Peripherals = std::variant<LCDAdapter>;
+
     // SRAM 62256 is a 32K x 8-bit SRAM
     class W65C22S : public core::BusSlave
     {
@@ -50,20 +57,19 @@ namespace EaterEmulator::devices
         
         std::string getName() const override { return "W65C22S"; }
 
-#ifdef UNIT_TEST
-
-#endif 
+        void connect(Port viaPort, core::Peripheral auto device, int peripheralPortId)
+        {
+            connections[viaPort] = {device, peripheralPortId};
+        }
 
     private:
-
+        struct Connection {
+            Peripherals device;
+            int peripheralPortId;
+        };
+        std::map<Port, Connection> connections;
         bool handleRead(Register reg);
         bool handleWrite(Register reg);
-
-        void writeData(Port port);
-        uint8_t readData(Port port);
-
-        core::Bus _busA;
-        core::Bus _busB;
 
         uint8_t readRegister(Register reg);
         uint8_t _dataA;

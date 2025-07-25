@@ -8,6 +8,8 @@
 
 #include "devices/ArduinoMega/ArduinoMega.h"
 #include "devices/EEPROM28C256/EEPROM28C256.h"
+#include "devices/HD44780LCD/HD44780LCD.h"
+#include "devices/HD44780LCD/LCDAdapter.h"
 #include "devices/SRAM62256/SRAM62256.h"
 #include "devices/W65C02S/W65C02S.h"
 #include "devices/W65C22S/W65C22S.h"
@@ -50,8 +52,13 @@ int main(int argc, char* argv[]) {
     bus.addSlave(&ram62256);
     devices::W65C22S w65c22s(bus);
     bus.addSlave(&w65c22s);
-    devices::ArduinoMega arduinoMega(bus);
-    bus.addSlave(&arduinoMega);
+    // devices::ArduinoMega arduinoMega(bus);
+    // bus.addSlave(&arduinoMega);
+
+    auto lcd = std::make_shared<devices::HD44780LCD>();
+    devices::LCDAdapter lcdAdapter(lcd);
+    w65c22s.connect(devices::W65C22S::Port::A, lcdAdapter, devices::LCDAdapter::CONTROL_PORT);
+    w65c22s.connect(devices::W65C22S::Port::B, lcdAdapter, devices::LCDAdapter::DATA_PORT);
 
     while (true)
     {
