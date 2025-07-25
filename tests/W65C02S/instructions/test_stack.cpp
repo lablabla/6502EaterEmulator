@@ -24,8 +24,8 @@ TEST_F(CPUInstructionTest, PHA_PushValue)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     
     auto ramMemory = ram->getMemory();
@@ -53,8 +53,8 @@ TEST_F(CPUInstructionTest, PLA_PullValue)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     
     EXPECT_EQ(cpu->getAccumulator(), 0x42);
@@ -81,8 +81,8 @@ TEST_F(CPUInstructionTest, PHP_PushStatus)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     
     auto ramMemory = ram->getMemory();
@@ -109,8 +109,8 @@ TEST_F(CPUInstructionTest, PLP_PullStatus)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     
     EXPECT_EQ(cpu->getStatus(), devices::STATUS_NEGATIVE | devices::STATUS_ZERO);

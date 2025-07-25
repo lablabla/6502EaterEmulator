@@ -59,14 +59,14 @@ TEST_F(InterruptTest, BRK_ExecutesCorrectly) {
     // Reset
     for (int i = 0; i < 2; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     
     // Execute BRK instruction
     for (int i = 0; i < cycles; ++i) {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     
     // Verify BRK behavior
@@ -102,13 +102,13 @@ TEST_F(InterruptTest, BRK_SetsBreakFlag) {
     // Reset
     for (int i = 0; i < 2; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     
     for (int i = 0; i < cycles; ++i) {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     
     // Check that break flag was pushed to stack
@@ -133,15 +133,15 @@ TEST_F(InterruptTest, IRQ_TriggersWhenEnabled) {
     // Reset
     for (int i = 0; i < 2; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
 
     // 2 NOP and then 7 cycles total for IRQ handling
     for (int i = 0; i < 2 + 7; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
         if (i == 1)
         {
             cpu->setIRQ(core::LOW);
@@ -183,15 +183,15 @@ TEST_F(InterruptTest, IRQ_IgnoredWhenDisabled) {
     // Reset
     for (int i = 0; i < 2; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
 
     // 2 NOP and then 7 cycles total for IRQ handling which should be ignored and should execute the NOPs
     for (int i = 0; i < 2 + 7; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
         if (i == 1)
         {
             cpu->setIRQ(core::LOW);
@@ -219,15 +219,15 @@ TEST_F(InterruptTest, NMI_TriggersRegardlessOfInterruptFlag) {
     // Reset
     for (int i = 0; i < 2; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
 
     // 2 NOP and then 7 cycles total for NMI handling
     for (int i = 0; i < 2 + 7; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
         if (i == 1)
         {
             cpu->setNMI(core::LOW);
@@ -277,8 +277,8 @@ TEST_F(InterruptTest, RTI_RestoresStateCorrectly) {
     auto it = OpcodeMap.find(Opcode::RTI);
     auto cycles = it->second.cycles;
     for (int i = 0; i < cycles; ++i) {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     
     // Verify RTI behavior
@@ -301,19 +301,19 @@ TEST_F(InterruptTest, InterruptPriority_NMI_OverIRQ) {
     // Reset
     for (int i = 0; i < 2; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     
     
     // Execute one instruction cycle
-    cpu->handleClockStateChange(core::LOW);
-    cpu->handleClockStateChange(core::HIGH);
+    cpu->onClockStateChange(core::LOW);
+    cpu->onClockStateChange(core::HIGH);
     
     // Continue for interrupt handling cycles
     for (int i = 1; i < 2 + 7; ++i) {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
         if (i == 1)
         {
             // Trigger both NMI and IRQ simultaneously

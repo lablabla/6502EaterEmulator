@@ -22,8 +22,8 @@ TEST_F(CPUInstructionTest, EOR_IMM_XorsImmediateValue)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     
     EXPECT_EQ(cpu->getAccumulator(), 0xFF); // 0xF0 ^ 0x0F = 0xFF
@@ -50,8 +50,8 @@ TEST_F(CPUInstructionTest, EOR_IMM_SetsZeroFlag)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     
     EXPECT_EQ(cpu->getAccumulator(), 0x00); // 0xAA ^ 0xAA = 0x00
@@ -78,8 +78,8 @@ TEST_F(CPUInstructionTest, EOR_IMM_ClearsNegativeFlag)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     
     EXPECT_EQ(cpu->getAccumulator(), 0x01); // 0x80 ^ 0x81 = 0x01
@@ -113,8 +113,8 @@ TEST_F(CPUInstructionTest, EOR_ZP_XorsZeroPageValue)
 
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     
     EXPECT_EQ(cpu->getAccumulator(), 0x66); // 0x55 ^ 0x33 = 0x66
@@ -149,8 +149,8 @@ TEST_F(CPUInstructionTest, EOR_ABS_XorsAbsoluteValue)
 
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     
     EXPECT_EQ(cpu->getAccumulator(), 0x26); // 0x12 ^ 0x34 = 0x26
@@ -185,8 +185,8 @@ TEST_F(CPUInstructionTest, EOR_ZPX_XorsZeroPageXValue)
 
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     
     EXPECT_EQ(cpu->getAccumulator(), 0xF0); // 0xFF ^ 0x0F = 0xF0

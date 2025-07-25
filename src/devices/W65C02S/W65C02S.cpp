@@ -1,6 +1,5 @@
 
 #include "devices/W65C02S/W65C02S.h"
-#include "core/clocked_device.h"
 #include "core/defines.h"
 #include "devices/W65C02S/opcodes.h"
 #include "spdlog/spdlog.h"
@@ -11,7 +10,7 @@
 namespace EaterEmulator::devices
 {
     W65C02S::W65C02S(core::Bus& bus)
-        : core::ClockedDevice(bus)        
+        : core::Device(bus)        
     {
         // Constructor implementation
     }
@@ -35,7 +34,7 @@ namespace EaterEmulator::devices
         _resetStage = 0;
     }
 
-    void W65C02S::handleClockStateChange(core::State state)
+    void W65C02S::onClockStateChange(core::State state)
     {
         if (state == core::HIGH) 
         {

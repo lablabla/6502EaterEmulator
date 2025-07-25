@@ -21,8 +21,8 @@ TEST_F(CPUInstructionTest, TAX_TransferValue)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
 
     EXPECT_EQ(cpu->getXRegister(), 0x42);
@@ -47,8 +47,8 @@ TEST_F(CPUInstructionTest, TAX_TransferNegativeValue)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
 
     EXPECT_EQ(cpu->getXRegister(), 0x82);
@@ -73,8 +73,8 @@ TEST_F(CPUInstructionTest, TAX_TransferZeroValue)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
 
     EXPECT_EQ(cpu->getXRegister(), 0x00);
@@ -99,8 +99,8 @@ TEST_F(CPUInstructionTest, TXA_TransferValue)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
 
     EXPECT_EQ(cpu->getAccumulator(), 0x42);
@@ -125,8 +125,8 @@ TEST_F(CPUInstructionTest, TXA_TransferNegativeValue)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
 
     EXPECT_EQ(cpu->getAccumulator(), 0x82);
@@ -151,8 +151,8 @@ TEST_F(CPUInstructionTest, TXA_TransferZeroValue)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
 
     EXPECT_EQ(cpu->getAccumulator(), 0x00);
@@ -177,8 +177,8 @@ TEST_F(CPUInstructionTest, TAY_TransferValue)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
 
     EXPECT_EQ(cpu->getYRegister(), 0x42);
@@ -203,8 +203,8 @@ TEST_F(CPUInstructionTest, TAY_TransferNegativeValue)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
 
     EXPECT_EQ(cpu->getYRegister(), 0x82);
@@ -229,8 +229,8 @@ TEST_F(CPUInstructionTest, TAY_TransferZeroValue)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
 
     EXPECT_EQ(cpu->getYRegister(), 0x00);
@@ -255,8 +255,8 @@ TEST_F(CPUInstructionTest, TYA_TransferValue)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
 
     EXPECT_EQ(cpu->getAccumulator(), 0x42);
@@ -281,8 +281,8 @@ TEST_F(CPUInstructionTest, TYA_TransferNegativeValue)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
 
     EXPECT_EQ(cpu->getAccumulator(), 0x82);
@@ -307,8 +307,8 @@ TEST_F(CPUInstructionTest, TYA_TransferZeroValue)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
 
     EXPECT_EQ(cpu->getAccumulator(), 0x00);
@@ -333,8 +333,8 @@ TEST_F(CPUInstructionTest, TSX_TransferValue)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
 
     EXPECT_EQ(cpu->getXRegister(), 0x42);
@@ -359,8 +359,8 @@ TEST_F(CPUInstructionTest, TSX_TransferNegativeValue)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
 
     EXPECT_EQ(cpu->getXRegister(), 0x82);
@@ -385,8 +385,8 @@ TEST_F(CPUInstructionTest, TSX_TransferZeroValue)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
 
     EXPECT_EQ(cpu->getXRegister(), 0x00);
@@ -411,8 +411,8 @@ TEST_F(CPUInstructionTest, TXS_TransferValue)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
 
     EXPECT_EQ(cpu->getStackPointer(), 0x42);
@@ -439,8 +439,8 @@ TEST_F(CPUInstructionTest, TXS_TransferNegativeValue)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
 
     EXPECT_EQ(cpu->getStackPointer(), 0x82);
@@ -466,8 +466,8 @@ TEST_F(CPUInstructionTest, TXS_TransferZeroValue)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
 
     EXPECT_EQ(cpu->getStackPointer(), 0x00);
@@ -490,8 +490,8 @@ TEST_F(CPUInstructionTest, INX_IncrementXValue)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
 
     EXPECT_EQ(cpu->getXRegister(), 0x04);
@@ -515,8 +515,8 @@ TEST_F(CPUInstructionTest, INX_IncrementXToNegativeValue)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
 
     EXPECT_EQ(cpu->getXRegister(), 0x80);
@@ -540,8 +540,8 @@ TEST_F(CPUInstructionTest, INX_IncrementXToZeroValue)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
 
     EXPECT_EQ(cpu->getXRegister(), 0x00);
@@ -565,8 +565,8 @@ TEST_F(CPUInstructionTest, INY_IncrementXValue)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
 
     EXPECT_EQ(cpu->getYRegister(), 0x04);
@@ -590,8 +590,8 @@ TEST_F(CPUInstructionTest, INY_IncrementXToNegativeValue)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
 
     EXPECT_EQ(cpu->getYRegister(), 0x80);
@@ -615,8 +615,8 @@ TEST_F(CPUInstructionTest, INY_IncrementXToZeroValue)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
 
     EXPECT_EQ(cpu->getYRegister(), 0x00);
@@ -640,8 +640,8 @@ TEST_F(CPUInstructionTest, DEX_DecrementXValue)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
 
     EXPECT_EQ(cpu->getXRegister(), 0x02);
@@ -665,8 +665,8 @@ TEST_F(CPUInstructionTest, DEX_DecrementXToNegativeValue)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
 
     EXPECT_EQ(cpu->getXRegister(), 0xFF);
@@ -690,8 +690,8 @@ TEST_F(CPUInstructionTest, DEX_DecrementXToZeroValue)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
 
     EXPECT_EQ(cpu->getXRegister(), 0x00);
@@ -715,8 +715,8 @@ TEST_F(CPUInstructionTest, DEY_DecrementXValue)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
 
     EXPECT_EQ(cpu->getYRegister(), 0x02);
@@ -740,8 +740,8 @@ TEST_F(CPUInstructionTest, DEY_DecrementXToNegativeValue)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
 
     EXPECT_EQ(cpu->getYRegister(), 0xFF);
@@ -765,8 +765,8 @@ TEST_F(CPUInstructionTest, DEY_DecrementXToZeroValue)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
 
     EXPECT_EQ(cpu->getYRegister(), 0x00);

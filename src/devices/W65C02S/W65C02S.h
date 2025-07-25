@@ -1,6 +1,7 @@
 #pragma once
 
-#include "core/clocked_device.h"
+#include "core/clock.h"
+#include "core/device.h"
 #include "core/defines.h"
 #include "devices/W65C02S/opcodes.h"
 
@@ -22,21 +23,21 @@ namespace EaterEmulator::devices
 
 
     // W65C02S CPU device class
-    class W65C02S : public core::ClockedDevice
+    class W65C02S : public core::Device, public core::ClockObserver
     {
     public:
         W65C02S(core::Bus& bus);
         virtual ~W65C02S();
 
-        W65C02S(const W65C02S&) = default;
-        W65C02S& operator=(const W65C02S&) = default;
+        W65C02S(const W65C02S&) = delete;
+        W65C02S& operator=(const W65C02S&) = delete;
         W65C02S(W65C02S&&) = delete;
         W65C02S& operator=(W65C02S&&) = delete;
 
         // Reset the CPU
         void reset();
 
-        void handleClockStateChange(core::State state) override;
+        void onClockStateChange(core::State state) override;
         void setIRQ(core::State state);
         void setNMI(core::State state);
 

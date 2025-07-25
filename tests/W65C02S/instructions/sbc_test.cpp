@@ -23,8 +23,8 @@ TEST_F(CPUInstructionTest, SBC_IMM_SubtractsImmediateValue)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     
     EXPECT_EQ(cpu->getAccumulator(), 0x20); // 0x50 - 0x30 = 0x20
@@ -53,8 +53,8 @@ TEST_F(CPUInstructionTest, SBC_IMM_SubtractsWithBorrow)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     
     EXPECT_EQ(cpu->getAccumulator(), 0x1F); // 0x50 - 0x30 - 1 = 0x1F
@@ -83,8 +83,8 @@ TEST_F(CPUInstructionTest, SBC_IMM_SetsZeroFlag)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     
     EXPECT_EQ(cpu->getAccumulator(), 0x00); // 0x42 - 0x42 = 0x00
@@ -113,8 +113,8 @@ TEST_F(CPUInstructionTest, SBC_IMM_CausesUnderflow)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     
     EXPECT_EQ(cpu->getAccumulator(), 0xF0); // 0x10 - 0x20 = 0xF0 (underflow)
@@ -143,8 +143,8 @@ TEST_F(CPUInstructionTest, SBC_IMM_SetsNegativeFlag)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     
     EXPECT_EQ(cpu->getAccumulator(), 0xFF); // 0x00 - 0x01 = 0xFF
@@ -180,8 +180,8 @@ TEST_F(CPUInstructionTest, SBC_ZP_SubtractsZeroPageValue)
 
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     
     EXPECT_EQ(cpu->getAccumulator(), 0x50); // 0x80 - 0x30 = 0x50
@@ -218,8 +218,8 @@ TEST_F(CPUInstructionTest, SBC_ABS_SubtractsAbsoluteValue)
 
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     
     EXPECT_EQ(cpu->getAccumulator(), 0x80); // 0xFF - 0x7F = 0x80
@@ -256,8 +256,8 @@ TEST_F(CPUInstructionTest, SBC_ZPX_SubtractsZeroPageXValue)
 
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     
     EXPECT_EQ(cpu->getAccumulator(), 0x40); // 0x60 - 0x20 = 0x40

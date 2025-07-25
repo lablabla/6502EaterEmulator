@@ -8,7 +8,7 @@ namespace EaterEmulator::core
     class Device
     {
     public:
-        Device(Bus& bus, uint16_t offset) : _bus(bus), _offset(offset) {}
+        Device(Bus& bus, uint16_t offset = 0) : _bus(bus), _offset(offset) {}
         virtual ~Device() = default;
 
         Device(const Device&) = delete;

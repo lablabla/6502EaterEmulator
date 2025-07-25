@@ -22,8 +22,8 @@ TEST_F(CPUInstructionTest, ADC_IMM_AddsImmediateValue)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     
     EXPECT_EQ(cpu->getAccumulator(), 0x30); // 0x10 + 0x20 = 0x30
@@ -52,8 +52,8 @@ TEST_F(CPUInstructionTest, ADC_IMM_AddsWithCarryFlag)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     
     EXPECT_EQ(cpu->getAccumulator(), 0x31); // 0x10 + 0x20 + 1 = 0x31
@@ -81,8 +81,8 @@ TEST_F(CPUInstructionTest, ADC_IMM_SetsCarryFlag)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     
     EXPECT_EQ(cpu->getAccumulator(), 0x00); // 0xFF + 0x01 = 0x100 (wraps to 0x00)
@@ -110,8 +110,8 @@ TEST_F(CPUInstructionTest, ADC_IMM_SetsNegativeFlag)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     
     EXPECT_EQ(cpu->getAccumulator(), 0x90); // 0x70 + 0x20 = 0x90
@@ -146,8 +146,8 @@ TEST_F(CPUInstructionTest, ADC_ZP_AddsZeroPageValue)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     
     EXPECT_EQ(cpu->getAccumulator(), 0x3A); // 0x15 + 0x25 = 0x3A
@@ -182,8 +182,8 @@ TEST_F(CPUInstructionTest, ADC_ABS_AddsAbsoluteValue)
     sramData[0x1234 - 0x0000] = 0x40; // Value at address $1234
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     
     EXPECT_EQ(cpu->getAccumulator(), 0x70); // 0x30 + 0x40 = 0x70

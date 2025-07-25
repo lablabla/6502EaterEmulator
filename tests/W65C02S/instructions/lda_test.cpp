@@ -19,8 +19,8 @@ TEST_F(CPUInstructionTest, LDA_IMM_LoadsImmediateValue)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     EXPECT_EQ(cpu->getAccumulator(), 0x42);
     EXPECT_EQ(cpu->getProgramCounter(), 0xFFFD + 1);
@@ -42,8 +42,8 @@ TEST_F(CPUInstructionTest, LDA_IMM_LoadsImmediateNegativeValue)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     EXPECT_EQ(cpu->getAccumulator(), 0x8E);
     EXPECT_EQ(cpu->getProgramCounter(), 0xFFFD + 1);
@@ -65,8 +65,8 @@ TEST_F(CPUInstructionTest, LDA_IMM_LoadsImmediateZeroValue)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     EXPECT_EQ(cpu->getAccumulator(), 0x00);
     EXPECT_EQ(cpu->getProgramCounter(), 0xFFFD + 1);
@@ -90,8 +90,8 @@ TEST_F(CPUInstructionTest, LDA_ABS_LoadsAbsoluteValue)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     EXPECT_EQ(cpu->getAccumulator(), 0x11);
     EXPECT_EQ(cpu->getProgramCounter(), 0xFFFE + 1);
@@ -115,8 +115,8 @@ TEST_F(CPUInstructionTest, LDA_ABS_LoadsAbsoluteNegativeValue)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     EXPECT_EQ(cpu->getAccumulator(), 0x8F);
     EXPECT_EQ(cpu->getProgramCounter(), 0xFFFE + 1);
@@ -140,8 +140,8 @@ TEST_F(CPUInstructionTest, LDA_ABS_LoadsAbsoluteZeroValue)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     EXPECT_EQ(cpu->getAccumulator(), 0x00);
     EXPECT_EQ(cpu->getProgramCounter(), 0xFFFE + 1);
@@ -166,8 +166,8 @@ TEST_F(CPUInstructionTest, LDA_ABSX_LoadsAbsoluteXValue)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     EXPECT_EQ(cpu->getAccumulator(), 0x11);
     EXPECT_EQ(cpu->getProgramCounter(), 0xFFFE + 1);
@@ -192,8 +192,8 @@ TEST_F(CPUInstructionTest, LDA_ABSX_LoadsAbsoluteNegativeXValue)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     EXPECT_EQ(cpu->getAccumulator(), 0x8F);
     EXPECT_EQ(cpu->getProgramCounter(), 0xFFFE + 1);
@@ -218,8 +218,8 @@ TEST_F(CPUInstructionTest, LDA_ABSX_LoadsAbsoluteXZeroValue)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     EXPECT_EQ(cpu->getAccumulator(), 0x0);
     EXPECT_EQ(cpu->getProgramCounter(), 0xFFFE + 1);
@@ -244,8 +244,8 @@ TEST_F(CPUInstructionTest, LDA_ABSY_LoadsAbsoluteYValue)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     EXPECT_EQ(cpu->getAccumulator(), 0x11);
     EXPECT_EQ(cpu->getProgramCounter(), 0xFFFE + 1);
@@ -270,8 +270,8 @@ TEST_F(CPUInstructionTest, LDA_ABSX_LoadsAbsoluteYNegativeValue)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     EXPECT_EQ(cpu->getAccumulator(), 0x8F);
     EXPECT_EQ(cpu->getProgramCounter(), 0xFFFE + 1);
@@ -296,8 +296,8 @@ TEST_F(CPUInstructionTest, LDA_ABSX_LoadsAbsoluteYZeroValue)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     EXPECT_EQ(cpu->getAccumulator(), 0x0);
     EXPECT_EQ(cpu->getProgramCounter(), 0xFFFE + 1);
@@ -323,8 +323,8 @@ TEST_F(CPUInstructionTest, LDA_ZP_LoadsZeroPageValue)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     EXPECT_EQ(cpu->getAccumulator(), 0x11);
     EXPECT_EQ(cpu->getProgramCounter(), 0xFFFD + 1);
@@ -350,8 +350,8 @@ TEST_F(CPUInstructionTest, LDA_ZP_LoadsZeroPageNegativeValue)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     EXPECT_EQ(cpu->getAccumulator(), 0x81);
     EXPECT_EQ(cpu->getProgramCounter(), 0xFFFD + 1);
@@ -377,8 +377,8 @@ TEST_F(CPUInstructionTest, LDA_ZP_LoadsZeroPageZeroValue)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     EXPECT_EQ(cpu->getAccumulator(), 0x00);
     EXPECT_EQ(cpu->getProgramCounter(), 0xFFFD + 1);
@@ -405,8 +405,8 @@ TEST_F(CPUInstructionTest, LDA_ZPX_LoadsZeroPageXValue)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     EXPECT_EQ(cpu->getAccumulator(), 0x11);
     EXPECT_EQ(cpu->getProgramCounter(), 0xFFFD + 1);
@@ -433,8 +433,8 @@ TEST_F(CPUInstructionTest, LDA_ZPX_LoadsZeroPageXNegativeValue)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     EXPECT_EQ(cpu->getAccumulator(), 0x84);
     EXPECT_EQ(cpu->getProgramCounter(), 0xFFFD + 1);
@@ -461,8 +461,8 @@ TEST_F(CPUInstructionTest, LDA_ZPX_LoadsZeroPageXZeroValue)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     EXPECT_EQ(cpu->getAccumulator(), 0x00);
     EXPECT_EQ(cpu->getProgramCounter(), 0xFFFD + 1);
@@ -489,8 +489,8 @@ TEST_F(CPUInstructionTest, LDA_ZPX_LoadsZeroPageXOverflowValue)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     EXPECT_EQ(cpu->getAccumulator(), 0x42);
     EXPECT_EQ(cpu->getProgramCounter(), 0xFFFD + 1);

@@ -66,8 +66,8 @@ int main(int argc, char* argv[]) {
 
     while (true)
     {
-        cpu6502.handleClockStateChange(core::LOW);
-        cpu6502.handleClockStateChange(core::HIGH);
+        cpu6502.onClockStateChange(core::LOW);
+        cpu6502.onClockStateChange(core::HIGH);
     }
     
     return 0;

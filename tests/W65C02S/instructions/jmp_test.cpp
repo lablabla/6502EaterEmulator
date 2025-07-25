@@ -21,8 +21,8 @@ TEST_F(CPUInstructionTest, JMP_ABS)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     
     EXPECT_EQ(cpu->getProgramCounter(), 0x8037);
@@ -54,8 +54,8 @@ TEST_F(CPUInstructionTest, JSR)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     
     auto ramMemory = ram->getMemory();
@@ -92,8 +92,8 @@ TEST_F(CPUInstructionTest, RTS)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     
     EXPECT_EQ(cpu->getProgramCounter(), 0xFF08);
@@ -122,8 +122,8 @@ TEST_F(CPUInstructionTest, BEQ_PositiveOffsetSamePageTakeBranch)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     
     EXPECT_EQ(cpu->getProgramCounter(), 0xFF09);
@@ -151,8 +151,8 @@ TEST_F(CPUInstructionTest, BEQ_PositiveOffsetSamePageDontTakeBranch)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     
     EXPECT_EQ(cpu->getProgramCounter(), 0xFF07);
@@ -180,8 +180,8 @@ TEST_F(CPUInstructionTest, BEQ_NegativeOffsetSamePageTakeBranch)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     
     EXPECT_EQ(cpu->getProgramCounter(), 0xFF04);
@@ -209,8 +209,8 @@ TEST_F(CPUInstructionTest, BEQ_NegativeOffsetSamePageDontTakeBranch)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     
     EXPECT_EQ(cpu->getProgramCounter(), 0xFF07);
@@ -238,8 +238,8 @@ TEST_F(CPUInstructionTest, BNE_PositiveOffsetSamePageTakeBranch)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     
     EXPECT_EQ(cpu->getProgramCounter(), 0xFF09);
@@ -267,8 +267,8 @@ TEST_F(CPUInstructionTest, BNE_PositiveOffsetSamePageDontTakeBranch)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     
     EXPECT_EQ(cpu->getProgramCounter(), 0xFF07);
@@ -296,8 +296,8 @@ TEST_F(CPUInstructionTest, BNE_NegativeOffsetSamePageTakeBranch)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     
     EXPECT_EQ(cpu->getProgramCounter(), 0xFF04);
@@ -325,8 +325,8 @@ TEST_F(CPUInstructionTest, BNE_NegativeOffsetSamePageDontTakeBranch)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     
     EXPECT_EQ(cpu->getProgramCounter(), 0xFF07);

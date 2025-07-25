@@ -24,8 +24,8 @@ TEST_F(CPUInstructionTest, STA_ABS_StoreValue)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     
     auto ramMemory = ram->getMemory();

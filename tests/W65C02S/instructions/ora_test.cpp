@@ -22,8 +22,8 @@ TEST_F(CPUInstructionTest, ORA_IMM_OrsImmediateValue)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     
     EXPECT_EQ(cpu->getAccumulator(), 0xFF); // 0x0F | 0xF0 = 0xFF
@@ -50,8 +50,8 @@ TEST_F(CPUInstructionTest, ORA_IMM_SetsZeroFlag)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     
     EXPECT_EQ(cpu->getAccumulator(), 0x00); // 0x00 | 0x00 = 0x00
@@ -78,8 +78,8 @@ TEST_F(CPUInstructionTest, ORA_IMM_PreservesExistingBits)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     
     EXPECT_EQ(cpu->getAccumulator(), 0xFF); // 0x55 | 0xAA = 0xFF
@@ -106,8 +106,8 @@ TEST_F(CPUInstructionTest, ORA_IMM_SetsNegativeFlag)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     
     EXPECT_EQ(cpu->getAccumulator(), 0x80); // 0x00 | 0x80 = 0x80
@@ -141,8 +141,8 @@ TEST_F(CPUInstructionTest, ORA_ZP_OrsZeroPageValue)
 
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     
     EXPECT_EQ(cpu->getAccumulator(), 0x33); // 0x11 | 0x22 = 0x33
@@ -177,8 +177,8 @@ TEST_F(CPUInstructionTest, ORA_ABS_OrsAbsoluteValue)
 
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     
     EXPECT_EQ(cpu->getAccumulator(), 0x7F); // 0x0F | 0x70 = 0x7F
@@ -213,8 +213,8 @@ TEST_F(CPUInstructionTest, ORA_ZPX_OrsZeroPageXValue)
 
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     
     EXPECT_EQ(cpu->getAccumulator(), 0x0C); // 0x08 | 0x04 = 0x0C
