@@ -8,8 +8,12 @@
 
 #include "devices/ArduinoMega/ArduinoMega.h"
 #include "devices/EEPROM28C256/EEPROM28C256.h"
+#include "devices/HD44780LCD/HD44780LCD.h"
+#include "devices/HD44780LCD/LCDAdapter.h"
 #include "devices/SRAM62256/SRAM62256.h"
+#include "devices/W65C02S/CPUAdapter.h"
 #include "devices/W65C02S/W65C02S.h"
+#include "devices/W65C22S/W65C22S.h"
 #include "spdlog/spdlog.h"
 
 using namespace EaterEmulator;
@@ -42,13 +46,23 @@ int main(int argc, char* argv[]) {
     core::Bus bus;
     
     devices::W65C02S cpu6502(bus);
-    cpu6502.reset(); // Reset the CPU to initialize registers
+    cpu6502.reset();
     devices::EEPROM28C256 rom28C256(rom, bus);
-    bus.addSlave(&rom28C256); // Add the ROM to the bus
+    bus.addSlave(&rom28C256);
     devices::SRAM62256 ram62256(bus);
     bus.addSlave(&ram62256);
-    devices::ArduinoMega arduinoMega(bus);
-    bus.addSlave(&arduinoMega); // Add the Arduino Mega to the bus
+    devices::W65C22S w65c22s(bus);
+    bus.addSlave(&w65c22s);
+    // devices::ArduinoMega arduinoMega(bus);
+    // bus.addSlave(&arduinoMega);
+
+    auto lcd = std::make_shared<devices::HD44780LCD>();
+    devices::LCDAdapter lcdAdapter(lcd);
+    w65c22s.connect(devices::W65C22S::Port::A, lcdAdapter, devices::LCDAdapter::CONTROL_PORT);
+    w65c22s.connect(devices::W65C22S::Port::B, lcdAdapter, devices::LCDAdapter::DATA_PORT);
+
+    // devices::CPUAdapter cpuAdapter(std::make_shared<devices::W65C02S>(cpu6502));
+    // w65c22s.connect(devices::W65C22S::Port::CB2, cpuAdapter, devices::CPUAdapter::IRQ_PORT);
 
     while (true)
     {

@@ -1,5 +1,6 @@
 
 #include "devices/W65C02S/W65C02S.h"
+#include "core/clocked_device.h"
 #include "core/defines.h"
 #include "devices/W65C02S/opcodes.h"
 #include "spdlog/spdlog.h"
@@ -10,7 +11,7 @@
 namespace EaterEmulator::devices
 {
     W65C02S::W65C02S(core::Bus& bus)
-        : core::BusMaster(bus)        
+        : core::ClockedDevice(bus)        
     {
         // Constructor implementation
     }
@@ -42,11 +43,6 @@ namespace EaterEmulator::devices
         } else {            
             handlePhi2Low();
         }
-    }
-
-    void W65C02S::notifyBus(uint8_t rwb)
-    {
-        _bus.notifySlaves(rwb);
     }
 
     void W65C02S::setIRQ(core::State state)

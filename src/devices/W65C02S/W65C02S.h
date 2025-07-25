@@ -1,6 +1,6 @@
 #pragma once
 
-#include "core/bus_master.h"
+#include "core/clocked_device.h"
 #include "core/defines.h"
 #include "devices/W65C02S/opcodes.h"
 
@@ -22,15 +22,14 @@ namespace EaterEmulator::devices
 
 
     // W65C02S CPU device class
-    class W65C02S : public core::BusMaster
+    class W65C02S : public core::ClockedDevice
     {
     public:
         W65C02S(core::Bus& bus);
         virtual ~W65C02S();
 
-        // Non-copyable, Non-movable
-        W65C02S(const W65C02S&) = delete;
-        W65C02S& operator=(const W65C02S&) = delete;
+        W65C02S(const W65C02S&) = default;
+        W65C02S& operator=(const W65C02S&) = default;
         W65C02S(W65C02S&&) = delete;
         W65C02S& operator=(W65C02S&&) = delete;
 
@@ -38,7 +37,6 @@ namespace EaterEmulator::devices
         void reset();
 
         void handleClockStateChange(core::State state) override;
-        void notifyBus(uint8_t rwb) override;
         void setIRQ(core::State state);
         void setNMI(core::State state);
 

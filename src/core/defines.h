@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <concepts>
 
 namespace EaterEmulator::core
 {
@@ -11,4 +12,10 @@ namespace EaterEmulator::core
 
     static constexpr uint8_t READ = HIGH;
     static constexpr uint8_t WRITE = LOW;
+
+    template<typename T>
+    concept Peripheral = requires(T device, int portId, uint8_t data) 
+    {
+        { device.writeToPort(portId, data) } -> std::same_as<void>;
+    };
 }
