@@ -110,18 +110,29 @@ namespace EaterEmulator::devices
         [[nodiscard]]bool handleZeroPageIndexedLow(const OpcodeInfo& info);
         [[nodiscard]]bool handleZeroPageIndexedHigh(const OpcodeInfo& info);
 
+        [[nodiscard]]bool handleIndirectAddressing(const OpcodeInfo& info, core::State clockState);
+        [[nodiscard]]bool handleIndirectLow(const OpcodeInfo& info);
+        [[nodiscard]]bool handleIndirectHigh(const OpcodeInfo& info);
+
+        [[nodiscard]]bool handleIndirectIndexedAddressing(const OpcodeInfo& info, core::State clockState);
+        [[nodiscard]]bool handleIndirectIndexedLow(const OpcodeInfo& info);
+        [[nodiscard]]bool handleIndirectIndexedHigh(const OpcodeInfo& info);
+
         // Math
         void doAND();
         void doORA();
         void doEOR();
         void doADC();
         void doSBC();
+        void doCMP();
 
         void doBIT();
-        void doASL();
-        void doLSR();
-        void doROL();
-        void doROR();
+        void doASL(bool accumulator);
+        void doLSR(bool accumulator);
+        void doROL(bool accumulator);
+        void doROR(bool accumulator);
+        void doINC();
+        void doDEC();
 
         uint8_t fetchByte();
         void writeByte(uint8_t data);
@@ -142,6 +153,7 @@ namespace EaterEmulator::devices
         Opcode _ir; // Instruction Register
         uint8_t _adl; // Address Low Byte
         uint8_t _adh; // Address High Byte
+        uint8_t _add;
 
         core::State _irq = core::HIGH;
         core::State _nmi = core::HIGH;

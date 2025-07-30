@@ -13,7 +13,7 @@ namespace EaterEmulator::devices
 {
     using Peripherals = std::variant<LCDAdapter, CPUAdapter>;
 
-    // SRAM 62256 is a 32K x 8-bit SRAM
+    // VIA 6522 is a versatile I/O expander
     class W65C22S : public core::BusSlave
     {
     public:

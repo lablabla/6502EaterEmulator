@@ -41,7 +41,8 @@ namespace EaterEmulator::devices
     {
         // Decode address from the address bus and check if it falls within the range of this VIA
         // VIA is mapped to addresses 0x6000 to 0x7FFF so only if A13 and A14 are HIGH and A15 is LOW
-        return (address & (1 << 15)) == 0 && (address & (1 << 14)) != 0 && (address & (1 << 13)) != 0; 
+        // To avoid collision with ACIA, A12 must be LOW.
+        return (address & (1 << 15)) == 0 && (address & (1 << 14)) != 0 && (address & (1 << 13)) != 0 && (address & (1 << 12)) == 0; 
     }
 
     bool W65C22S::handleRead(Register reg)

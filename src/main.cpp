@@ -14,6 +14,7 @@
 #include "devices/W65C02S/CPUAdapter.h"
 #include "devices/W65C02S/W65C02S.h"
 #include "devices/W65C22S/W65C22S.h"
+#include "devices/W65C51N/W65C51N.h"
 #include "spdlog/spdlog.h"
 
 using namespace EaterEmulator;
@@ -45,14 +46,16 @@ int main(int argc, char* argv[]) {
     }
     auto bus = std::make_shared<core::Bus>();
     
-    devices::W65C02S cpu6502(bus);
-    cpu6502.reset();
+    auto cpu6502 = std::make_shared<devices::W65C02S>(bus);
+    cpu6502->reset();
     devices::EEPROM28C256 rom28C256(rom, bus);
     bus->addSlave(&rom28C256);
     devices::SRAM62256 ram62256(bus);
     bus->addSlave(&ram62256);
     devices::W65C22S w65c22s(bus);
     bus->addSlave(&w65c22s);
+    devices::W65C51N w65c51n(bus);
+    bus->addSlave(&w65c51n);
     // devices::ArduinoMega arduinoMega(bus);
     // bus->addSlave(&arduinoMega);
 
@@ -61,13 +64,14 @@ int main(int argc, char* argv[]) {
     w65c22s.connect(devices::W65C22S::Port::A, lcdAdapter, devices::LCDAdapter::CONTROL_PORT);
     w65c22s.connect(devices::W65C22S::Port::B, lcdAdapter, devices::LCDAdapter::DATA_PORT);
 
-    devices::CPUAdapter cpuAdapter(std::make_shared<devices::W65C02S>(cpu6502));
+    devices::CPUAdapter cpuAdapter(cpu6502);
     w65c22s.connect(devices::W65C22S::Port::CB2, cpuAdapter, devices::CPUAdapter::IRQ_PORT);
+    
 
     while (true)
     {
-        cpu6502.onClockStateChange(core::LOW);
-        cpu6502.onClockStateChange(core::HIGH);
+        cpu6502->onClockStateChange(core::LOW);
+        cpu6502->onClockStateChange(core::HIGH);
     }
     
     return 0;

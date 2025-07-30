@@ -1,7 +1,7 @@
 #pragma once
 
 #include "core/bus_slave.h"
-
+#include "spdlog/spdlog.h"
 #include <memory>
 
 namespace EaterEmulator::devices
@@ -24,5 +24,8 @@ namespace EaterEmulator::devices
         bool shouldHandleAddress(const uint16_t& address) const override;
         
         std::string getName() const override { return "ArduinoMega"; }
+
+    private:
+        std::shared_ptr<spdlog::logger> _logger;
     };
 } // namespace EaterEmulator
