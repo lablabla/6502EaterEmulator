@@ -27,7 +27,7 @@ namespace EaterEmulator::devices
     {
     public:
         W65C02S(std::shared_ptr<core::Bus> bus);
-        W65C02S() = default;
+        W65C02S() = delete;
         virtual ~W65C02S();
 
         W65C02S(const W65C02S&) = default;
