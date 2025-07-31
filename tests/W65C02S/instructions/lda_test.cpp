@@ -498,3 +498,38 @@ TEST_F(CPUInstructionTest, LDA_ZPX_LoadsZeroPageXOverflowValue)
     EXPECT_EQ(status & devices::STATUS_ZERO, 0); // Zero flag should not be set
     EXPECT_EQ(status & devices::STATUS_NEGATIVE, 0); // Negative flag should not be set
 }
+
+TEST_F(CPUInstructionTest, LDA_INDX_LoadsValue) 
+{
+    auto opcode = Opcode::LDA_INDX;
+    auto it = OpcodeMap.find(opcode);
+    ASSERT_NE(it, OpcodeMap.end()) << "Opcode not found in map";
+    auto cycles = it->second.cycles;
+    memory[0xFFFC - MEMORY_OFFSET] = static_cast<uint8_t>(opcode);
+    memory[0xFFFD - MEMORY_OFFSET] = 0x34; // Pointer address
+    
+    cpu->setXRegister(0x05);
+    rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
+    
+    bus->addSlave(rom.get());
+    auto ram = std::make_unique<devices::SRAM62256>(bus);
+    
+    // Address
+    ram->getMemory()[0x0039] = 0x42;
+    ram->getMemory()[0x003A] = 0x37;
+
+    // Value
+    ram->getMemory()[0x3742] = 0x11;
+    bus->addSlave(ram.get());
+    
+    for (int i = 0; i < cycles; ++i) 
+    {
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
+    }
+    EXPECT_EQ(cpu->getAccumulator(), 0x11);
+    EXPECT_EQ(cpu->getProgramCounter(), 0xFFFD + 1);
+    uint8_t status = cpu->getStatus();
+    EXPECT_EQ(status & devices::STATUS_ZERO, 0); // Zero flag should not be set
+    EXPECT_EQ(status & devices::STATUS_NEGATIVE, 0); // Negative flag should not be set
+}

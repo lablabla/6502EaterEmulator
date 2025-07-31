@@ -282,10 +282,10 @@ namespace EaterEmulator::devices
                     doROR(true);
                     break;
                 case Opcode::INC_ACC:
-                    doINC();
+                    doINC(true);
                     break;
                 case Opcode::DEC_ACC:
-                    doDEC();
+                    doDEC(true);
                     break;
                 default:
                     return false;
@@ -782,6 +782,14 @@ namespace EaterEmulator::devices
                 case Opcode::ROR_ABSX:
                     doROR(false);
                     break;
+                case Opcode::INC_ABS:
+                case Opcode::INC_ABSX:
+                    doINC(false);
+                    break;
+                case Opcode::DEC_ABS:
+                case Opcode::DEC_ABSX:
+                    doDEC(false);
+                    break;
 
                 // Read-modify-write instructions
                 // Write instructions
@@ -1058,7 +1066,7 @@ namespace EaterEmulator::devices
                 case Opcode::CPX_ZP:
                 case Opcode::CPY_ZP:
                     doCMP();
-                    break;                
+                    break;
 
                 case Opcode::BIT_ZP:
                     doBIT();
@@ -1074,6 +1082,14 @@ namespace EaterEmulator::devices
                     break;
                 case Opcode::ROR_ZP:
                     doROR(false);
+                    break;
+                case Opcode::INC_ZP:
+                case Opcode::INC_ZPX:
+                    doINC(false);
+                    break;
+                case Opcode::DEC_ZP:
+                case Opcode::DEC_ZPX:
+                    doDEC(false);
                     break;
 
                 // Read-modify-write instructions
@@ -1260,7 +1276,7 @@ namespace EaterEmulator::devices
             _adh = fetchByte();
         } else if (_cycle == 3) {
             _add = fetchByte();
-        } else if (_cycle == 5) {
+        } else if (_cycle == 4) {
             switch (info.opcode) {
                 case Opcode::JMP_IND:
                     _pc = (fetchByte() << 8) | _add;                
@@ -1292,11 +1308,11 @@ namespace EaterEmulator::devices
         } else if (_cycle == 2) {
             _bus->setAddress(_add);
         } else if (_cycle == 3) {
-            _bus->setAddress(_add & 0xFF);
+            _bus->setAddress(_add + 1);
         } else if (_cycle == 4) {
-            _bus->setAddress((_add + 1) & 0xFF);
-        } else if (_cycle == 5) {
             _bus->setAddress(((_adh << 8) | _adl));
+        } else if (_cycle == 5) {
+            // Do nothing
         } else {
             spdlog::error("Unhandled cycle {} for indirect indexed low clock, opcode: {:#04x}", _cycle, static_cast<int>(info.opcode));
             return false;
@@ -1308,14 +1324,12 @@ namespace EaterEmulator::devices
     {
         uint8_t& indexingRegister = info.addressingMode == AddressingMode::INDX ? _x : _y;
         if (_cycle == 1) {
-            _add = fetchByte();
-        } else if (_cycle == 2) {
             _add = fetchByte() + indexingRegister;
-        } else if (_cycle == 3) {
+        } else if (_cycle == 2) {
             _adl = fetchByte();
-        } else if (_cycle == 4) {
+        } else if (_cycle == 3) {
             _adh = fetchByte();
-        } else if (_cycle == 5) {
+        } else if (_cycle == 4) {
             switch (info.opcode) {
                 case Opcode::LDA_INDX:
                 case Opcode::LDA_INDY:
@@ -1354,6 +1368,8 @@ namespace EaterEmulator::devices
                     spdlog::error("Unhandled opcode for indirect indexed high clock, opcode: {:#04x}", static_cast<int>(info.opcode));
                     return false;
             }
+        } else if (_cycle == 5) {
+            // Do nothing
         } else {
             spdlog::error("Unhandled cycle {} for indirect indexed high clock, opcode: {:#04x}", _cycle, static_cast<int>(info.opcode));
             return false;
@@ -1452,7 +1468,14 @@ namespace EaterEmulator::devices
         _status &= ~(STATUS_ZERO | STATUS_NEGATIVE);
         _status |= (value & 0x80) ? STATUS_CARRY : 0;
         value <<= 1;
-        _a = value;
+        if (accumulator)
+        {
+            _a = value;
+        }
+        else
+        {
+            writeByte(value);
+        }
         updateStatusFlags(_a);
     }
 
@@ -1466,7 +1489,14 @@ namespace EaterEmulator::devices
         _status &= ~(STATUS_ZERO | STATUS_NEGATIVE);
         _status |= (value & 0x01) ? STATUS_CARRY : 0;
         value >>= 1;
-        _a = value;
+        if (accumulator)
+        {
+            _a = value;
+        }
+        else
+        {
+            writeByte(value);
+        }
         updateStatusFlags(_a);
     }
 
@@ -1483,7 +1513,14 @@ namespace EaterEmulator::devices
         if (carry) {
             _status |= STATUS_CARRY; // Set carry flag if it was set before
         }
-        _a = value;
+        if (accumulator)
+        {
+            _a = value;
+        }
+        else
+        {
+            writeByte(value);
+        }
         updateStatusFlags(_a);
     }
 
@@ -1500,20 +1537,53 @@ namespace EaterEmulator::devices
         if (carry) {
             _status |= STATUS_CARRY; // Set carry flag if it was set before
         }
-        _a = value;
+        if (accumulator)
+        {
+            _a = value;
+        }
+        else
+        {
+            writeByte(value);
+        }
         updateStatusFlags(_a);
     }
 
-    void W65C02S::doINC()
+    void W65C02S::doINC(bool accumulator)
     {
-        _a++;
-        updateStatusFlags(_a);
+        uint8_t value = _a;
+        if (!accumulator)
+        {
+            value = fetchByte();
+        }
+        value++;
+        if (accumulator)
+        {
+            _a = value;
+        }
+        else
+        {
+            writeByte(value);
+        }
+        updateStatusFlags(value);
     }
 
-    void W65C02S::doDEC()
+    void W65C02S::doDEC(bool accumulator)
     {
-        _a--;
-        updateStatusFlags(_a);
+        uint8_t value = _a;
+        if (!accumulator)
+        {
+            value = fetchByte();
+        }
+        value--;
+        if (accumulator)
+        {
+            _a = value;
+        }
+        else
+        {
+            writeByte(value);
+        }
+        updateStatusFlags(value);
     }
 
     uint8_t W65C02S::fetchByte()

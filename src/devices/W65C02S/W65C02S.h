@@ -131,8 +131,8 @@ namespace EaterEmulator::devices
         void doLSR(bool accumulator);
         void doROL(bool accumulator);
         void doROR(bool accumulator);
-        void doINC();
-        void doDEC();
+        void doINC(bool accumulator);
+        void doDEC(bool accumulator);
 
         uint8_t fetchByte();
         void writeByte(uint8_t data);
