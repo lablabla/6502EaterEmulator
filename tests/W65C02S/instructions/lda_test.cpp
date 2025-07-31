@@ -15,12 +15,12 @@ TEST_F(CPUInstructionTest, LDA_IMM_LoadsImmediateValue)
     memory[0xFFFC - MEMORY_OFFSET] = static_cast<uint8_t>(opcode);
     memory[0xFFFD - MEMORY_OFFSET] = 0x42;
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     EXPECT_EQ(cpu->getAccumulator(), 0x42);
     EXPECT_EQ(cpu->getProgramCounter(), 0xFFFD + 1);
@@ -38,12 +38,12 @@ TEST_F(CPUInstructionTest, LDA_IMM_LoadsImmediateNegativeValue)
     memory[0xFFFC - MEMORY_OFFSET] = static_cast<uint8_t>(opcode);
     memory[0xFFFD - MEMORY_OFFSET] = 0x8E;
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     EXPECT_EQ(cpu->getAccumulator(), 0x8E);
     EXPECT_EQ(cpu->getProgramCounter(), 0xFFFD + 1);
@@ -61,12 +61,12 @@ TEST_F(CPUInstructionTest, LDA_IMM_LoadsImmediateZeroValue)
     memory[0xFFFC - MEMORY_OFFSET] = static_cast<uint8_t>(opcode);
     memory[0xFFFD - MEMORY_OFFSET] = 0x00;
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     EXPECT_EQ(cpu->getAccumulator(), 0x00);
     EXPECT_EQ(cpu->getProgramCounter(), 0xFFFD + 1);
@@ -86,12 +86,12 @@ TEST_F(CPUInstructionTest, LDA_ABS_LoadsAbsoluteValue)
     memory[0xFFFE - MEMORY_OFFSET] = 0x80;
     memory[0x8037 - MEMORY_OFFSET] = 0x11;
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     EXPECT_EQ(cpu->getAccumulator(), 0x11);
     EXPECT_EQ(cpu->getProgramCounter(), 0xFFFE + 1);
@@ -111,12 +111,12 @@ TEST_F(CPUInstructionTest, LDA_ABS_LoadsAbsoluteNegativeValue)
     memory[0xFFFE - MEMORY_OFFSET] = 0x80;
     memory[0x8037 - MEMORY_OFFSET] = 0x8F; 
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     EXPECT_EQ(cpu->getAccumulator(), 0x8F);
     EXPECT_EQ(cpu->getProgramCounter(), 0xFFFE + 1);
@@ -136,12 +136,12 @@ TEST_F(CPUInstructionTest, LDA_ABS_LoadsAbsoluteZeroValue)
     memory[0xFFFE - MEMORY_OFFSET] = 0x80;
     memory[0x8037 - MEMORY_OFFSET] = 0x00;
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     EXPECT_EQ(cpu->getAccumulator(), 0x00);
     EXPECT_EQ(cpu->getProgramCounter(), 0xFFFE + 1);
@@ -162,12 +162,12 @@ TEST_F(CPUInstructionTest, LDA_ABSX_LoadsAbsoluteXValue)
     memory[0x803B - MEMORY_OFFSET] = 0x11;
     cpu->setXRegister(0x04);
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     EXPECT_EQ(cpu->getAccumulator(), 0x11);
     EXPECT_EQ(cpu->getProgramCounter(), 0xFFFE + 1);
@@ -188,12 +188,12 @@ TEST_F(CPUInstructionTest, LDA_ABSX_LoadsAbsoluteNegativeXValue)
     memory[0x803B - MEMORY_OFFSET] = 0x8F;
     cpu->setXRegister(0x04);
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     EXPECT_EQ(cpu->getAccumulator(), 0x8F);
     EXPECT_EQ(cpu->getProgramCounter(), 0xFFFE + 1);
@@ -214,12 +214,12 @@ TEST_F(CPUInstructionTest, LDA_ABSX_LoadsAbsoluteXZeroValue)
     memory[0x803B - MEMORY_OFFSET] = 0x0;
     cpu->setXRegister(0x04);
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     EXPECT_EQ(cpu->getAccumulator(), 0x0);
     EXPECT_EQ(cpu->getProgramCounter(), 0xFFFE + 1);
@@ -240,12 +240,12 @@ TEST_F(CPUInstructionTest, LDA_ABSY_LoadsAbsoluteYValue)
     memory[0x803B - MEMORY_OFFSET] = 0x11; // Absolute address 0x8037 contains value 0x11
     cpu->setYRegister(0x04);
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     EXPECT_EQ(cpu->getAccumulator(), 0x11);
     EXPECT_EQ(cpu->getProgramCounter(), 0xFFFE + 1);
@@ -266,12 +266,12 @@ TEST_F(CPUInstructionTest, LDA_ABSX_LoadsAbsoluteYNegativeValue)
     memory[0x803B - MEMORY_OFFSET] = 0x8F;
     cpu->setYRegister(0x04);
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     EXPECT_EQ(cpu->getAccumulator(), 0x8F);
     EXPECT_EQ(cpu->getProgramCounter(), 0xFFFE + 1);
@@ -292,12 +292,12 @@ TEST_F(CPUInstructionTest, LDA_ABSX_LoadsAbsoluteYZeroValue)
     memory[0x803B - MEMORY_OFFSET] = 0x0;
     cpu->setYRegister(0x04);
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     EXPECT_EQ(cpu->getAccumulator(), 0x0);
     EXPECT_EQ(cpu->getProgramCounter(), 0xFFFE + 1);
@@ -316,15 +316,15 @@ TEST_F(CPUInstructionTest, LDA_ZP_LoadsZeroPageValue)
     memory[0xFFFD - MEMORY_OFFSET] = 0x37;
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
     
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     auto ram = std::make_unique<devices::SRAM62256>(bus);
     ram->getMemory()[0x0037] = 0x11; // Zero page address 0x0037 contains value 0x11
-    bus.addSlave(ram.get());
+    bus->addSlave(ram.get());
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     EXPECT_EQ(cpu->getAccumulator(), 0x11);
     EXPECT_EQ(cpu->getProgramCounter(), 0xFFFD + 1);
@@ -343,15 +343,15 @@ TEST_F(CPUInstructionTest, LDA_ZP_LoadsZeroPageNegativeValue)
     memory[0xFFFD - MEMORY_OFFSET] = 0x37;
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
     
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     auto ram = std::make_unique<devices::SRAM62256>(bus);
     ram->getMemory()[0x0037] = 0x81; // Zero page address 0x0081 contains value 0x11
-    bus.addSlave(ram.get());
+    bus->addSlave(ram.get());
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     EXPECT_EQ(cpu->getAccumulator(), 0x81);
     EXPECT_EQ(cpu->getProgramCounter(), 0xFFFD + 1);
@@ -370,15 +370,15 @@ TEST_F(CPUInstructionTest, LDA_ZP_LoadsZeroPageZeroValue)
     memory[0xFFFD - MEMORY_OFFSET] = 0x37;
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
     
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     auto ram = std::make_unique<devices::SRAM62256>(bus);
     ram->getMemory()[0x0037] = 0x00; // Zero page address 0x0037 contains value 0x11
-    bus.addSlave(ram.get());
+    bus->addSlave(ram.get());
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     EXPECT_EQ(cpu->getAccumulator(), 0x00);
     EXPECT_EQ(cpu->getProgramCounter(), 0xFFFD + 1);
@@ -398,15 +398,15 @@ TEST_F(CPUInstructionTest, LDA_ZPX_LoadsZeroPageXValue)
     cpu->setXRegister(0x0F);
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
     
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     auto ram = std::make_unique<devices::SRAM62256>(bus);
     ram->getMemory()[0x008F] = 0x11; // Zero page address 0x0037 contains value 0x11
-    bus.addSlave(ram.get());
+    bus->addSlave(ram.get());
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     EXPECT_EQ(cpu->getAccumulator(), 0x11);
     EXPECT_EQ(cpu->getProgramCounter(), 0xFFFD + 1);
@@ -426,15 +426,15 @@ TEST_F(CPUInstructionTest, LDA_ZPX_LoadsZeroPageXNegativeValue)
     cpu->setXRegister(0x0F);
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
     
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     auto ram = std::make_unique<devices::SRAM62256>(bus);
     ram->getMemory()[0x008F] = 0x84; // Zero page address 0x0037 contains value 0x11
-    bus.addSlave(ram.get());
+    bus->addSlave(ram.get());
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     EXPECT_EQ(cpu->getAccumulator(), 0x84);
     EXPECT_EQ(cpu->getProgramCounter(), 0xFFFD + 1);
@@ -454,15 +454,15 @@ TEST_F(CPUInstructionTest, LDA_ZPX_LoadsZeroPageXZeroValue)
     cpu->setXRegister(0x0F);
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
     
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     auto ram = std::make_unique<devices::SRAM62256>(bus);
     ram->getMemory()[0x008F] = 0x00;
-    bus.addSlave(ram.get());
+    bus->addSlave(ram.get());
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     EXPECT_EQ(cpu->getAccumulator(), 0x00);
     EXPECT_EQ(cpu->getProgramCounter(), 0xFFFD + 1);
@@ -482,17 +482,52 @@ TEST_F(CPUInstructionTest, LDA_ZPX_LoadsZeroPageXOverflowValue)
     cpu->setXRegister(0xFF);
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
     
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     auto ram = std::make_unique<devices::SRAM62256>(bus);
     ram->getMemory()[0x007F] = 0x42;
-    bus.addSlave(ram.get());
+    bus->addSlave(ram.get());
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     EXPECT_EQ(cpu->getAccumulator(), 0x42);
+    EXPECT_EQ(cpu->getProgramCounter(), 0xFFFD + 1);
+    uint8_t status = cpu->getStatus();
+    EXPECT_EQ(status & devices::STATUS_ZERO, 0); // Zero flag should not be set
+    EXPECT_EQ(status & devices::STATUS_NEGATIVE, 0); // Negative flag should not be set
+}
+
+TEST_F(CPUInstructionTest, LDA_INDX_LoadsValue) 
+{
+    auto opcode = Opcode::LDA_INDX;
+    auto it = OpcodeMap.find(opcode);
+    ASSERT_NE(it, OpcodeMap.end()) << "Opcode not found in map";
+    auto cycles = it->second.cycles;
+    memory[0xFFFC - MEMORY_OFFSET] = static_cast<uint8_t>(opcode);
+    memory[0xFFFD - MEMORY_OFFSET] = 0x34; // Pointer address
+    
+    cpu->setXRegister(0x05);
+    rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
+    
+    bus->addSlave(rom.get());
+    auto ram = std::make_unique<devices::SRAM62256>(bus);
+    
+    // Address
+    ram->getMemory()[0x0039] = 0x42;
+    ram->getMemory()[0x003A] = 0x37;
+
+    // Value
+    ram->getMemory()[0x3742] = 0x11;
+    bus->addSlave(ram.get());
+    
+    for (int i = 0; i < cycles; ++i) 
+    {
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
+    }
+    EXPECT_EQ(cpu->getAccumulator(), 0x11);
     EXPECT_EQ(cpu->getProgramCounter(), 0xFFFD + 1);
     uint8_t status = cpu->getStatus();
     EXPECT_EQ(status & devices::STATUS_ZERO, 0); // Zero flag should not be set

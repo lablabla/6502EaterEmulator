@@ -17,12 +17,12 @@ TEST_F(CPUInstructionTest, JMP_ABS)
     memory[0xFFFE - MEMORY_OFFSET] = 0x80;
     uint8_t statusBefore = cpu->getStatus();
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     
     EXPECT_EQ(cpu->getProgramCounter(), 0x8037);
@@ -46,16 +46,16 @@ TEST_F(CPUInstructionTest, JSR)
 
     uint8_t statusBefore = cpu->getStatus();
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     auto ram = std::make_unique<devices::SRAM62256>(bus);
-    bus.addSlave(ram.get());
+    bus->addSlave(ram.get());
 
     cpu->setStackPointer(0xFF);
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     
     auto ramMemory = ram->getMemory();
@@ -81,9 +81,9 @@ TEST_F(CPUInstructionTest, RTS)
 
     uint8_t statusBefore = cpu->getStatus();
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     auto ram = std::make_unique<devices::SRAM62256>(bus);
-    bus.addSlave(ram.get());
+    bus->addSlave(ram.get());
 
     auto& ramMemory = ram->getMemory();
     ramMemory[0x01FF] = 0xFF;
@@ -92,8 +92,8 @@ TEST_F(CPUInstructionTest, RTS)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     
     EXPECT_EQ(cpu->getProgramCounter(), 0xFF08);
@@ -118,12 +118,12 @@ TEST_F(CPUInstructionTest, BEQ_PositiveOffsetSamePageTakeBranch)
     cpu->setStatus(devices::STATUS_ZERO);
     uint8_t statusBefore = cpu->getStatus();
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     
     EXPECT_EQ(cpu->getProgramCounter(), 0xFF09);
@@ -147,12 +147,12 @@ TEST_F(CPUInstructionTest, BEQ_PositiveOffsetSamePageDontTakeBranch)
     cpu->setStatus(0);
     uint8_t statusBefore = cpu->getStatus();
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     
     EXPECT_EQ(cpu->getProgramCounter(), 0xFF07);
@@ -176,12 +176,12 @@ TEST_F(CPUInstructionTest, BEQ_NegativeOffsetSamePageTakeBranch)
     cpu->setStatus(devices::STATUS_ZERO);
     uint8_t statusBefore = cpu->getStatus();
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     
     EXPECT_EQ(cpu->getProgramCounter(), 0xFF04);
@@ -205,12 +205,12 @@ TEST_F(CPUInstructionTest, BEQ_NegativeOffsetSamePageDontTakeBranch)
     cpu->setStatus(0);
     uint8_t statusBefore = cpu->getStatus();
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     
     EXPECT_EQ(cpu->getProgramCounter(), 0xFF07);
@@ -234,12 +234,12 @@ TEST_F(CPUInstructionTest, BNE_PositiveOffsetSamePageTakeBranch)
     cpu->setStatus(0);
     uint8_t statusBefore = cpu->getStatus();
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     
     EXPECT_EQ(cpu->getProgramCounter(), 0xFF09);
@@ -263,12 +263,12 @@ TEST_F(CPUInstructionTest, BNE_PositiveOffsetSamePageDontTakeBranch)
     cpu->setStatus(devices::STATUS_ZERO);
     uint8_t statusBefore = cpu->getStatus();
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     
     EXPECT_EQ(cpu->getProgramCounter(), 0xFF07);
@@ -292,12 +292,12 @@ TEST_F(CPUInstructionTest, BNE_NegativeOffsetSamePageTakeBranch)
     cpu->setStatus(0);
     uint8_t statusBefore = cpu->getStatus();
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     
     EXPECT_EQ(cpu->getProgramCounter(), 0xFF04);
@@ -321,12 +321,12 @@ TEST_F(CPUInstructionTest, BNE_NegativeOffsetSamePageDontTakeBranch)
     cpu->setStatus(devices::STATUS_ZERO);
     uint8_t statusBefore = cpu->getStatus();
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     
     EXPECT_EQ(cpu->getProgramCounter(), 0xFF07);

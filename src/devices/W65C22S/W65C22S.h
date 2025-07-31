@@ -11,9 +11,9 @@
 
 namespace EaterEmulator::devices
 {
-    using Peripherals = std::variant<LCDAdapter>;
+    using Peripherals = std::variant<LCDAdapter, CPUAdapter>;
 
-    // SRAM 62256 is a 32K x 8-bit SRAM
+    // VIA 6522 is a versatile I/O expander
     class W65C22S : public core::BusSlave
     {
     public:
@@ -47,7 +47,7 @@ namespace EaterEmulator::devices
             CA2
         };
 
-        W65C22S(core::Bus& bus);
+        W65C22S(std::shared_ptr<core::Bus> bus);
         virtual ~W65C22S();
 
         W65C22S(const W65C22S&) = delete;

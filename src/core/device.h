@@ -1,6 +1,8 @@
 #pragma once
 
 #include "core/bus.h"
+
+#include <memory>
 #include <string>
 
 namespace EaterEmulator::core
@@ -8,11 +10,11 @@ namespace EaterEmulator::core
     class Device
     {
     public:
-        Device(Bus& bus, uint16_t offset) : _bus(bus), _offset(offset) {}
+        Device(std::shared_ptr<Bus> bus, uint16_t offset = 0) : _bus(bus), _offset(offset) {}
         virtual ~Device() = default;
 
-        Device(const Device&) = delete;
-        Device& operator=(const Device&) = delete;
+        Device(const Device&) = default;
+        Device& operator=(const Device&) = default;
 
         Device(Device&&) = delete;
         Device& operator=(Device&&) = delete;
@@ -22,7 +24,7 @@ namespace EaterEmulator::core
         virtual std::string getName() const = 0;
 
     protected:
-        Bus& _bus;
+        std::shared_ptr<Bus> _bus;
         uint16_t _offset; // Offset for the device, used to calculate the address range it handles
     };
 }

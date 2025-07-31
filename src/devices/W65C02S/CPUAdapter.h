@@ -12,11 +12,12 @@ namespace EaterEmulator::devices
     public:
         static constexpr int IRQ_PORT = 0;
 
-        CPUAdapter(W65C02S& cpu);
+        CPUAdapter(std::shared_ptr<W65C02S> cpu);
+        CPUAdapter() = default;
         ~CPUAdapter();
 
         CPUAdapter(const CPUAdapter&) = default;
-        CPUAdapter& operator=(const CPUAdapter&) = delete;
+        CPUAdapter& operator=(const CPUAdapter&) = default;
 
         CPUAdapter(const CPUAdapter&&) = delete;
         CPUAdapter&& operator=(const CPUAdapter&&) = delete;
@@ -24,6 +25,6 @@ namespace EaterEmulator::devices
         void writeToPort(int portId, uint8_t data);
 
     private:
-        W65C02S& _cpu;
+        std::shared_ptr<W65C02S> _cpu = nullptr;
     };
 } // namespace EaterEmulator

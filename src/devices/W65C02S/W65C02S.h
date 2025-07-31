@@ -1,6 +1,7 @@
 #pragma once
 
-#include "core/clocked_device.h"
+#include "core/clock.h"
+#include "core/device.h"
 #include "core/defines.h"
 #include "devices/W65C02S/opcodes.h"
 
@@ -22,10 +23,11 @@ namespace EaterEmulator::devices
 
 
     // W65C02S CPU device class
-    class W65C02S : public core::ClockedDevice
+    class W65C02S : public core::Device, public core::ClockObserver
     {
     public:
-        W65C02S(core::Bus& bus);
+        W65C02S(std::shared_ptr<core::Bus> bus);
+        W65C02S() = delete;
         virtual ~W65C02S();
 
         W65C02S(const W65C02S&) = default;
@@ -36,7 +38,7 @@ namespace EaterEmulator::devices
         // Reset the CPU
         void reset();
 
-        void handleClockStateChange(core::State state) override;
+        void onClockStateChange(core::State state) override;
         void setIRQ(core::State state);
         void setNMI(core::State state);
 
@@ -108,18 +110,29 @@ namespace EaterEmulator::devices
         [[nodiscard]]bool handleZeroPageIndexedLow(const OpcodeInfo& info);
         [[nodiscard]]bool handleZeroPageIndexedHigh(const OpcodeInfo& info);
 
+        [[nodiscard]]bool handleIndirectAddressing(const OpcodeInfo& info, core::State clockState);
+        [[nodiscard]]bool handleIndirectLow(const OpcodeInfo& info);
+        [[nodiscard]]bool handleIndirectHigh(const OpcodeInfo& info);
+
+        [[nodiscard]]bool handleIndirectIndexedAddressing(const OpcodeInfo& info, core::State clockState);
+        [[nodiscard]]bool handleIndirectIndexedLow(const OpcodeInfo& info);
+        [[nodiscard]]bool handleIndirectIndexedHigh(const OpcodeInfo& info);
+
         // Math
         void doAND();
         void doORA();
         void doEOR();
         void doADC();
         void doSBC();
+        void doCMP();
 
         void doBIT();
-        void doASL();
-        void doLSR();
-        void doROL();
-        void doROR();
+        void doASL(bool accumulator);
+        void doLSR(bool accumulator);
+        void doROL(bool accumulator);
+        void doROR(bool accumulator);
+        void doINC(bool accumulator);
+        void doDEC(bool accumulator);
 
         uint8_t fetchByte();
         void writeByte(uint8_t data);
@@ -140,6 +153,7 @@ namespace EaterEmulator::devices
         Opcode _ir; // Instruction Register
         uint8_t _adl; // Address Low Byte
         uint8_t _adh; // Address High Byte
+        uint8_t _add;
 
         core::State _irq = core::HIGH;
         core::State _nmi = core::HIGH;

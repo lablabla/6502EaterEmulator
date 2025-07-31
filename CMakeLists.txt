@@ -10,23 +10,18 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -g")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
 
-# Third party fetches
-# Include the FetchContent module
 include(FetchContent)
 
-# Define the spdlog repository details
 FetchContent_Declare(
   spdlog
   GIT_REPOSITORY https://github.com/gabime/spdlog.git
-  GIT_TAG v1.13.0 # or a specific commit hash
+  GIT_TAG v1.15.3 
 )
 
-# Populate the spdlog content
 FetchContent_MakeAvailable(spdlog)
 
 add_subdirectory(src)
-if (${BUILD_TESTS})   
-    # GoogleTest
+if (${BUILD_TESTS})
     FetchContent_Declare(
       googletest
       URL https://github.com/google/googletest/archive/refs/tags/v1.17.0.zip

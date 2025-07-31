@@ -17,7 +17,7 @@ using namespace EaterEmulator;
 class CPUInstructionTest : public ::testing::Test {
 protected:
 
-    core::Bus bus;
+    std::shared_ptr<core::Bus> bus;
 
     std::unique_ptr<devices::W65C02S> cpu;
     std::unique_ptr<devices::EEPROM28C256> rom;
@@ -26,6 +26,7 @@ protected:
     
     std::vector<uint8_t> memory;
     void SetUp() override { 
+        bus = std::make_shared<core::Bus>();
         spdlog::set_pattern("[%H:%M:%S %z] [%n] [%^---%L---%$] %v");
         spdlog::set_level(spdlog::level::info);
         memory.resize(0x8000, 0x00);

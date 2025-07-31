@@ -135,10 +135,12 @@ namespace EaterEmulator
         CPY_ABS = 0xCC, // CPY $nnnn Absolute
 
         // Increments & Decrements
+        INC_ACC = 0x1A, // INC Accumulator
         INC_ZP = 0xE6,  // INC $nn Zero Page
         INC_ZPX = 0xF6, // INC $nn,X Zero Page,X
         INC_ABS = 0xEE, // INC $nnnn Absolute
         INC_ABSX = 0xFE, // INC $nnnn,X Absolute,X
+        DEC_ACC = 0x3A, // DEC Accumulator
         DEC_ZP = 0xC6,  // DEC $nn Zero Page
         DEC_ZPX = 0xD6, // DEC $nn,X Zero Page,X
         DEC_ABS = 0xCE, // DEC $nnnn Absolute
@@ -254,12 +256,12 @@ namespace EaterEmulator
         {Opcode::LDY_ABSX, { Opcode::LDY_ABSX, AddressingMode::ABSX, 4, core::HIGH}},
 
         {Opcode::STA_ZP, { Opcode::STA_ZP, AddressingMode::ZP, 3, core::LOW}},
-        {Opcode::STA_ZPX, { Opcode::STA_ZPX, AddressingMode::ZP, 4, core::LOW}},
+        {Opcode::STA_ZPX, { Opcode::STA_ZPX, AddressingMode::ZPX, 4, core::LOW}},
         {Opcode::STA_ABS, { Opcode::STA_ABS, AddressingMode::ABS, 4, core::LOW}},
-        {Opcode::STA_ABSX, { Opcode::STA_ABSX, AddressingMode::ABS, 5, core::LOW}},        
-        {Opcode::STA_ABSY, { Opcode::STA_ABSY, AddressingMode::ABS, 5, core::LOW}},
-        {Opcode::STA_INDX, { Opcode::STA_INDX, AddressingMode::ABS, 6, core::LOW}},
-        {Opcode::STA_INDY, { Opcode::STA_INDY, AddressingMode::ABS, 6, core::LOW}},
+        {Opcode::STA_ABSX, { Opcode::STA_ABSX, AddressingMode::ABSX, 5, core::LOW}},        
+        {Opcode::STA_ABSY, { Opcode::STA_ABSY, AddressingMode::ABSY, 5, core::LOW}},
+        {Opcode::STA_INDX, { Opcode::STA_INDX, AddressingMode::INDX, 6, core::LOW}},
+        {Opcode::STA_INDY, { Opcode::STA_INDY, AddressingMode::INDY, 6, core::LOW}},
         {Opcode::STX_ZP, { Opcode::STX_ZP, AddressingMode::ZP, 3, core::LOW}},
         {Opcode::STX_ZPY, { Opcode::STX_ZPY, AddressingMode::ZPY, 4, core::LOW}},
         {Opcode::STX_ABS, { Opcode::STX_ABS, AddressingMode::ABS, 4, core::LOW}},
@@ -336,10 +338,12 @@ namespace EaterEmulator
         {Opcode::CPY_ABS, { Opcode::CPY_ABS, AddressingMode::ABS, 4, core::HIGH}},
 
         // Increments & Decrements
+        {Opcode::INC_ACC, { Opcode::INC_ACC, AddressingMode::ACC, 2, core::HIGH}},
         {Opcode::INC_ZP, { Opcode::INC_ZP, AddressingMode::ZP, 5, core::HIGH}},
         {Opcode::INC_ZPX, { Opcode::INC_ZPX, AddressingMode::ZPX, 6, core::HIGH}},
         {Opcode::INC_ABS, { Opcode::INC_ABS, AddressingMode::ABS, 6, core::HIGH}},
         {Opcode::INC_ABSX, { Opcode::INC_ABSX, AddressingMode::ABSX, 7, core::HIGH}},
+        {Opcode::DEC_ACC, { Opcode::DEC_ACC, AddressingMode::ACC, 2, core::HIGH}},
         {Opcode::DEC_ZP, { Opcode::DEC_ZP, AddressingMode::ZP, 5, core::HIGH}},
         {Opcode::DEC_ZPX, { Opcode::DEC_ZPX, AddressingMode::ZPX, 6, core::HIGH}},
         {Opcode::DEC_ABS, { Opcode::DEC_ABS, AddressingMode::ABS, 6, core::HIGH}},
@@ -391,9 +395,8 @@ namespace EaterEmulator
 
 
         
-        {Opcode::NOP, {Opcode::NOP, AddressingMode::IMP, 2, core::HIGH}}, // NOP is a no-operation instruction
-        {Opcode::BRK, {Opcode::BRK, AddressingMode::IMP, 7, core::HIGH}}, // BRK is a break instruction
-        {Opcode::RTI, {Opcode::RTI, AddressingMode::IMP, 6, core::HIGH}}, // RTI is a return from interrupt instruction
-
+        {Opcode::NOP, {Opcode::NOP, AddressingMode::IMP, 2, core::HIGH}},
+        {Opcode::BRK, {Opcode::BRK, AddressingMode::IMP, 7, core::HIGH}},
+        {Opcode::RTI, {Opcode::RTI, AddressingMode::IMP, 6, core::HIGH}},
     };
 }

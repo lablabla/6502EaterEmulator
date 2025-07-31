@@ -8,7 +8,7 @@
 
 namespace EaterEmulator::devices
 {
-    SRAM62256::SRAM62256(core::Bus& bus) 
+    SRAM62256::SRAM62256(std::shared_ptr<core::Bus> bus) 
         : core::BusSlave(bus, 0x0000), _memory{}
     {
     }
@@ -27,13 +27,13 @@ namespace EaterEmulator::devices
         if (rwb == core::HIGH)
         {
             // EEPROM Only handles when clock is HIGH
-            _bus.setData(_memory[address - _offset]);
+            _bus->setData(_memory[address - _offset]);
         }
         else
         {
             // Write operation
             uint8_t data;
-            _bus.getData(data); // Get data from the bus
+            _bus->getData(data); // Get data from the bus
             _memory[address - _offset] = data; // Write data to the memory
             spdlog::debug("SRAM62256: Written data {:#04x} to address {:#04x}", data, address);
         }

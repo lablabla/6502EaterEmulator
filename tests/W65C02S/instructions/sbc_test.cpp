@@ -19,12 +19,12 @@ TEST_F(CPUInstructionTest, SBC_IMM_SubtractsImmediateValue)
     memory[0xFFFC - MEMORY_OFFSET] = static_cast<uint8_t>(opcode);
     memory[0xFFFD - MEMORY_OFFSET] = 0x30; // Subtract 0x30
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     
     EXPECT_EQ(cpu->getAccumulator(), 0x20); // 0x50 - 0x30 = 0x20
@@ -49,12 +49,12 @@ TEST_F(CPUInstructionTest, SBC_IMM_SubtractsWithBorrow)
     memory[0xFFFC - MEMORY_OFFSET] = static_cast<uint8_t>(opcode);
     memory[0xFFFD - MEMORY_OFFSET] = 0x30; // Subtract 0x30
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     
     EXPECT_EQ(cpu->getAccumulator(), 0x1F); // 0x50 - 0x30 - 1 = 0x1F
@@ -79,12 +79,12 @@ TEST_F(CPUInstructionTest, SBC_IMM_SetsZeroFlag)
     memory[0xFFFC - MEMORY_OFFSET] = static_cast<uint8_t>(opcode);
     memory[0xFFFD - MEMORY_OFFSET] = 0x42; // Subtract same value
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     
     EXPECT_EQ(cpu->getAccumulator(), 0x00); // 0x42 - 0x42 = 0x00
@@ -109,12 +109,12 @@ TEST_F(CPUInstructionTest, SBC_IMM_CausesUnderflow)
     memory[0xFFFC - MEMORY_OFFSET] = static_cast<uint8_t>(opcode);
     memory[0xFFFD - MEMORY_OFFSET] = 0x20; // Subtract larger value
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     
     EXPECT_EQ(cpu->getAccumulator(), 0xF0); // 0x10 - 0x20 = 0xF0 (underflow)
@@ -139,12 +139,12 @@ TEST_F(CPUInstructionTest, SBC_IMM_SetsNegativeFlag)
     memory[0xFFFC - MEMORY_OFFSET] = static_cast<uint8_t>(opcode);
     memory[0xFFFD - MEMORY_OFFSET] = 0x01; // Subtract 0x01
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     
     EXPECT_EQ(cpu->getAccumulator(), 0xFF); // 0x00 - 0x01 = 0xFF
@@ -170,18 +170,18 @@ TEST_F(CPUInstructionTest, SBC_ZP_SubtractsZeroPageValue)
     memory[0xFFFC - MEMORY_OFFSET] = static_cast<uint8_t>(opcode);
     memory[0xFFFD - MEMORY_OFFSET] = 0x42; // Zero page address
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     
     auto sram = std::make_unique<devices::SRAM62256>( bus);
-    bus.addSlave(sram.get());
+    bus->addSlave(sram.get());
     
     auto& sramData = sram->getMemory();
     sramData[0x42] = 0x30; // Value at zero page address $42
 
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     
     EXPECT_EQ(cpu->getAccumulator(), 0x50); // 0x80 - 0x30 = 0x50
@@ -208,18 +208,18 @@ TEST_F(CPUInstructionTest, SBC_ABS_SubtractsAbsoluteValue)
     memory[0xFFFD - MEMORY_OFFSET] = 0x34; // Low byte of address
     memory[0xFFFE - MEMORY_OFFSET] = 0x12; // High byte of address
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     
     auto sram = std::make_unique<devices::SRAM62256>(bus);
-    bus.addSlave(sram.get());
+    bus->addSlave(sram.get());
     
     auto& sramData = sram->getMemory();
     sramData[0x1234 - 0x0000] = 0x7F; // Value at address $1234
 
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     
     EXPECT_EQ(cpu->getAccumulator(), 0x80); // 0xFF - 0x7F = 0x80
@@ -246,18 +246,18 @@ TEST_F(CPUInstructionTest, SBC_ZPX_SubtractsZeroPageXValue)
     memory[0xFFFC - MEMORY_OFFSET] = static_cast<uint8_t>(opcode);
     memory[0xFFFD - MEMORY_OFFSET] = 0x40; // Zero page base address
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     
     auto sram = std::make_unique<devices::SRAM62256>(bus);
-    bus.addSlave(sram.get());
+    bus->addSlave(sram.get());
     
     auto& sramData = sram->getMemory();
     sramData[0x42] = 0x20; // Value at zero page address $42
 
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     
     EXPECT_EQ(cpu->getAccumulator(), 0x40); // 0x60 - 0x20 = 0x40

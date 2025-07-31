@@ -9,6 +9,7 @@ add_library(${LIB_NAME} STATIC
     ${CMAKE_SOURCE_DIR}/src/devices/HD44780LCD/LCDAdapter.cpp
     ${CMAKE_SOURCE_DIR}/src/devices/SRAM62256/SRAM62256.cpp
     ${CMAKE_SOURCE_DIR}/src/devices/W65C22S/W65C22S.cpp
+    ${CMAKE_SOURCE_DIR}/src/devices/W65C51N/W65C51N.cpp
     ${CMAKE_SOURCE_DIR}/src/devices/ArduinoMega/ArduinoMega.cpp
 )
 

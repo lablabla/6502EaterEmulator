@@ -12,7 +12,7 @@ protected:
     void SetUp() override {
         CPUInstructionTest::SetUp();
         ram = std::make_unique<devices::SRAM62256>(bus);
-        bus.addSlave(ram.get());
+        bus->addSlave(ram.get());
         cpu->setResetStage(0);
     }
     
@@ -50,7 +50,7 @@ TEST_F(InterruptTest, BRK_ExecutesCorrectly) {
     memory[0x8001 - MEMORY_OFFSET] = 0x00; // BRK operand (ignored)
     
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     
     // Set initial state
     uint8_t initialStatus = cpu->getStatus();
@@ -59,14 +59,14 @@ TEST_F(InterruptTest, BRK_ExecutesCorrectly) {
     // Reset
     for (int i = 0; i < 2; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     
     // Execute BRK instruction
     for (int i = 0; i < cycles; ++i) {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     
     // Verify BRK behavior
@@ -95,20 +95,20 @@ TEST_F(InterruptTest, BRK_SetsBreakFlag) {
     
     memory[0x8000 - MEMORY_OFFSET] = static_cast<uint8_t>(opcode);
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     
     uint8_t initialSP = cpu->getStackPointer();
     
     // Reset
     for (int i = 0; i < 2; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     
     for (int i = 0; i < cycles; ++i) {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     
     // Check that break flag was pushed to stack
@@ -123,7 +123,7 @@ TEST_F(InterruptTest, IRQ_TriggersWhenEnabled) {
     // Set up NOP instruction at reset vector
     memory[0x8000 - MEMORY_OFFSET] = static_cast<uint8_t>(Opcode::NOP);
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     
     // Ensure interrupt flag is clear (interrupts enabled)
     cpu->setStatus(cpu->getStatus() & ~devices::STATUS_INTERRUPT);
@@ -133,15 +133,15 @@ TEST_F(InterruptTest, IRQ_TriggersWhenEnabled) {
     // Reset
     for (int i = 0; i < 2; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
 
     // 2 NOP and then 7 cycles total for IRQ handling
     for (int i = 0; i < 2 + 7; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
         if (i == 1)
         {
             cpu->setIRQ(core::LOW);
@@ -174,7 +174,7 @@ TEST_F(InterruptTest, IRQ_IgnoredWhenDisabled) {
     memory[0x8004 - MEMORY_OFFSET] = static_cast<uint8_t>(Opcode::NOP);
     memory[0x8005 - MEMORY_OFFSET] = static_cast<uint8_t>(Opcode::NOP);
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     
     // Disable interrupts
     cpu->setStatus(cpu->getStatus() | devices::STATUS_INTERRUPT);
@@ -183,15 +183,15 @@ TEST_F(InterruptTest, IRQ_IgnoredWhenDisabled) {
     // Reset
     for (int i = 0; i < 2; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
 
     // 2 NOP and then 7 cycles total for IRQ handling which should be ignored and should execute the NOPs
     for (int i = 0; i < 2 + 7; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
         if (i == 1)
         {
             cpu->setIRQ(core::LOW);
@@ -209,7 +209,7 @@ TEST_F(InterruptTest, NMI_TriggersRegardlessOfInterruptFlag) {
     // Set up NOP instruction at reset vector
     memory[0x8000 - MEMORY_OFFSET] = static_cast<uint8_t>(Opcode::NOP);
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     
     // Disable interrupts (NMI should still work)
     cpu->setStatus(cpu->getStatus() | devices::STATUS_INTERRUPT);
@@ -219,15 +219,15 @@ TEST_F(InterruptTest, NMI_TriggersRegardlessOfInterruptFlag) {
     // Reset
     for (int i = 0; i < 2; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
 
     // 2 NOP and then 7 cycles total for NMI handling
     for (int i = 0; i < 2 + 7; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
         if (i == 1)
         {
             cpu->setNMI(core::LOW);
@@ -256,7 +256,7 @@ TEST_F(InterruptTest, RTI_RestoresStateCorrectly) {
     // Set up initial instruction at reset vector
     memory[0x8000 - MEMORY_OFFSET] = static_cast<uint8_t>(Opcode::NOP);
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     
     // Manually set up stack as if we came from an interrupt
     uint16_t returnAddress = 0x8001;
@@ -277,8 +277,8 @@ TEST_F(InterruptTest, RTI_RestoresStateCorrectly) {
     auto it = OpcodeMap.find(Opcode::RTI);
     auto cycles = it->second.cycles;
     for (int i = 0; i < cycles; ++i) {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     
     // Verify RTI behavior
@@ -293,7 +293,7 @@ TEST_F(InterruptTest, InterruptPriority_NMI_OverIRQ) {
     // Set up NOP instruction at reset vector
     memory[0x8000 - MEMORY_OFFSET] = static_cast<uint8_t>(Opcode::NOP);
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
     
     // Enable interrupts
     cpu->setStatus(cpu->getStatus() & ~devices::STATUS_INTERRUPT);
@@ -301,19 +301,19 @@ TEST_F(InterruptTest, InterruptPriority_NMI_OverIRQ) {
     // Reset
     for (int i = 0; i < 2; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
     
     
     // Execute one instruction cycle
-    cpu->handleClockStateChange(core::LOW);
-    cpu->handleClockStateChange(core::HIGH);
+    cpu->onClockStateChange(core::LOW);
+    cpu->onClockStateChange(core::HIGH);
     
     // Continue for interrupt handling cycles
     for (int i = 1; i < 2 + 7; ++i) {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
         if (i == 1)
         {
             // Trigger both NMI and IRQ simultaneously

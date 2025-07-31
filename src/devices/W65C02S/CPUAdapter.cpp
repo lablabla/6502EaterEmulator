@@ -6,7 +6,7 @@
 
 namespace EaterEmulator::devices
 {
-    CPUAdapter::CPUAdapter(W65C02S& cpu)
+    CPUAdapter::CPUAdapter(std::shared_ptr<W65C02S> cpu)
         : _cpu(cpu)
     {        
     }
@@ -21,7 +21,7 @@ namespace EaterEmulator::devices
         switch (portId) 
         {
             case IRQ_PORT:
-                _cpu.setIRQ(data == 0 ? core::LOW : core::HIGH);
+                _cpu->setIRQ(data == 0 ? core::LOW : core::HIGH);
                 break;
         }
     }

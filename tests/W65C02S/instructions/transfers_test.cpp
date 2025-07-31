@@ -14,15 +14,15 @@ TEST_F(CPUInstructionTest, TAX_TransferValue)
     auto cycles = it->second.cycles;
     memory[0xFFFC - MEMORY_OFFSET] = static_cast<uint8_t>(opcode);
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
 
     cpu->setAccumulator(0x42);
     cpu->setXRegister(0x00);
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
 
     EXPECT_EQ(cpu->getXRegister(), 0x42);
@@ -40,15 +40,15 @@ TEST_F(CPUInstructionTest, TAX_TransferNegativeValue)
     auto cycles = it->second.cycles;
     memory[0xFFFC - MEMORY_OFFSET] = static_cast<uint8_t>(opcode);
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
 
     cpu->setAccumulator(0x82);
     cpu->setXRegister(0x00);
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
 
     EXPECT_EQ(cpu->getXRegister(), 0x82);
@@ -66,15 +66,15 @@ TEST_F(CPUInstructionTest, TAX_TransferZeroValue)
     auto cycles = it->second.cycles;
     memory[0xFFFC - MEMORY_OFFSET] = static_cast<uint8_t>(opcode);
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
 
     cpu->setAccumulator(0x00);
     cpu->setXRegister(0x00);
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
 
     EXPECT_EQ(cpu->getXRegister(), 0x00);
@@ -92,15 +92,15 @@ TEST_F(CPUInstructionTest, TXA_TransferValue)
     auto cycles = it->second.cycles;
     memory[0xFFFC - MEMORY_OFFSET] = static_cast<uint8_t>(opcode);
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
 
     cpu->setXRegister(0x42);
     cpu->setAccumulator(0x00);
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
 
     EXPECT_EQ(cpu->getAccumulator(), 0x42);
@@ -118,15 +118,15 @@ TEST_F(CPUInstructionTest, TXA_TransferNegativeValue)
     auto cycles = it->second.cycles;
     memory[0xFFFC - MEMORY_OFFSET] = static_cast<uint8_t>(opcode);
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
 
     cpu->setXRegister(0x82);
     cpu->setAccumulator(0x00);
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
 
     EXPECT_EQ(cpu->getAccumulator(), 0x82);
@@ -144,15 +144,15 @@ TEST_F(CPUInstructionTest, TXA_TransferZeroValue)
     auto cycles = it->second.cycles;
     memory[0xFFFC - MEMORY_OFFSET] = static_cast<uint8_t>(opcode);
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
 
     cpu->setXRegister(0x00);
     cpu->setAccumulator(0x00);
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
 
     EXPECT_EQ(cpu->getAccumulator(), 0x00);
@@ -170,15 +170,15 @@ TEST_F(CPUInstructionTest, TAY_TransferValue)
     auto cycles = it->second.cycles;
     memory[0xFFFC - MEMORY_OFFSET] = static_cast<uint8_t>(opcode);
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
 
     cpu->setAccumulator(0x42);
     cpu->setYRegister(0x00);
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
 
     EXPECT_EQ(cpu->getYRegister(), 0x42);
@@ -196,15 +196,15 @@ TEST_F(CPUInstructionTest, TAY_TransferNegativeValue)
     auto cycles = it->second.cycles;
     memory[0xFFFC - MEMORY_OFFSET] = static_cast<uint8_t>(opcode);
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
 
     cpu->setAccumulator(0x82);
     cpu->setYRegister(0x00);
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
 
     EXPECT_EQ(cpu->getYRegister(), 0x82);
@@ -222,15 +222,15 @@ TEST_F(CPUInstructionTest, TAY_TransferZeroValue)
     auto cycles = it->second.cycles;
     memory[0xFFFC - MEMORY_OFFSET] = static_cast<uint8_t>(opcode);
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
 
     cpu->setAccumulator(0x00);
     cpu->setYRegister(0x00);
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
 
     EXPECT_EQ(cpu->getYRegister(), 0x00);
@@ -248,15 +248,15 @@ TEST_F(CPUInstructionTest, TYA_TransferValue)
     auto cycles = it->second.cycles;
     memory[0xFFFC - MEMORY_OFFSET] = static_cast<uint8_t>(opcode);
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
 
     cpu->setYRegister(0x42);
     cpu->setAccumulator(0x00);
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
 
     EXPECT_EQ(cpu->getAccumulator(), 0x42);
@@ -274,15 +274,15 @@ TEST_F(CPUInstructionTest, TYA_TransferNegativeValue)
     auto cycles = it->second.cycles;
     memory[0xFFFC - MEMORY_OFFSET] = static_cast<uint8_t>(opcode);
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
 
     cpu->setYRegister(0x82);
     cpu->setAccumulator(0x00);
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
 
     EXPECT_EQ(cpu->getAccumulator(), 0x82);
@@ -300,15 +300,15 @@ TEST_F(CPUInstructionTest, TYA_TransferZeroValue)
     auto cycles = it->second.cycles;
     memory[0xFFFC - MEMORY_OFFSET] = static_cast<uint8_t>(opcode);
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
 
     cpu->setYRegister(0x00);
     cpu->setAccumulator(0x00);
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
 
     EXPECT_EQ(cpu->getAccumulator(), 0x00);
@@ -326,15 +326,15 @@ TEST_F(CPUInstructionTest, TSX_TransferValue)
     auto cycles = it->second.cycles;
     memory[0xFFFC - MEMORY_OFFSET] = static_cast<uint8_t>(opcode);
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
 
     cpu->setStackPointer(0x42);
     cpu->setXRegister(0x00);
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
 
     EXPECT_EQ(cpu->getXRegister(), 0x42);
@@ -352,15 +352,15 @@ TEST_F(CPUInstructionTest, TSX_TransferNegativeValue)
     auto cycles = it->second.cycles;
     memory[0xFFFC - MEMORY_OFFSET] = static_cast<uint8_t>(opcode);
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
 
     cpu->setStackPointer(0x82);
     cpu->setXRegister(0x00);
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
 
     EXPECT_EQ(cpu->getXRegister(), 0x82);
@@ -378,15 +378,15 @@ TEST_F(CPUInstructionTest, TSX_TransferZeroValue)
     auto cycles = it->second.cycles;
     memory[0xFFFC - MEMORY_OFFSET] = static_cast<uint8_t>(opcode);
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
 
     cpu->setStackPointer(0x00);
     cpu->setXRegister(0x00);
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
 
     EXPECT_EQ(cpu->getXRegister(), 0x00);
@@ -404,15 +404,15 @@ TEST_F(CPUInstructionTest, TXS_TransferValue)
     auto cycles = it->second.cycles;
     memory[0xFFFC - MEMORY_OFFSET] = static_cast<uint8_t>(opcode);
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
 
     cpu->setXRegister(0x42);
     cpu->setStackPointer(0x00);
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
 
     EXPECT_EQ(cpu->getStackPointer(), 0x42);
@@ -430,7 +430,7 @@ TEST_F(CPUInstructionTest, TXS_TransferNegativeValue)
     auto cycles = it->second.cycles;
     memory[0xFFFC - MEMORY_OFFSET] = static_cast<uint8_t>(opcode);
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
 
     auto statusBefore = cpu->getStatus();
 
@@ -439,8 +439,8 @@ TEST_F(CPUInstructionTest, TXS_TransferNegativeValue)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
 
     EXPECT_EQ(cpu->getStackPointer(), 0x82);
@@ -457,7 +457,7 @@ TEST_F(CPUInstructionTest, TXS_TransferZeroValue)
     auto cycles = it->second.cycles;
     memory[0xFFFC - MEMORY_OFFSET] = static_cast<uint8_t>(opcode);
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
 
     auto statusBefore = cpu->getStatus();
 
@@ -466,8 +466,8 @@ TEST_F(CPUInstructionTest, TXS_TransferZeroValue)
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
 
     EXPECT_EQ(cpu->getStackPointer(), 0x00);
@@ -484,14 +484,14 @@ TEST_F(CPUInstructionTest, INX_IncrementXValue)
     auto cycles = it->second.cycles;
     memory[0xFFFC - MEMORY_OFFSET] = static_cast<uint8_t>(opcode);
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
 
     cpu->setXRegister(0x03);
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
 
     EXPECT_EQ(cpu->getXRegister(), 0x04);
@@ -509,14 +509,14 @@ TEST_F(CPUInstructionTest, INX_IncrementXToNegativeValue)
     auto cycles = it->second.cycles;
     memory[0xFFFC - MEMORY_OFFSET] = static_cast<uint8_t>(opcode);
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
 
     cpu->setXRegister(0x7F);
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
 
     EXPECT_EQ(cpu->getXRegister(), 0x80);
@@ -534,14 +534,14 @@ TEST_F(CPUInstructionTest, INX_IncrementXToZeroValue)
     auto cycles = it->second.cycles;
     memory[0xFFFC - MEMORY_OFFSET] = static_cast<uint8_t>(opcode);
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
 
     cpu->setXRegister(0xFF);
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
 
     EXPECT_EQ(cpu->getXRegister(), 0x00);
@@ -559,14 +559,14 @@ TEST_F(CPUInstructionTest, INY_IncrementXValue)
     auto cycles = it->second.cycles;
     memory[0xFFFC - MEMORY_OFFSET] = static_cast<uint8_t>(opcode);
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
 
     cpu->setYRegister(0x03);
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
 
     EXPECT_EQ(cpu->getYRegister(), 0x04);
@@ -584,14 +584,14 @@ TEST_F(CPUInstructionTest, INY_IncrementXToNegativeValue)
     auto cycles = it->second.cycles;
     memory[0xFFFC - MEMORY_OFFSET] = static_cast<uint8_t>(opcode);
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
 
     cpu->setYRegister(0x7F);
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
 
     EXPECT_EQ(cpu->getYRegister(), 0x80);
@@ -609,14 +609,14 @@ TEST_F(CPUInstructionTest, INY_IncrementXToZeroValue)
     auto cycles = it->second.cycles;
     memory[0xFFFC - MEMORY_OFFSET] = static_cast<uint8_t>(opcode);
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
 
     cpu->setYRegister(0xFF);
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
 
     EXPECT_EQ(cpu->getYRegister(), 0x00);
@@ -634,14 +634,14 @@ TEST_F(CPUInstructionTest, DEX_DecrementXValue)
     auto cycles = it->second.cycles;
     memory[0xFFFC - MEMORY_OFFSET] = static_cast<uint8_t>(opcode);
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
 
     cpu->setXRegister(0x03);
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
 
     EXPECT_EQ(cpu->getXRegister(), 0x02);
@@ -659,14 +659,14 @@ TEST_F(CPUInstructionTest, DEX_DecrementXToNegativeValue)
     auto cycles = it->second.cycles;
     memory[0xFFFC - MEMORY_OFFSET] = static_cast<uint8_t>(opcode);
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
 
     cpu->setXRegister(0x00);
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
 
     EXPECT_EQ(cpu->getXRegister(), 0xFF);
@@ -684,14 +684,14 @@ TEST_F(CPUInstructionTest, DEX_DecrementXToZeroValue)
     auto cycles = it->second.cycles;
     memory[0xFFFC - MEMORY_OFFSET] = static_cast<uint8_t>(opcode);
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
 
     cpu->setXRegister(0x01);
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
 
     EXPECT_EQ(cpu->getXRegister(), 0x00);
@@ -709,14 +709,14 @@ TEST_F(CPUInstructionTest, DEY_DecrementXValue)
     auto cycles = it->second.cycles;
     memory[0xFFFC - MEMORY_OFFSET] = static_cast<uint8_t>(opcode);
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
 
     cpu->setYRegister(0x03);
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
 
     EXPECT_EQ(cpu->getYRegister(), 0x02);
@@ -734,14 +734,14 @@ TEST_F(CPUInstructionTest, DEY_DecrementXToNegativeValue)
     auto cycles = it->second.cycles;
     memory[0xFFFC - MEMORY_OFFSET] = static_cast<uint8_t>(opcode);
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
 
     cpu->setYRegister(0x00);
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
 
     EXPECT_EQ(cpu->getYRegister(), 0xFF);
@@ -759,14 +759,14 @@ TEST_F(CPUInstructionTest, DEY_DecrementXToZeroValue)
     auto cycles = it->second.cycles;
     memory[0xFFFC - MEMORY_OFFSET] = static_cast<uint8_t>(opcode);
     rom = std::make_unique<devices::EEPROM28C256>(memory, bus);
-    bus.addSlave(rom.get());
+    bus->addSlave(rom.get());
 
     cpu->setYRegister(0x01);
     
     for (int i = 0; i < cycles; ++i) 
     {
-        cpu->handleClockStateChange(core::LOW);
-        cpu->handleClockStateChange(core::HIGH);
+        cpu->onClockStateChange(core::LOW);
+        cpu->onClockStateChange(core::HIGH);
     }
 
     EXPECT_EQ(cpu->getYRegister(), 0x00);
