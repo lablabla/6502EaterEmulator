@@ -25,6 +25,8 @@ This project implements a cycle-accurate emulation of the W65C02S microprocessor
 - **Clock-phase accurate execution**: Separate handling of Φ2 low and high clock states
 - **Extensible architecture**: Easy addition of new addressing modes and opcodes
 
+The intention is to have a fully supported and functioning system. If you found an issue, a missing opcode or incorrect behavior, please let us know by opening an issue.
+
 ## Features
 
 - ✅ Complete 6502 instruction set implementation
@@ -83,10 +85,7 @@ After building, the main executable will be located at `build/src/EaterEmulator`
 ./build/src/EaterEmulator
 
 # Run with specific ROM file
-./build/src/EaterEmulator --rom path/to/program.bin
-
-# Run with verbose logging
-./build/src/EaterEmulator --verbose
+./build/src/EaterEmulator path/to/program.bin
 ```
 
 ## Usage Examples
