@@ -114,6 +114,10 @@ namespace EaterEmulator::devices
         [[nodiscard]]bool handleIndirectLow(const OpcodeInfo& info);
         [[nodiscard]]bool handleIndirectHigh(const OpcodeInfo& info);
 
+        [[nodiscard]]bool handleIndexedIndirectAddressing(const OpcodeInfo& info, core::State clockState);
+        [[nodiscard]]bool handleIndexedIndirectLow(const OpcodeInfo& info);
+        [[nodiscard]]bool handleIndexedIndirectHigh(const OpcodeInfo& info);
+
         [[nodiscard]]bool handleIndirectIndexedAddressing(const OpcodeInfo& info, core::State clockState);
         [[nodiscard]]bool handleIndirectIndexedLow(const OpcodeInfo& info);
         [[nodiscard]]bool handleIndirectIndexedHigh(const OpcodeInfo& info);

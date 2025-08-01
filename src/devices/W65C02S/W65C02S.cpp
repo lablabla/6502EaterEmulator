@@ -4,9 +4,7 @@
 #include "devices/W65C02S/opcodes.h"
 #include "spdlog/spdlog.h"
 
-#include <cinttypes>
 #include <cstdint>
-#include <iostream>
 
 namespace EaterEmulator::devices
 {
@@ -37,11 +35,11 @@ namespace EaterEmulator::devices
 
     void W65C02S::onClockStateChange(core::State state)
     {
-        if (state == core::HIGH) 
+        if (state == core::LOW) 
         {
-            handlePhi2High();
-        } else {            
             handlePhi2Low();
+        } else {            
+            handlePhi2High();
         }
     }
 
@@ -111,6 +109,8 @@ namespace EaterEmulator::devices
                     handled = handleIndirectAddressing(opcodeInfo, core::LOW);
                     break;
                 case AddressingMode::INDX:
+                    handled = handleIndexedIndirectAddressing(opcodeInfo, core::LOW);
+                    break;
                 case AddressingMode::INDY:
                     handled = handleIndirectIndexedAddressing(opcodeInfo, core::LOW);
                     break;
@@ -214,6 +214,8 @@ namespace EaterEmulator::devices
                     handled = handleIndirectAddressing(opcodeInfo, core::HIGH);
                     break;
                 case AddressingMode::INDX:
+                    handled = handleIndexedIndirectAddressing(opcodeInfo, core::HIGH);
+                    break;
                 case AddressingMode::INDY:
                     handled = handleIndirectIndexedAddressing(opcodeInfo, core::HIGH);
                     break;
@@ -1126,11 +1128,11 @@ namespace EaterEmulator::devices
 
         bool W65C02S::handleZeroPageIndexedAddressing(const OpcodeInfo& info, core::State clockState)
         {
-        if (clockState == core::LOW)
-        {
-            return handleZeroPageIndexedLow(info);
-        }
-        return handleZeroPageIndexedHigh(info);
+            if (clockState == core::LOW)
+            {
+                return handleZeroPageIndexedLow(info);
+            }
+            return handleZeroPageIndexedHigh(info);
         }        
         bool W65C02S::handleZeroPageIndexedLow(const OpcodeInfo& info)
         {
@@ -1292,6 +1294,80 @@ namespace EaterEmulator::devices
         return true;                    
     }
 
+    bool W65C02S::handleIndexedIndirectAddressing(const OpcodeInfo& info, core::State clockState)
+    {
+        if (clockState == core::LOW)
+        {
+            return handleIndexedIndirectLow(info);
+        }
+        return handleIndexedIndirectHigh(info);
+    }
+    bool W65C02S::handleIndexedIndirectLow(const OpcodeInfo& info)
+    {
+        if (_cycle == 1) {
+            _bus->setAddress(_pc++);
+        } else if (_cycle == 2) {
+            _bus->setAddress(_add);
+        } else if (_cycle == 3) {
+            _bus->setAddress(_add + 1);
+        } else if (_cycle == 4) {
+            _bus->setAddress(((_adh << 8) | _adl));
+        } else if (_cycle == 5) {
+            // Do nothing
+        } else {
+            spdlog::error("Unhandled cycle {} for indirect indexed low clock, opcode: {:#04x}", _cycle, static_cast<int>(info.opcode));
+            return false;
+        }
+        return true;
+    }
+    bool W65C02S::handleIndexedIndirectHigh(const OpcodeInfo& info)
+    {
+        if (_cycle == 1) {
+            _add = fetchByte() + _x;
+        } else if (_cycle == 2) {
+            _adl = fetchByte();
+        } else if (_cycle == 3) {
+            _adh = fetchByte();
+        } else if (_cycle == 4) {
+            switch (info.opcode) {
+                case Opcode::LDA_INDX:
+                    _a = fetchByte();
+                    updateStatusFlags(_a);
+                    break;
+                case Opcode::AND_INDX:
+                    doAND();
+                    break;
+                case Opcode::ORA_INDX:
+                    doORA();
+                    break;
+                case Opcode::EOR_INDX:
+                    doEOR();
+                    break;
+                case Opcode::ADC_INDX:
+                    doADC();
+                    break;
+                case Opcode::SBC_INDX:
+                    doSBC();
+                    break;
+                case Opcode::CMP_INDX:
+                    doCMP();
+                    break;
+                case Opcode::STA_INDX:
+                    writeByte(_a);
+                    break;
+                default:
+                    spdlog::error("Unhandled opcode for indirect indexed high clock, opcode: {:#04x}", static_cast<int>(info.opcode));
+                    return false;
+            }
+        } else if (_cycle == 5) {
+            // Do nothing
+        } else {
+            spdlog::error("Unhandled cycle {} for indirect indexed high clock, opcode: {:#04x}", _cycle, static_cast<int>(info.opcode));
+            return false;
+        }
+        return true;
+    }
+
     bool W65C02S::handleIndirectIndexedAddressing(const OpcodeInfo& info, core::State clockState)
     {
         if (clockState == core::LOW)
@@ -1322,45 +1398,36 @@ namespace EaterEmulator::devices
 
     bool W65C02S::handleIndirectIndexedHigh(const OpcodeInfo& info)
     {
-        uint8_t& indexingRegister = info.addressingMode == AddressingMode::INDX ? _x : _y;
         if (_cycle == 1) {
-            _add = fetchByte() + indexingRegister;
+            _add = fetchByte();
         } else if (_cycle == 2) {
-            _adl = fetchByte();
+            _adl = fetchByte() + _y;
         } else if (_cycle == 3) {
             _adh = fetchByte();
         } else if (_cycle == 4) {
             switch (info.opcode) {
-                case Opcode::LDA_INDX:
                 case Opcode::LDA_INDY:
                     _a = fetchByte();
                     updateStatusFlags(_a);
                     break;
-                case Opcode::AND_INDX:
                 case Opcode::AND_INDY:
                     doAND();
                     break;
-                case Opcode::ORA_INDX:
                 case Opcode::ORA_INDY:
                     doORA();
                     break;
-                case Opcode::EOR_INDX:
                 case Opcode::EOR_INDY:
                     doEOR();
                     break;
-                case Opcode::ADC_INDX:
                 case Opcode::ADC_INDY:
                     doADC();
                     break;
-                case Opcode::SBC_INDX:
                 case Opcode::SBC_INDY:
                     doSBC();
                     break;
-                case Opcode::CMP_INDX:
                 case Opcode::CMP_INDY:
                     doCMP();
                     break;
-                case Opcode::STA_INDX:
                 case Opcode::STA_INDY:
                     writeByte(_a);
                     break;
@@ -1376,7 +1443,6 @@ namespace EaterEmulator::devices
         }
         return true;
     }
-
 
     void W65C02S::doAND()
     {
