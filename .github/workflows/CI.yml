@@ -22,8 +22,10 @@ jobs:
       
       # Define the build matrix
       matrix:
+        os: [ubuntu-latest, macos-latest]
         build_type: [Release, Debug]
         build_tests: [ON, OFF]
+        c_compiler: [gcc, clang]
         include:
           # --- Linux Configurations ---
           - os: ubuntu-latest
@@ -31,11 +33,9 @@ jobs:
             cpp_compiler: g++
           - os: ubuntu-latest
             c_compiler: clang
-            cpp_compiler: clang++
           # --- macOS Configuration ---
           - os: macos-latest
             c_compiler: clang # On macOS, this defaults to AppleClang
-            cpp_compiler: clang++
         exclude:
           # Exclude tests in Release builds for faster CI
           - build_type: Release
