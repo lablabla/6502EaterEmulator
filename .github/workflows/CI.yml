@@ -63,13 +63,6 @@ jobs:
         fi
       shell: bash
 
-    - name: Select latest Xcode (for Apple Clang 16)
-      if: runner.os == 'macOS'
-      run: |
-        # Note: Apple Clang 17 is not yet available on GitHub runners.
-        # This selects Xcode 16 Beta, which provides Apple Clang 16.
-        sudo xcode-select -s /Applications/Xcode_16.0.app/Contents/Developer
-
     - name: Set reusable strings
       # Turn repeated input strings (such as the build output directory) into step outputs.
       id: strings
