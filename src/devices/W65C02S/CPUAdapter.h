@@ -19,8 +19,8 @@ namespace EaterEmulator::devices
         CPUAdapter(const CPUAdapter&) = default;
         CPUAdapter& operator=(const CPUAdapter&) = default;
 
-        CPUAdapter(const CPUAdapter&&) = delete;
-        CPUAdapter&& operator=(const CPUAdapter&&) = delete;
+        CPUAdapter(CPUAdapter&&) = default;
+        CPUAdapter& operator=(CPUAdapter&&) = default;
 
         void writeToPort(int portId, uint8_t data);
 
