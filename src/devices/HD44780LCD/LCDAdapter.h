@@ -20,8 +20,8 @@ namespace EaterEmulator::devices
         LCDAdapter(const LCDAdapter&) = default;
         LCDAdapter& operator=(const LCDAdapter&) = default;
 
-        LCDAdapter(const LCDAdapter&&) = delete;
-        LCDAdapter&& operator=(const LCDAdapter&&) = delete;
+        LCDAdapter(LCDAdapter&&) = default;
+        LCDAdapter& operator=(LCDAdapter&&) = default;
 
         void writeToPort(int portId, uint8_t data);
 
