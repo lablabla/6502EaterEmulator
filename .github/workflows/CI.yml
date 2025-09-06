@@ -1,5 +1,5 @@
-# This starter workflow is for a CMake project running on multiple platforms. There is a different starter workflow if you just want a single platform.
-# See: https://github.com/actions/starter-workflows/blob/main/ci/cmake-single-platform.yml
+# This workflow is for a CMake project running on multiple platforms.
+# It builds and tests the project on Ubuntu and macOS.
 name: CMake on multiple platforms
 
 on:
@@ -13,43 +13,65 @@ on:
 
 jobs:
   build:
+    # Use the operating system from the build matrix
     runs-on: ${{ matrix.os }}
 
     strategy:
-      # Set fail-fast to false to ensure that feedback is delivered for all matrix combinations. Consider changing this to true when your workflow is stable.
+      # Set fail-fast to false to ensure that feedback is delivered for all matrix combinations.
       fail-fast: false
       
+      # Define the build matrix
       matrix:
-        os: [ubuntu-latest]
+        os: [ubuntu-latest, macos-latest]
         build_type: [Release, Debug]
-        c_compiler: [gcc, clang]
         build_tests: [ON, OFF]
+        c_compiler: [gcc, clang]
         include:
+          # --- Linux Configurations ---
           - os: ubuntu-latest
             c_compiler: gcc
             cpp_compiler: g++
           - os: ubuntu-latest
             c_compiler: clang
             cpp_compiler: clang++
+          # --- macOS Configuration ---
+          - os: macos-latest
+            c_compiler: clang # On macOS, this defaults to AppleClang
+            cpp_compiler: clang++
         exclude:
-          # Exclude tests in Release builds
+          # Exclude tests in Release builds for faster CI
           - build_type: Release
             build_tests: ON
-          # Exclude no-tests in Debug builds (force tests ON in Debug)
+          # Exclude no-tests in Debug builds (always test in Debug)
           - build_type: Debug
             build_tests: OFF
+          # Explicitly exclude GCC on macOS
+          - os: macos-latest
+            c_compiler: gcc
 
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: |
+        if [ "${{ runner.os }}" == "Linux" ]; then
+          sudo apt-get update
+          sudo apt-get install -y ninja-build libx11-dev
+        elif [ "${{ runner.os }}" == "macOS" ]; then
+          brew install ninja raylib
+        fi
+      shell: bash
 
     - name: Set reusable strings
-      # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
+      # Turn repeated input strings (such as the build output directory) into step outputs.
       id: strings
       shell: bash
       run: |
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
 
     - name: Configure CMake
+      # Configure CMake with the compilers and build type from the matrix
       run: >
         cmake -B ${{ steps.strings.outputs.build-output-dir }} -GNinja
         -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
@@ -59,10 +81,11 @@ jobs:
         -S ${{ github.workspace }}
 
     - name: Build
-      # Build your program with the given configuration. Note that --config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).
+      # Build your program with the given configuration
       run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }}
 
     - name: Test
+      # Run tests only if they were built
       if: matrix.build_tests == 'ON'
       working-directory: ${{ steps.strings.outputs.build-output-dir }}
       run: ctest --build-config ${{ matrix.build_type }}
